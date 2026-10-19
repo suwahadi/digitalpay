@@ -109,8 +109,8 @@
             </div>
 
             <!-- Bottom Section -->
-            <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 text-sm">
+            <div class="border-t border-gray-800 mt-8 pt-8">
+                <p class="text-gray-400 text-sm text-center">
                     Copyright &copy; {{ currentYear }} {{ $page.props.settings.title }}
                 </p>
             </div>

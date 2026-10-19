@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             ProductVariantSeeder::class,
             ArticleSeeder::class,
             FaqSeeder::class,
+            PageSeeder::class,
             SlideSeeder::class,
             UpdateProductsSeeder::class,
             DigitalStockSeeder::class,

@@ -205,18 +205,20 @@
                                         {{ getPaymentTypeLabel(type) }}
                                     </h3>
                                     
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div 
-                                            v-for="method in methods" 
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <button
+                                            v-for="method in methods"
                                             :key="method.id"
+                                            type="button"
                                             @click="selectPaymentMethod(method)"
+                                            :aria-pressed="form.payment_method_id === method.id"
                                             :class="{
                                                 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20': form.payment_method_id === method.id,
                                                 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600': form.payment_method_id !== method.id
                                             }"
-                                            class="relative border rounded-xl p-4 cursor-pointer transition-all duration-200 bg-white dark:bg-gray-800"
+                                            class="relative w-full text-left border rounded-xl p-4 cursor-pointer transition-all duration-200 bg-white dark:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
                                         >
-                                            <div class="flex items-start space-x-4">
+                                            <div class="flex items-center gap-4 lg:flex-col lg:items-start lg:gap-3">
                                                 <!-- Payment Method Logo -->
                                                 <div class="flex-shrink-0">
                                                     <img 
@@ -251,7 +253,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
