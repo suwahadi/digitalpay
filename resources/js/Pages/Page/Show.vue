@@ -4,7 +4,7 @@
 
         <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
             <!-- Page Content Container -->
-            <div class="max-w-2xl mx-auto py-2 px-2 sm:px-4 mt-4">
+            <div class="w-full mx-auto max-w-4xl py-12 px-2 sm:px-4">
                 <div class="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-8">
                     <!-- Breadcrumb -->
                     <nav class="mb-6">
@@ -100,7 +100,6 @@ const formatDate = (dateString) => {
 }
 
 onMounted(() => {
-    // Simple loading delay for skeleton effect
     setTimeout(() => {
         isLoading.value = false
     }, 800)
