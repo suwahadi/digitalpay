@@ -120,7 +120,6 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:6|confirmed',
@@ -129,7 +128,6 @@ class AuthController extends Controller
         try {
             $user = User::create([
                 'name' => $validated['name'],
-                'username' => $validated['username'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'],
                 'password' => Hash::make($validated['password']),

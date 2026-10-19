@@ -431,13 +431,7 @@
                         <!-- Modal Body -->
                         <div class="p-6 space-y-6">
                             <!-- Product Summary -->
-                            <div class="flex space-x-4">
-                                <img 
-                                    :src="product.image" 
-                                    :alt="product.name"
-                                    class="w-16 h-16 object-contain bg-gray-100 dark:bg-gray-700 rounded-lg"
-                                    @error="onImageError($event, '/images/placeholder.png')"
-                                />
+                            <div class="flex">
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-900 dark:text-white">
                                         {{ product.name }}

@@ -34,25 +34,6 @@
                             </p>
                         </div>
 
-                        <!-- Username Input -->
-                        <div class="mb-6">
-                            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Username
-                            </label>
-                            <input
-                                id="username"
-                                v-model="form.username"
-                                type="text"
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                                placeholder="Masukkan username unik"
-                                :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.username }"
-                            />
-                            <p v-if="errors.username" class="mt-2 text-sm text-red-600 dark:text-red-400">
-                                {{ errors.username }}
-                            </p>
-                        </div>
-
                         <!-- Email Input -->
                         <div class="mb-6">
                             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -245,7 +226,6 @@ const processing = ref(false)
 
 const form = reactive({
     name: '',
-    username: '',
     email: '',
     phone: '',
     password: '',

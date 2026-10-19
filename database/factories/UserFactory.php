@@ -13,7 +13,6 @@ class UserFactory extends Factory
         return [
             'uuid' => Str::uuid(),
             'name' => fake()->name(),
-            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'phone' => fake()->unique()->phoneNumber(),

@@ -68,7 +68,6 @@ class BrevoChannelTest extends TestCase
 
         $response = $this->post('/register', [
             'name' => 'Budi',
-            'username' => 'budi',
             'email' => 'budi@example.com',
             'phone' => '',
             'password' => 'secret123',

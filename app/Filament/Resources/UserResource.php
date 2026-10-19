@@ -41,11 +41,6 @@ class UserResource extends Resource
                         ->label('Nama')
                         ->required()
                         ->maxLength(255),
-                    TextInput::make('username')
-                        ->label('Username')
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(255),
                     TextInput::make('email')
                         ->label('Email')
                         ->email()
@@ -97,10 +92,6 @@ class UserResource extends Resource
                     ->size(50),
                 TextColumn::make('name')
                     ->label('Nama')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('username')
-                    ->label('Username')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')

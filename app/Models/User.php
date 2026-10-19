@@ -19,7 +19,6 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'uuid',
         'name',
-        'username', 
         'email',
         'phone',
         'password',
@@ -117,7 +116,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function getDisplayNameAttribute(): string
     {
-        return $this->name ?: $this->username;
+        return $this->name;
     }
 
     public function getAvatarUrlAttribute(): string
