@@ -39,7 +39,11 @@ class Slide extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+        if (!$this->image) {
+            return '/images/placeholder.png';
+        }
+
+        if (str_starts_with($this->image, '/') || filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
 

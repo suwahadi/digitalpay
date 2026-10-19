@@ -1,70 +1,34 @@
 <template>
     <section class="w-full mx-auto max-w-[85rem] p-4 mt-20 sm:mt-28">
-        <div class="swiper heroSwiper" ref="swiperContainer">
-            <div class="swiper-wrapper">
-                <div 
-                    v-for="slide in slides" 
-                    :key="slide.id" 
-                    class="swiper-slide"
-                >
-                    <Link :href="slide.link">
-                        <img 
-                            :src="slide.image" 
-                            :alt="slide.title"
-                            class="w-full rounded-lg"
-                            @error="handleImageError"
-                        />
-                    </Link>
-                </div>
-            </div>
-            <div class="swiper-pagination"></div>
-        </div>
+        <component
+            v-if="slide"
+            :is="hasLink ? Link : 'div'"
+            v-bind="hasLink ? { href: slide.link } : {}"
+            class="block overflow-hidden rounded-lg"
+        >
+            <img
+                :src="slide.image"
+                :alt="slide.title || 'DigitalPay'"
+                class="w-full aspect-[16/6] object-cover"
+                width="1600"
+                height="600"
+                fetchpriority="high"
+                decoding="async"
+                @error="onImageError($event, '/images/placeholder.png')"
+            />
+        </component>
     </section>
 </template>
 
 <script setup>
-import { onImageError } from '@/imageFallback'
-import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
-import { Swiper } from 'swiper'
-import { Navigation, Pagination, Autoplay } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
+import { onImageError } from '@/imageFallback'
 
-defineProps({
+const props = defineProps({
     slides: Array,
 })
 
-const swiperContainer = ref(null)
-
-onMounted(() => {
-    new Swiper(swiperContainer.value, {
-        modules: [Navigation, Pagination, Autoplay],
-        loop: true,
-        autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-        },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-        breakpoints: {
-            640: {
-                slidesPerView: 1,
-            },
-            768: {
-                slidesPerView: 1,
-            },
-            1024: {
-                slidesPerView: 1,
-            },
-        },
-    })
-})
-
-const handleImageError = (event) => {
-    onImageError(event, '/images/placeholder.png')
-}
+const slide = computed(() => props.slides?.[0] ?? null)
+const hasLink = computed(() => !!slide.value?.link && slide.value.link !== '#')
 </script>
