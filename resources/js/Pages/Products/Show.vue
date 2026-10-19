@@ -33,7 +33,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                     <!-- Product Image -->
                     <div class="flex justify-center">
-                        <div class="w-full max-w-md">
+                        <div class="w-full max-w-md lg:max-w-none">
                             <div class="aspect-video overflow-hidden bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm">
                                 <img 
                                     :src="product.image" 
@@ -328,7 +328,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Produk Terkait</h3>
                     
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         <ProductCard 
                             v-for="relatedProduct in relatedProducts" 
                             :key="relatedProduct.id"

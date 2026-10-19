@@ -97,7 +97,7 @@
                 </div>
 
                 <!-- Products Grid - 6 Columns Desktop, 2 Columns Mobile -->
-                <div v-if="products.data.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                <div v-if="products.data.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <ProductCard 
                         v-for="product in products.data" 
                         :key="product.id"
