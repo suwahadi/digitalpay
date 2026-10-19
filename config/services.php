@@ -40,7 +40,7 @@ return [
         'api_url' => env('BREVO_API_URL', 'https://api.brevo.com/v3'),
         'enabled' => env('BREVO_ENABLED', false),
         'sender_email' => env('BREVO_SENDER_EMAIL', 'no-reply@digitalpay.web.id'),
-        'sender_name' => env('BREVO_SENDER_NAME', 'DigitalPay Solusi'),
+        'sender_name' => env('BREVO_SENDER_NAME', 'DigitalPay'),
     ],
 
 ];
