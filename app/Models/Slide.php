@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\DeletesReplacedFiles;
 use Illuminate\Database\Eloquent\Model;
 
 class Slide extends Model
 {
+    use DeletesReplacedFiles;
+
+    protected array $storedFiles = ['image'];
+
     protected $fillable = [
         'image',
         'title',
@@ -22,7 +27,6 @@ class Slide extends Model
         ];
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -33,15 +37,12 @@ class Slide extends Model
         return $query->orderBy('sort_order')->orderBy('id');
     }
 
-    // Accessors
     public function getImageUrlAttribute(): string
     {
-        // Check if image is a full URL
         if (filter_var($this->image, FILTER_VALIDATE_URL)) {
             return $this->image;
         }
-        
-        // If not a URL, assume it's a storage path
+
         return asset('storage/' . $this->image);
     }
 }

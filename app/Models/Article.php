@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DeletesReplacedFiles;
 use App\Traits\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Article extends Model
 {
     use Sluggable;
+    use DeletesReplacedFiles;
+
+    protected array $storedFiles = ['featured_image'];
 
     protected $fillable = [
         'title',

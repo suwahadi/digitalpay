@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Helpers\WebpImage;
+use Closure;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,9 +21,39 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AdminPanelProvider extends PanelProvider
 {
+    /**
+     * Every image uploaded from the admin panel, including rich editor attachments,
+     * is validated by content and re-encoded to WebP under a server-generated name.
+     * A future non-image FileUpload must override saveUploadedFileUsing() itself.
+     */
+    public function boot(): void
+    {
+        FileUpload::configureUsing(fn (FileUpload $upload) => $upload
+            ->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
+                if ($value instanceof TemporaryUploadedFile && $problem = WebpImage::problem($value->getRealPath())) {
+                    $fail($problem);
+                }
+            })
+            ->saveUploadedFileUsing(static fn (FileUpload $component, TemporaryUploadedFile $file): string => WebpImage::store(
+                $file,
+                $component->getDiskName(),
+                $component->getDirectory(),
+                $component->getStatePath(),
+            )));
+
+        RichEditor::configureUsing(fn (RichEditor $editor) => $editor
+            ->saveUploadedFileAttachmentsUsing(static fn (RichEditor $component, TemporaryUploadedFile $file): string => WebpImage::store(
+                $file,
+                $component->getFileAttachmentsDiskName(),
+                $component->getFileAttachmentsDirectory(),
+                $component->getStatePath(),
+            )));
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel

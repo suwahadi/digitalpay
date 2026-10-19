@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use App\Traits\DeletesReplacedFiles;
 use App\Traits\Sluggable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,9 @@ class Product extends BaseModel
 {
     use Sluggable;
     use HasFactory;
+    use DeletesReplacedFiles;
+
+    protected array $storedFiles = ['image'];
 
     protected $fillable = [
         'uuid',
