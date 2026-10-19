@@ -2,7 +2,6 @@
     <AppLayout>
         <Head :title="title" />
 
-        <!-- Loading state when redirecting -->
         <div v-if="!product || !selectedVariant" class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12 flex items-center justify-center">
             <div class="text-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -10,7 +9,6 @@
             </div>
         </div>
 
-        <!-- Main checkout content -->
         <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
             <div class="w-full mx-auto max-w-[85rem] px-4 py-12 sm:px-6 lg:px-8">
                 <!-- Header -->
@@ -191,7 +189,6 @@
                                 Metode Pembayaran
                             </h2>
                             
-                            <!-- Debug info -->
                             <div v-if="!paymentMethods || paymentMethods.length === 0" class="text-center py-8">
                                 <p class="text-gray-500 dark:text-gray-400">
                                     Tidak ada metode pembayaran tersedia.
@@ -223,9 +220,6 @@
                                         <h4 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2">
                                             {{ method.display_name }}
                                         </h4>
-                                        <p class="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
-                                            {{ getPaymentTypeLabel(method.type) }}
-                                        </p>
                                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                             {{ getPaymentFeeText(method) }}
                                         </p>
@@ -503,7 +497,6 @@
                 </div>
             </Transition>
         </Teleport>
-        <!-- End of conditional main content -->
     </AppLayout>
 </template>
 
@@ -855,16 +848,6 @@ const confirmOrder = () => {
             console.log('[Checkout] Request finished')
         }
     })
-}
-
-const getPaymentTypeLabel = (type) => {
-    const labels = {
-        'virtual_account': 'Virtual Account',
-        'ewallet': 'E-Wallet',
-        'qris': 'QRIS',
-        'bank_transfer': 'Bank Transfer'
-    }
-    return labels[type] || type
 }
 
 const handleImageError = (event) => {

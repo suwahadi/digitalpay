@@ -218,6 +218,7 @@ class HomeController extends Controller
     {
         try {
             return PaymentMethod::where('is_active', true)
+                ->where('code', '!=', 'shopeepay')
                 ->orderBy('sort_order')
                 ->get(['id', 'name', 'icon', 'type'])
                 ->map(function ($method) {

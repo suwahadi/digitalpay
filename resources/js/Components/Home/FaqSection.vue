@@ -84,12 +84,7 @@ defineProps({
 const openFaqs = ref([])
 
 const toggleFaq = (faqId) => {
-    const index = openFaqs.value.indexOf(faqId)
-    if (index > -1) {
-        openFaqs.value.splice(index, 1)
-    } else {
-        openFaqs.value.push(faqId)
-    }
+    openFaqs.value = openFaqs.value.includes(faqId) ? [] : [faqId]
 }
 </script>
 
