@@ -25,12 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         
         $middleware->validateCsrfTokens(except: [
-            'api/*',
+            'midtrans/notification',
             'midtrans/callback',
-            'midtrans/*',
             'api/midtrans/notification',
-            'news/*',
-            '*.ngrok-free.app/*'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

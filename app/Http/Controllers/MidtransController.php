@@ -149,8 +149,9 @@ class MidtransController extends Controller
      */
     private function isValidSignature(array $notif): bool
     {
-        // Skip validation for test notifications
-        if (isset($notif['order_id']) && strpos($notif['order_id'], 'payment_notif_test_') === 0) {
+        if (!app()->environment('production')
+            && isset($notif['order_id'])
+            && str_starts_with($notif['order_id'], 'payment_notif_test_')) {
             return true;
         }
 

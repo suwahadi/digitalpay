@@ -15,19 +15,19 @@ use App\Http\Controllers\SecureDownloadController;
 use App\Http\Controllers\OrderAccessController;
 
 Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:6,1');
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
+Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:6,1');
 
 Route::get('/verify', [App\Http\Controllers\AuthController::class, 'showVerifyForm'])->name('verify');
-Route::post('/verify', [App\Http\Controllers\AuthController::class, 'verify']);
-Route::post('/verify/resend', [App\Http\Controllers\AuthController::class, 'resendOtp'])->name('verify.resend');
+Route::post('/verify', [App\Http\Controllers\AuthController::class, 'verify'])->middleware('throttle:6,1');
+Route::post('/verify/resend', [App\Http\Controllers\AuthController::class, 'resendOtp'])->middleware('throttle:3,1')->name('verify.resend');
 
 Route::get('/forgot-password', [App\Http\Controllers\AuthController::class, 'showForgotPasswordForm'])->name('password.request');
-Route::post('/forgot-password', [App\Http\Controllers\AuthController::class, 'forgotPassword'])->name('password.email');
+Route::post('/forgot-password', [App\Http\Controllers\AuthController::class, 'forgotPassword'])->middleware('throttle:5,1')->name('password.email');
 Route::get('/reset-password', [App\Http\Controllers\AuthController::class, 'showResetPasswordForm'])->name('password.reset');
-Route::post('/reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword'])->name('password.update');
+Route::post('/reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword'])->middleware('throttle:6,1')->name('password.update');
 
 Route::middleware(['member'])->prefix('user')->name('user.')->group(function () {
     Route::get('/', [App\Http\Controllers\UserController::class, 'dashboard'])->name('dashboard');
