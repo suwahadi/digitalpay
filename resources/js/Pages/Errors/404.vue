@@ -11,11 +11,11 @@
                 <p class="mt-3 text-gray-600 dark:text-gray-400">
                     {{ message || 'Halaman yang Anda cari tidak ada atau sudah dipindahkan.' }}
                 </p>
-                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-                    <Link href="/" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
-                        Kembali ke Beranda
+                <div class="mt-8 grid grid-cols-2 gap-3">
+                    <Link href="/" class="px-4 py-3 rounded-xl bg-blue-600 text-center text-white font-medium hover:bg-blue-700 transition-colors">
+                        Halaman Utama
                     </Link>
-                    <Link href="/products" class="px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <Link href="/products" class="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-center text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                         Lihat Produk
                     </Link>
                 </div>

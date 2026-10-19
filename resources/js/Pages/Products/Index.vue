@@ -7,14 +7,11 @@
             <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                        <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center justify-between gap-3">
                             <div class="min-w-0">
                                 <h1 class="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-3xl">
                                     Semua Produk
                                 </h1>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Temukan berbagai aplikasi premium dengan harga terjangkau
-                                </p>
                             </div>
 
                             <button

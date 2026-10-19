@@ -50,13 +50,13 @@
         }
         h1 { font-size: 20px; font-weight: 700; margin: 16px 0 8px; }
         p { color: var(--muted); margin: 0 auto 28px; max-width: 34ch; line-height: 1.6; }
-        .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             min-height: 44px;
-            padding: 0 22px;
+            padding: 0 12px;
             border-radius: 10px;
             font-weight: 500;
             text-decoration: none;
@@ -76,7 +76,7 @@
         <h1>Halaman tidak ditemukan</h1>
         <p>Halaman yang kamu cari mungkin sudah dipindahkan atau tidak pernah ada. Yuk kembali dan lanjutkan dari sini.</p>
         <div class="actions">
-            <a class="btn btn-primary" href="/">Kembali ke Beranda</a>
+            <a class="btn btn-primary" href="/">Halaman Utama</a>
             <a class="btn btn-ghost" href="/products">Lihat Produk</a>
         </div>
     </main>

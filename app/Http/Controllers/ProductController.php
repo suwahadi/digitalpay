@@ -78,67 +78,9 @@ class ProductController extends Controller
     
     public function byCategory(Category $category, Request $request)
     {
-        $query = $category->products()->active()->with(['variants' => function ($q) {
-            $q->active()->ordered();
-        }]);
+        $request->merge(['category' => $category->slug]);
 
-        if ($request->has('search') && !empty($request->search)) {
-            $query->search($request->search);
-        }
-        
-        $sortBy = $request->get('sort', 'popular');
-        switch ($sortBy) {
-            case 'price_low':
-                $query->orderByRaw('(SELECT MIN(price) FROM product_variants WHERE product_id = products.id AND is_active = 1) ASC');
-                break;
-            case 'price_high':
-                $query->orderByRaw('(SELECT MIN(price) FROM product_variants WHERE product_id = products.id AND is_active = 1) DESC');
-                break;
-            case 'newest':
-                $query->latest();
-                break;
-            case 'popular':
-            default:
-                $query->popular()->latest();
-                break;
-        }
-        
-        $products = $query->paginate(36)->withQueryString();
-        
-        $products->getCollection()->transform(function ($product) {
-            return [
-                'id' => $product->id,
-                'uuid' => $product->uuid,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'image' => $product->image_url,
-                'category' => $product->category->name,
-                'min_price' => $product->min_price,
-                'max_price' => $product->max_price,
-                'stock_status' => $product->stock_status,
-                'is_popular' => $product->is_popular,
-                'url' => route('products.show', $product->slug),
-            ];
-        });
-        
-        $siteName = ConfigHelper::siteName();
-
-        return Inertia::render('Products/Category', [
-            'title' => $category->name . ' - ' . $siteName,
-            'products' => $products,
-            'category' => [
-                'id' => $category->id,
-                'name' => $category->name,
-                'slug' => $category->slug,
-                'description' => $category->description,
-                'icon' => $category->icon ?? 'lucide:package',
-            ],
-            'categories' => $this->getCategories(),
-            'filters' => [
-                'search' => $request->search,
-                'sort' => $sortBy,
-            ],
-        ]);
+        return $this->index($request);
     }
     
     public function show(Product $product)
