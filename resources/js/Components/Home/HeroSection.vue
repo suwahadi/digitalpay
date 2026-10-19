@@ -23,6 +23,7 @@
 </template>
 
 <script setup>
+import { onImageError } from '@/imageFallback'
 import { onMounted, ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { Swiper } from 'swiper'
@@ -64,6 +65,6 @@ onMounted(() => {
 })
 
 const handleImageError = (event) => {
-    event.target.src = '/storage/images/default.jpg'
+    onImageError(event, '/storage/images/default.jpg')
 }
 </script>

@@ -56,7 +56,6 @@ class Product extends BaseModel
         ];
     }
 
-    // Relationships
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -72,7 +71,6 @@ class Product extends BaseModel
         return $this->hasMany(OrderItem::class);
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -102,7 +100,6 @@ class Product extends BaseModel
         });
     }
 
-    // Accessors
     public function getImageUrlAttribute(): string
     {
         if ($this->image) {
@@ -135,11 +132,15 @@ class Product extends BaseModel
 
     public function getStockStatusAttribute(): string
     {
-        $totalStock = $this->variants()->where('is_active', true)->sum('stock_quantity');
-        
-        if ($totalStock === null) {
+        $variants = $this->variants()->where('is_active', true);
+
+        if ((clone $variants)->whereNull('stock_quantity')->exists()) {
             return 'unlimited';
-        } elseif ($totalStock > 10) {
+        }
+
+        $totalStock = $variants->sum('stock_quantity');
+
+        if ($totalStock > 10) {
             return 'in_stock';
         } elseif ($totalStock > 0) {
             return 'low_stock';

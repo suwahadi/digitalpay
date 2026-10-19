@@ -39,6 +39,7 @@
                                     :src="product.image" 
                                     :alt="product.name"
                                     class="w-full h-full object-contain"
+                                    @error="onImageError($event, '/storage/images/default-product.png')"
                                 />
                             </div>
                         </div>
@@ -435,6 +436,7 @@
                                     :src="product.image" 
                                     :alt="product.name"
                                     class="w-16 h-16 object-contain bg-gray-100 dark:bg-gray-700 rounded-lg"
+                                    @error="onImageError($event, '/storage/images/default-product.png')"
                                 />
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-900 dark:text-white">
@@ -500,6 +502,7 @@
 import { ref, computed, inject } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { onImageError } from '@/imageFallback'
 import ProductCard from '@/Components/Products/ProductCard.vue'
 import IconifyIcon from '@/Components/IconifyIcon.vue'
 
@@ -512,17 +515,14 @@ const props = defineProps({
     relatedProducts: Array,
 })
 
-// Reactive data
 const selectedVariant = ref(null)
 const openFaqs = ref([])
 const showConfirmationModal = ref(false)
 const showNotification = ref(false)
 
-// Computed properties
 const sortedVariants = computed(() => {
     if (!props.product.variants) return []
     return [...props.product.variants].sort((a, b) => {
-        // Sort by sort_order first, then by id as fallback
         const sortOrderA = a.sort_order || 0
         const sortOrderB = b.sort_order || 0
         if (sortOrderA !== sortOrderB) {
@@ -532,16 +532,13 @@ const sortedVariants = computed(() => {
     })
 })
 
-// Get view and sales count from product data
 const viewCount = computed(() => props.product.view_count || 0)
 const salesCount = computed(() => props.product.sales_count || 0)
 
-// Check if user is logged in from page props
 const isLoggedIn = computed(() => {
     return !!$page.props.auth?.user
 })
 
-// Social sharing buttons
 const socialButtons = [
     { name: 'Facebook', platform: 'facebook', icon: 'simple-icons:facebook', color: 'text-blue-600' },
     { name: 'Twitter', platform: 'twitter', icon: 'simple-icons:x', color: 'text-gray-900 dark:text-white' },
@@ -551,7 +548,6 @@ const socialButtons = [
     { name: 'Copy', platform: 'copy', icon: 'lucide:copy', color: 'text-gray-600' },
 ]
 
-// Product-specific FAQs (this would come from backend)
 const productFaqs = ref([
     {
         id: 1,
@@ -575,7 +571,6 @@ const productFaqs = ref([
     },
 ])
 
-// Methods
 const selectVariant = (variant) => {
     if (variant.is_active && variant.stock_status !== 'Habis') {
         selectedVariant.value = variant
@@ -594,7 +589,6 @@ const closeConfirmationModal = () => {
 
 const proceedToCheckout = () => {
     if (selectedVariant.value) {
-        // Redirect to checkout with selected product data
         router.post('/checkout', {
             product_id: props.product.id,
             variant_id: selectedVariant.value.id,
@@ -686,7 +680,6 @@ const getStockStatusClass = (status) => {
     }
 }
 
-// Set first available variant as default
 if (props.product.variants && props.product.variants.length > 0) {
     const sortedAvailableVariants = sortedVariants.value.filter(v => v.is_active && v.stock_status !== 'Habis')
     if (sortedAvailableVariants.length > 0) {

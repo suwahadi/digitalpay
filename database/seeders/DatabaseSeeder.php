@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SlideSeeder::class,
             UpdateProductsSeeder::class,
             DigitalStockSeeder::class,
+            GoogleMapsReviewReplySeeder::class,
         ]);
     }
 }

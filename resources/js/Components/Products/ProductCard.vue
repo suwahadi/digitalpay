@@ -50,6 +50,7 @@
 </template>
 
 <script setup>
+import { onImageError } from '@/imageFallback'
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 
@@ -94,6 +95,6 @@ const formatPrice = (price) => {
 }
 
 const handleImageError = (event) => {
-    event.target.src = '/storage/images/default-product.png'
+    onImageError(event, '/storage/images/default-product.png')
 }
 </script>

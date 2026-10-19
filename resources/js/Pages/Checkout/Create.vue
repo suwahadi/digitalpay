@@ -309,7 +309,7 @@
                                         :src="product.image" 
                                         :alt="product.name"
                                         class="w-16 h-16 object-contain bg-gray-100 dark:bg-gray-700 rounded-lg"
-                                        @error="$event.target.src='/storage/images/default-product.png'"
+                                        @error="onImageError($event, '/storage/images/default-product.png')"
                                     />
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">
@@ -327,13 +327,13 @@
 
                             <!-- Price Breakdown -->
                                 <div class="space-y-3 py-4 border-t border-b dark:border-gray-700">
-                                <div class="flex justify-between text-sm">
+                                <div v-if="selectedVariant.original_price > selectedVariant.price" class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Harga Normal:</span>
                                     <span class="text-sm text-gray-500 line-through">{{ formatPrice(selectedVariant.original_price) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">Harga Promo:</span>
+                                    <span class="text-gray-600 dark:text-gray-400">{{ selectedVariant.original_price > selectedVariant.price ? 'Harga Promo:' : 'Harga:' }}</span>
                                     <span class="text-gray-900 dark:text-white">{{ formatPrice(selectedVariant.price) }}</span>
                                 </div>
 
@@ -525,6 +525,7 @@
 </template>
 
 <script setup>
+import { onImageError } from '@/imageFallback'
 import { ref, computed, onMounted, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
@@ -564,10 +565,8 @@ const props = defineProps({
     }
 })
 
-// Check if required data is missing and redirect
 onMounted(() => {
     if (!props.product || !props.selectedVariant) {
-        // Redirect to home with a meaningful message
         router.visit('/', {
             data: {
                 message: 'Silakan pilih produk terlebih dahulu untuk melanjutkan ke checkout.'
@@ -585,7 +584,6 @@ onMounted(() => {
     }
 })
 
-// Form data
 const form = ref({
     product_id: props.product?.id || null,
     variant_id: props.selectedVariant?.id || null,
@@ -637,7 +635,6 @@ const groupedPaymentMethods = computed(() => {
     }, {})
 })
 
-// Methods
 const selectPaymentMethod = (paymentMethod) => {
     if (paymentMethod?.id) {
         form.value.payment_method_id = paymentMethod.id
@@ -901,6 +898,6 @@ const getPaymentTypeLabel = (type) => {
 }
 
 const handleImageError = (event) => {
-    event.target.src = '/images/payment/default.png'
+    onImageError(event, '/images/payment/default.png')
 }
 </script>

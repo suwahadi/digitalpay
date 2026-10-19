@@ -53,7 +53,7 @@
                             :src="getImageUrl(article.featured_image || article.featured_image_url)"
                             :alt="article.title"
                             class="w-full h-48 sm:h-64 lg:h-80 object-cover rounded-lg shadow-lg"
-                            @error="$event.target.src = '/images/default-article.jpg'"
+                            @error="onImageError($event, '/images/default-article.jpg')"
                         />
                     </div>
 
@@ -127,7 +127,7 @@
                                         :src="getImageUrl(relatedArticle.featured_image || relatedArticle.featured_image_url)"
                                         :alt="relatedArticle.title"
                                         class="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                                        @error="$event.target.src = '/images/default-article.jpg'"
+                                        @error="onImageError($event, '/images/default-article.jpg')"
                                     />
                                 </Link>
                                 <div class="p-4">
@@ -154,6 +154,7 @@
 </template>
 
 <script setup>
+import { onImageError } from '@/imageFallback'
 import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
@@ -172,35 +173,28 @@ const currentUrl = computed(() => {
 const getImageUrl = (imagePath) => {
     if (!imagePath) return '/images/default-article.jpg'
     
-    // Jika sudah berupa URL penuh, gunakan langsung
     if (imagePath.startsWith('http')) {
         return imagePath
     }
     
-    // Jika path storage Laravel, konversi ke URL storage
     if (imagePath.includes('storage/app/public/')) {
-        // Hapus storage/app/public/ dan ganti dengan /storage/
         return imagePath.replace(/.*storage\/app\/public\//, '/storage/')
     }
     
-    // Jika path dimulai dengan articles/, tambahkan /storage/
     if (imagePath.startsWith('articles/')) {
         return '/storage/' + imagePath
     }
     
-    // Jika path dimulai dengan /, gunakan langsung
     if (imagePath.startsWith('/')) {
         return imagePath
     }
     
-    // Default: tambahkan /storage/ di depan
     return '/storage/' + imagePath
 }
 
 const copyToClipboard = async () => {
     try {
         await navigator.clipboard.writeText(currentUrl.value)
-        // You could add a toast notification here
         alert('Link berhasil disalin!')
     } catch (err) {
         console.error('Failed to copy: ', err)

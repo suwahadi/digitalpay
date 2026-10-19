@@ -84,7 +84,7 @@
                                 :src="getImageUrl(article.featured_image || article.featured_image_url)"
                                 :alt="article.title"
                                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                @error="$event.target.src = '/images/default-article.jpg'"
+                                @error="onImageError($event, '/images/default-article.jpg')"
                             />
                         </Link>
                         
@@ -156,6 +156,7 @@
 </template>
 
 <script setup>
+import { onImageError } from '@/imageFallback'
 import { ref, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { debounce } from 'lodash'
@@ -184,28 +185,22 @@ const handleSearch = debounce(() => {
 const getImageUrl = (imagePath) => {
     if (!imagePath) return '/images/default-article.jpg'
     
-    // Jika sudah berupa URL penuh, gunakan langsung
     if (imagePath.startsWith('http')) {
         return imagePath
     }
     
-    // Jika path storage Laravel, konversi ke URL storage
     if (imagePath.includes('storage/app/public/')) {
-        // Hapus storage/app/public/ dan ganti dengan /storage/
         return imagePath.replace(/.*storage\/app\/public\//, '/storage/')
     }
     
-    // Jika path dimulai dengan articles/, tambahkan /storage/
     if (imagePath.startsWith('articles/')) {
         return '/storage/' + imagePath
     }
     
-    // Jika path dimulai dengan /, gunakan langsung
     if (imagePath.startsWith('/')) {
         return imagePath
     }
     
-    // Default: tambahkan /storage/ di depan
     return '/storage/' + imagePath
 }
 
