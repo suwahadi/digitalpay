@@ -159,7 +159,7 @@
 import { onImageError } from '@/imageFallback'
 import { ref, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps({

@@ -57,7 +57,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-// Icon components using render functions
 import { h } from 'vue'
 
 const CheckCircleIcon = {
@@ -145,7 +144,6 @@ const addToast = (toast) => {
     
     toasts.value.push(newToast)
     
-    // Auto remove after duration
     const duration = toast.duration || 3000
     const interval = 50
     const steps = duration / interval
@@ -247,16 +245,16 @@ const getProgressBarColor = (type) => {
     return classes[type] || classes.info
 }
 
-// Global toast methods
-window.toast = {
-    success: (title, message, duration) => addToast({ type: 'success', title, message, duration }),
-    error: (title, message, duration) => addToast({ type: 'error', title, message, duration }),
-    warning: (title, message, duration) => addToast({ type: 'warning', title, message, duration }),
-    info: (title, message, duration) => addToast({ type: 'info', title, message, duration })
+if (typeof window !== 'undefined') {
+    window.toast = {
+        success: (title, message, duration) => addToast({ type: 'success', title, message, duration }),
+        error: (title, message, duration) => addToast({ type: 'error', title, message, duration }),
+        warning: (title, message, duration) => addToast({ type: 'warning', title, message, duration }),
+        info: (title, message, duration) => addToast({ type: 'info', title, message, duration })
+    }
 }
 
 onMounted(() => {
-    // Check for flash messages from server
     const page = window.$page || {}
     if (page.props?.flash?.message) {
         addToast({

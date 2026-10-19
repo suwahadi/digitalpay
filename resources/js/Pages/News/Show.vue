@@ -167,7 +167,7 @@ const props = defineProps({
 })
 
 const currentUrl = computed(() => {
-    return window.location.href
+    return typeof window !== 'undefined' ? window.location.href : ''
 })
 
 const getImageUrl = (imagePath) => {

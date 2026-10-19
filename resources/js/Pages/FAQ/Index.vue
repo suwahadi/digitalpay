@@ -211,7 +211,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import IconifyIcon from '@/Components/IconifyIcon.vue'
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 
 const props = defineProps({
     faqs: Array,
