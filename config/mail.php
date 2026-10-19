@@ -65,7 +65,7 @@ return [
     ],
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'noreply@digitalpay.web.id'),
+        'address' => env('MAIL_FROM_ADDRESS', 'no-reply@digitalpay.web.id'),
         'name' => env('MAIL_FROM_NAME', 'DigitalPay'),
     ],
 
