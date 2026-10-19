@@ -12,7 +12,7 @@
                         decoding="async"
                         :src="product.image" 
                         :alt="product.name" 
-                        class="object-cover rounded-2xl"
+                        class="aspect-video w-full object-cover rounded-2xl"
                         @error="handleImageError"
                     />
                 </div>

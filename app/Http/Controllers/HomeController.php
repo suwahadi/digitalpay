@@ -115,6 +115,8 @@ class HomeController extends Controller
             }])
                 ->active()
                 ->popular()
+                ->orderBy('sort_order')
+                ->orderBy('id')
                 ->limit(9)
                 ->get()
                 ->map(function ($product) {

@@ -1,7 +1,7 @@
 <template>
     <section v-if="paymentMethods.length" class="py-16 bg-gray-50 dark:bg-gray-900" aria-labelledby="payment-methods-heading">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="payment-methods-heading" class="mb-10 text-center text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 id="payment-methods-heading" class="mb-10 text-center text-base font-bold md:text-xl text-gray-900 dark:text-white">
                 Metode Pembayaran
             </h2>
 

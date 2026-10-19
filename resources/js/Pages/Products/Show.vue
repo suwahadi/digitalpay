@@ -34,11 +34,11 @@
                     <!-- Product Image -->
                     <div class="flex justify-center">
                         <div class="w-full max-w-md">
-                            <div class="aspect-square bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6 shadow-sm">
+                            <div class="aspect-video overflow-hidden bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm">
                                 <img 
                                     :src="product.image" 
                                     :alt="product.name"
-                                    class="w-full h-full object-contain"
+                                    class="w-full h-full object-cover"
                                     @error="onImageError($event, '/images/placeholder.png')"
                                 />
                             </div>
