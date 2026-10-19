@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamp('first_visit_at')->useCurrent();
-            $table->timestamp('last_activity_at')->useCurrentOnUpdate();
+            $table->timestamp('last_activity_at')->useCurrent()->useCurrentOnUpdate();
             $table->foreignId('merged_to_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('merged_at')->nullable();
 
