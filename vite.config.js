@@ -6,6 +6,7 @@ export default defineConfig(({ isSsrBuild }) => ({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
+            ssr: 'resources/js/ssr.js',
             refresh: true,
         }),
         vue({
@@ -30,7 +31,6 @@ export default defineConfig(({ isSsrBuild }) => ({
         rollupOptions: {
             output: !isSsrBuild ? {
                 manualChunks: {
-                    // Split vendor code into separate chunks (client-side only)
                     'vue-vendor': ['vue', '@inertiajs/vue3'],
                     'ui-vendor': ['@heroicons/vue', 'swiper'],
                     'utils': ['lodash', 'axios'],

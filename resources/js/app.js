@@ -1,26 +1,8 @@
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import IconifyIcon from './Components/IconifyIcon.vue'
+import { route } from './routes'
 import '../css/app.css'
-
-function route(name, params = {}) {
-    const routes = window.routes || {}
-    let url = routes[name]
-    
-    if (!url) {
-        console.warn(`Route '${name}' not found. Available routes:`, Object.keys(routes))
-        return `/${name}`
-    }
-
-    let finalUrl = url
-    for (const [key, value] of Object.entries(params)) {
-        const encodedValue = encodeURIComponent(value)
-        finalUrl = finalUrl.replace(`{${key}}`, encodedValue)
-        finalUrl = finalUrl.replace(`{${key}:slug}`, encodedValue)
-    }
-    
-    return finalUrl
-}
 
 createInertiaApp({
     title: title => title ? `${title} - DigitalPay` : 'DigitalPay',
@@ -33,9 +15,9 @@ createInertiaApp({
             .use(plugin)
             .component('IconifyIcon', IconifyIcon)
             .provide('route', route)
-        
+
         app.config.globalProperties.route = route
-        
+
         return app.mount(el)
     },
     progress: {
