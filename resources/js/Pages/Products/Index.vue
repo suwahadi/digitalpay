@@ -6,20 +6,35 @@
             <!-- Page Header -->
             <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div class="flex-1 min-w-0">
-                            <h1 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
-                                Semua Produk
-                            </h1>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Temukan berbagai aplikasi premium dengan harga terjangkau
-                            </p>
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h1 class="text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-3xl">
+                                    Semua Produk
+                                </h1>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Temukan berbagai aplikasi premium dengan harga terjangkau
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                @click="showFilters = !showFilters"
+                                :aria-expanded="showFilters"
+                                aria-controls="product-filters"
+                                class="lg:hidden inline-flex shrink-0 items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                            >
+                                <IconifyIcon :icon="showFilters ? 'lucide:x' : 'lucide:sliders-horizontal'" width="18" />
+                                <span>{{ showFilters ? 'Tutup' : 'Cari & Filter' }}</span>
+                            </button>
                         </div>
-                        
-                        <!-- Search and Filter Controls -->
-                        <div class="flex flex-col sm:flex-row gap-4 mt-4 md:mt-0">
-                            <!-- Search Input -->
-                            <div class="relative">
+
+                        <div
+                            id="product-filters"
+                            :class="showFilters ? 'grid' : 'hidden'"
+                            class="grid-cols-1 gap-3 lg:flex lg:items-center"
+                        >
+                            <div class="relative lg:w-64">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <IconifyIcon icon="lucide:search" width="18" class="text-gray-400" />
                                 </div>
@@ -28,31 +43,31 @@
                                     @input="handleSearch"
                                     type="text"
                                     placeholder="Cari produk..."
-                                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    class="block w-full h-10 pl-10 pr-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
-                            
-                            <!-- Category Filter -->
+
                             <select
                                 v-model="selectedCategory"
                                 @change="handleCategoryFilter"
-                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                aria-label="Kategori"
+                                class="block w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 lg:w-44"
                             >
                                 <option value="">Semua Kategori</option>
-                                <option 
-                                    v-for="category in categories" 
-                                    :key="category.id" 
+                                <option
+                                    v-for="category in categories"
+                                    :key="category.id"
                                     :value="category.slug"
                                 >
                                     {{ category.name }}
                                 </option>
                             </select>
-                            
-                            <!-- Sort Options -->
+
                             <select
                                 v-model="sortBy"
                                 @change="handleSort"
-                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                aria-label="Urutkan"
+                                class="block w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 lg:w-44"
                             >
                                 <option value="newest">Terbaru</option>
                                 <option value="popular">Terpopuler</option>
@@ -208,6 +223,7 @@ const props = defineProps({
 const searchQuery = ref(props.filters.search || '')
 const selectedCategory = ref(props.filters.category || '')
 const sortBy = ref(props.filters.sort || 'newest')
+const showFilters = ref(false)
 
 let searchTimeout = null
 const handleSearch = () => {

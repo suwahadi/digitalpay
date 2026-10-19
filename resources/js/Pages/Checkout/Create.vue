@@ -198,64 +198,45 @@
                                 </p>
                             </div>
                             
-                            <div v-else class="space-y-6">
-                                <!-- Group payment methods by type -->
-                                <div v-for="(methods, type) in groupedPaymentMethods" :key="type" class="space-y-3">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white capitalize">
-                                        {{ getPaymentTypeLabel(type) }}
-                                    </h3>
-                                    
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        <button
-                                            v-for="method in methods"
-                                            :key="method.id"
-                                            type="button"
-                                            @click="selectPaymentMethod(method)"
-                                            :aria-pressed="form.payment_method_id === method.id"
-                                            :class="{
-                                                'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20': form.payment_method_id === method.id,
-                                                'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600': form.payment_method_id !== method.id
-                                            }"
-                                            class="relative w-full text-left border rounded-xl p-4 cursor-pointer transition-all duration-200 bg-white dark:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
-                                        >
-                                            <div class="flex items-center gap-4 lg:flex-col lg:items-start lg:gap-3">
-                                                <!-- Payment Method Logo -->
-                                                <div class="flex-shrink-0">
-                                                    <img 
-                                                        :src="method.logo" 
-                                                        :alt="method.display_name"
-                                                        class="w-20 sm:w-24 h-12 p-2 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white"
-                                                        @error="handleImageError"
-                                                    />
-                                                </div>
-                                                
-                                                <!-- Payment Method Info -->
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex items-start justify-between">
-                                                        <div>
-                                                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
-                                                                {{ method.display_name }}
-                                                            </h4>
-
-                                                            <div class="flex items-center space-x-3 mt-2">
-                                                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                                    {{ getPaymentFeeText(method) }}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Selection Indicator -->
-                                                <div v-if="form.payment_method_id === method.id" class="absolute top-3 right-3">
-                                                    <div class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                                                        <IconifyIcon icon="lucide:check" width="12" class="text-white" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </button>
+                            <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                                <button
+                                    v-for="method in paymentMethods"
+                                    :key="method.id"
+                                    type="button"
+                                    @click="selectPaymentMethod(method)"
+                                    :aria-pressed="form.payment_method_id === method.id"
+                                    :class="{
+                                        'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20': form.payment_method_id === method.id,
+                                        'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600': form.payment_method_id !== method.id
+                                    }"
+                                    class="relative flex flex-col items-center text-center gap-3 border rounded-xl p-4 cursor-pointer transition-all duration-200 bg-white dark:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+                                >
+                                    <div class="flex h-10 w-full items-center justify-center">
+                                        <img
+                                            :src="method.logo"
+                                            :alt="method.display_name"
+                                            class="max-h-9 max-w-full object-contain"
+                                            @error="handleImageError"
+                                        />
                                     </div>
-                                </div>
+                                    <div class="w-full">
+                                        <h4 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2">
+                                            {{ method.display_name }}
+                                        </h4>
+                                        <p class="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
+                                            {{ getPaymentTypeLabel(method.type) }}
+                                        </p>
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ getPaymentFeeText(method) }}
+                                        </p>
+                                    </div>
+
+                                    <div v-if="form.payment_method_id === method.id" class="absolute top-2 right-2">
+                                        <div class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                                            <IconifyIcon icon="lucide:check" width="12" class="text-white" />
+                                        </div>
+                                    </div>
+                                </button>
                             </div>
                             
                             <div v-if="errors.payment_method_id" class="text-red-500 text-sm mt-4">
@@ -622,19 +603,6 @@ const canSubmit = computed(() => {
            form.value.customer_email && 
            form.value.customer_phone && 
            form.value.payment_method_id
-})
-
-const groupedPaymentMethods = computed(() => {
-    if (!props.paymentMethods) return {}
-    
-    return props.paymentMethods.reduce((groups, method) => {
-        const type = method.type
-        if (!groups[type]) {
-            groups[type] = []
-        }
-        groups[type].push(method)
-        return groups
-    }, {})
 })
 
 const selectPaymentMethod = (paymentMethod) => {
