@@ -48,13 +48,14 @@
                 <!-- Right Side -->
                 <div class="flex items-center gap-x-2">
                     <!-- Mobile Search Toggle -->
-                    <Link
-                        href="/products"
+                    <button
+                        type="button"
                         class="btn-icon md:hidden"
                         aria-label="Cari produk"
+                        @click="showSearch = true"
                     >
                         <IconifyIcon icon="lucide:search" width="18" />
-                    </Link>
+                    </button>
 
                     <!-- Dark Mode Toggle -->
                     <DarkModeToggle />
@@ -76,13 +77,47 @@
                 </div>
             </div>
         </nav>
+
+        <Teleport to="body">
+            <div
+                v-if="showSearch"
+                class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm px-4 pt-20 md:hidden"
+                @click.self="showSearch = false"
+            >
+                <div class="max-w-lg mx-auto rounded-xl bg-white p-4 shadow-xl dark:bg-gray-800">
+                    <div class="flex items-center gap-2">
+                        <SearchBar mobile class="flex-1" @navigate="showSearch = false" />
+                        <button
+                            type="button"
+                            class="btn-icon shrink-0"
+                            aria-label="Tutup pencarian"
+                            @click="showSearch = false"
+                        >
+                            <IconifyIcon icon="lucide:x" width="20" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </header>
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import SearchBar from './SearchBar.vue'
 import DarkModeToggle from './DarkModeToggle.vue'
 import UserMenu from './UserMenu.vue'
 import IconifyIcon from '../IconifyIcon.vue'
+
+const showSearch = ref(false)
+
+const onKeydown = (e) => {
+    if (e.key === 'Escape') {
+        showSearch.value = false
+    }
+}
+
+onMounted(() => document.addEventListener('keydown', onKeydown))
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 </script>

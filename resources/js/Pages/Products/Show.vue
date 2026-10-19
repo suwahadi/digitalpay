@@ -63,6 +63,10 @@
                             <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                 {{ product.name }}
                             </h1>
+                            <div class="flex items-center gap-0.5 mb-2" aria-label="Rating 5 dari 5">
+                                <IconifyIcon v-for="n in 5" :key="n" icon="material-symbols:star-rounded" width="20" class="text-amber-400" />
+                                <span class="ml-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">5.0</span>
+                            </div>
                             <p class="text-gray-600 dark:text-gray-400" v-if="product.short_description">
                                 {{ product.short_description }}
                             </p>

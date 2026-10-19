@@ -1,11 +1,12 @@
 <template>
-    <div class="relative hidden md:block">
+    <div :class="mobile ? 'relative w-full' : 'relative hidden md:block'">
         <div class="relative">
             <input
+                ref="inputRef"
                 v-model="searchQuery"
                 type="text"
                 placeholder="Cari produk..."
-                class="w-80 px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                :class="['pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400', mobile ? 'w-full py-3 text-base' : 'w-80 py-2 text-sm']"
                 @keyup.enter="performSearch"
             />
             <div class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -52,11 +53,16 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import IconifyIcon from '@/Components/IconifyIcon.vue'
 
+const props = defineProps({
+    mobile: { type: Boolean, default: false },
+})
+const emit = defineEmits(['navigate'])
+
 const searchQuery = ref('')
 const searchResults = ref([])
 const showResults = ref(false)
+const inputRef = ref(null)
 
-// Watch for search query changes
 watch(searchQuery, (newQuery) => {
     if (newQuery.length > 2) {
         searchProducts(newQuery)
@@ -68,7 +74,6 @@ watch(searchQuery, (newQuery) => {
 
 const searchProducts = async (query) => {
     try {
-        // Simulate API call - replace with actual API endpoint
         const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}`)
         const data = await response.json()
         searchResults.value = data.products || []
@@ -84,6 +89,7 @@ const performSearch = () => {
     if (searchQuery.value.trim()) {
         router.visit(`/products?search=${encodeURIComponent(searchQuery.value)}`)
         showResults.value = false
+        emit('navigate')
     }
 }
 
@@ -91,6 +97,7 @@ const selectResult = (result) => {
     router.visit(`/product/${result.slug}`)
     showResults.value = false
     searchQuery.value = ''
+    emit('navigate')
 }
 
 const formatPrice = (price) => {
@@ -108,6 +115,9 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
     document.addEventListener('click', handleClickOutside)
+    if (props.mobile) {
+        inputRef.value?.focus()
+    }
 })
 
 onUnmounted(() => {
