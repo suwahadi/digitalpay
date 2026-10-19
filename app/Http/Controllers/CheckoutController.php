@@ -75,7 +75,7 @@ class CheckoutController extends Controller
                     'type' => $method->type,
                     'provider' => $method->provider,
                     'display_name' => $method->name,
-                    'logo' => $method->icon,
+                    'logo' => $method->logo_url,
                     'description' => $this->getPaymentMethodDescription($method),
                     'fee_type' => $method->fee_type ?? 'none',
                     'fee_amount' => (float) ($method->fee_amount ?? 0),

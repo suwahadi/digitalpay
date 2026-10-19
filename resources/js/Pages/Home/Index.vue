@@ -21,7 +21,7 @@
         <FaqSection :faqs="faqs" />
         
         <!-- Payment Methods Section -->
-        <PaymentMethodsSection :methods="paymentMethods" />
+        <PaymentMethodsSection :payment-methods="paymentMethods" />
     </AppLayout>
 </template>
 

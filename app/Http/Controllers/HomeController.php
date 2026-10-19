@@ -50,7 +50,6 @@ class HomeController extends Controller
                 'slides' => $slides
             ];
         } catch (\Exception $e) {
-            // Fallback to default slides if database is not available
             return [
                 'slides' => [
                     [
@@ -109,7 +108,6 @@ class HomeController extends Controller
 
     protected function getPopularProducts()
     {
-        // Return default data if no database connection
         try {
             return Product::with(['category', 'variants' => function ($query) {
                 $query->active()->ordered();
@@ -138,7 +136,6 @@ class HomeController extends Controller
 
     protected function getProductsByCategory()
     {
-        // Return default data if no database connection
         try {
             return Category::with(['products' => function ($query) {
                 $query->active()
@@ -215,14 +212,14 @@ class HomeController extends Controller
     protected function getPaymentMethods()
     {
         try {
-            return PaymentMethod::active()
-                ->ordered()
+            return PaymentMethod::where('is_active', true)
+                ->orderBy('sort_order')
                 ->get(['id', 'name', 'icon', 'type'])
                 ->map(function ($method) {
                     return [
                         'id' => $method->id,
                         'name' => $method->name,
-                        'icon' => $method->icon_url,
+                        'logo' => $method->logo_url,
                         'type' => $method->type,
                     ];
                 });

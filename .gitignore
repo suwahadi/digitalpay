@@ -25,3 +25,4 @@ Thumbs.db
 /bootstrap/cache/*
 /bootstrap/ssr/*
 public/images/*
+!public/images/payment/

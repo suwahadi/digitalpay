@@ -38,18 +38,20 @@ class PaymentMethod extends Model
         return $this->getIconUrl();
     }
 
+    /**
+     * Seeded icons are public paths like /images/payment/bca.svg; icons uploaded
+     * from the admin panel are relative paths on the public disk.
+     */
     public function getIconUrl()
     {
         if (!$this->icon) {
-            return Storage::url('images/payment/default.png');
+            return null;
         }
 
-        // Check if icon already starts with /storage/ or http
-        if (str_starts_with($this->icon, '/storage/') || str_starts_with($this->icon, 'http')) {
+        if (str_starts_with($this->icon, '/') || str_starts_with($this->icon, 'http')) {
             return $this->icon;
         }
 
-        // Otherwise, use Storage::url
         return Storage::url($this->icon);
     }
 
@@ -81,7 +83,6 @@ class PaymentMethod extends Model
             'settings' => $this->settings ?: []
         ];
 
-        // Add specific configurations based on payment method code
         switch ($this->code) {
             case 'qris':
                 $config['payment_type'] = 'qris';
@@ -161,106 +162,6 @@ class PaymentMethod extends Model
         ];
 
         return $times[$this->code] ?? '1-5 menit';
-    }
-
-    /**
-     * Get Virtual Account display name
-     */
-    private function getVirtualAccountDisplayName()
-    {
-        $names = [
-            'bca' => 'BCA Virtual Account',
-            'bni' => 'BNI Virtual Account',
-            'bri' => 'BRI Virtual Account',
-            'permata' => 'Permata Virtual Account',
-            'cimb' => 'CIMB Niaga Virtual Account'
-        ];
-
-        return $names[strtolower($this->provider)] ?? strtoupper($this->provider) . ' Virtual Account';
-    }
-
-    /**
-     * Get Virtual Account logo
-     */
-    private function getVirtualAccountLogo()
-    {
-        if ($this->icon) {
-            return Storage::url($this->icon);
-        }
-
-        $logos = [
-            'bca' => 'images/payment/bca.png',
-            'bni' => 'images/payment/bni.png',
-            'bri' => 'images/payment/bri.png',
-            'permata' => 'images/payment/permata.png',
-            'cimb' => 'images/payment/cimb.png'
-        ];
-
-        return Storage::url($logos[strtolower($this->provider)] ?? 'images/payment/default.png');
-    }
-
-    /**
-     * Get E-wallet display name
-     */
-    private function getEwalletDisplayName()
-    {
-        $names = [
-            'gopay' => 'GoPay',
-            'shopeepay' => 'ShopeePay',
-            'dana' => 'DANA',
-            'linkaja' => 'LinkAja',
-            'ovo' => 'OVO'
-        ];
-
-        return $names[strtolower($this->provider)] ?? strtoupper($this->provider);
-    }
-
-    /**
-     * Get E-wallet logo
-     */
-    private function getEwalletLogo()
-    {
-        if ($this->icon) {
-            return Storage::url($this->icon);
-        }
-
-        $logos = [
-            'gopay' => 'images/payment/gopay.png',
-            'shopeepay' => 'images/payment/shopeepay.png',
-            'dana' => 'images/payment/dana.png',
-            'linkaja' => 'images/payment/linkaja.png',
-            'ovo' => 'images/payment/ovo.png'
-        ];
-
-        return Storage::url($logos[strtolower($this->provider)] ?? 'images/payment/default.png');
-    }
-
-    /**
-     * Get Bank Transfer display name
-     */
-    private function getBankTransferDisplayName()
-    {
-        $names = [
-            'mandiri' => 'Mandiri E-Channel'
-        ];
-
-        return $names[strtolower($this->provider)] ?? strtoupper($this->provider) . ' Bank Transfer';
-    }
-
-    /**
-     * Get Bank Transfer logo
-     */
-    private function getBankTransferLogo()
-    {
-        if ($this->icon) {
-            return Storage::url($this->icon);
-        }
-
-        $logos = [
-            'mandiri' => 'images/payment/mandiri.png'
-        ];
-
-        return Storage::url($logos[strtolower($this->provider)] ?? 'images/payment/default.png');
     }
 
     /**

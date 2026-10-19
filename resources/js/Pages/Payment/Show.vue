@@ -19,11 +19,11 @@
                 <!-- Payment Method Card - Primary Focus (Hidden if expired) -->
                 <div v-if="order && order.status !== 'expired' && paymentMethod" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                     <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-600">
-                            <img 
-                                :src="paymentMethod?.logo" 
+                        <div class="w-24 sm:w-28 h-16 flex-shrink-0 bg-white rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-600 px-3">
+                            <img
+                                :src="paymentMethod?.logo"
                                 :alt="paymentMethod?.display_name"
-                                class="w-12 h-12 object-contain"
+                                class="max-h-9 w-full object-contain"
                             />
                         </div>
                         <div>
@@ -466,7 +466,6 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import IconifyIcon from '@/Components/IconifyIcon.vue'
 import QRCode from 'qrcode'
 
-// Props with defaults to prevent null errors
 const props = defineProps({
     order: {
         type: Object,
@@ -486,7 +485,6 @@ const props = defineProps({
     }
 })
 
-// Reactive data
 const showInstructions = ref(false)
 const checkingStatus = ref(false)
 const qrCodeContainer = ref(null)
@@ -500,9 +498,7 @@ const countdownInterval = ref(null)
 const autoReloadInterval = ref(null)
 const isExpired = ref(false)
 
-// Toast notification system
 const showNotification = (message, type = 'info') => {
-    // Ensure we don't exceed max notifications
     if (notifications.value.length >= 5) {
         removeNotification(notifications.value[0].id)
     }
@@ -517,7 +513,6 @@ const showNotification = (message, type = 'info') => {
     
     notifications.value.push(notification)
     
-    // Auto remove after 5 seconds
     setTimeout(() => {
         removeNotification(id)
     }, 5000)
@@ -530,12 +525,10 @@ const removeNotification = (id) => {
     }
 }
 
-// Computed property for visible notifications
 const visibleNotifications = computed(() => {
     return notifications.value
 })
 
-// Copy to clipboard function
 const copyToClipboard = async (text, type) => {
     if (!text) {
         showNotification('Tidak ada teks untuk disalin', 'error')
@@ -543,7 +536,6 @@ const copyToClipboard = async (text, type) => {
     }
     
     try {
-        // Modern clipboard API
         if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(text)
         } else {
@@ -578,7 +570,6 @@ const copyToClipboard = async (text, type) => {
     }
 }
 
-// Check payment status
 const checkPaymentStatus = async () => {
     if (!props.order) {
         showNotification('Data pesanan tidak tersedia', 'error')
@@ -593,7 +584,6 @@ const checkPaymentStatus = async () => {
         router.reload({
             onSuccess: (page) => {
                 if (page.props.order && page.props.order.payment_status === 'paid') {
-                    // Clear callback listener interval
                     if (statusPollingInterval.value) {
                         clearInterval(statusPollingInterval.value)
                         statusPollingInterval.value = null
@@ -616,16 +606,13 @@ const checkPaymentStatus = async () => {
     }
 }
 
-// Generate QR Code
 const generateQRCode = async () => {
     if (!props.qrString) {
         return
     }
     
-    // Wait for DOM to be ready
     await nextTick()
     
-    // Check if container exists and is in DOM
     if (!qrCodeContainer.value) {
         // Retry after DOM is ready with max retries
         let retries = 0
@@ -649,7 +636,6 @@ const generateQRCode = async () => {
         return
     }
     
-    // Double check container is in DOM
     if (!document.contains(qrCodeContainer.value)) {
         return
     }
@@ -661,11 +647,9 @@ const generateQRCode = async () => {
     try {
         qrCodeLoading.value = true
         
-        // Clear any existing content safely
         if (qrCodeContainer.value) {
             qrCodeContainer.value.innerHTML = ''
             
-            // Show loading state
             qrCodeContainer.value.innerHTML = `
                 <div class="flex items-center justify-center h-full">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -673,11 +657,9 @@ const generateQRCode = async () => {
             `
         }
         
-        // Determine QR code size based on container
         const containerSize = qrCodeContainer.value?.offsetWidth || 160
         const qrSize = Math.min(containerSize, 192)
         
-        // Create a new canvas
         const canvas = document.createElement('canvas')
         await QRCode.toCanvas(canvas, props.qrString, {
             width: qrSize,
@@ -689,7 +671,6 @@ const generateQRCode = async () => {
             }
         })
         
-        // Clear loading and append canvas safely
         if (qrCodeContainer.value && document.contains(qrCodeContainer.value)) {
             qrCodeContainer.value.innerHTML = ''
             qrCodeContainer.value.appendChild(canvas)
@@ -701,7 +682,6 @@ const generateQRCode = async () => {
     } catch (error) {
         qrCodeLoading.value = false
         
-        // Only show notification if container exists
         if (qrCodeContainer.value && document.contains(qrCodeContainer.value)) {
             showNotification('Gagal membuat QR Code: ' + error.message, 'error')
             
@@ -717,10 +697,8 @@ const generateQRCode = async () => {
     }
 }
 
-// Component lifecycle
 onMounted(async () => {
     try {
-        // Wait for props to be available with retry mechanism
         const initializeComponent = async () => {
             if (!props.order) {
                 // If order is not available, wait a bit and retry (max 5 times)
@@ -742,7 +720,6 @@ onMounted(async () => {
                 return
             }
             
-            // Check if payment is already paid, redirect to invoice
             if (props.order.payment_status === 'paid') {
                 isRedirecting.value = true
                 showNotification('Pembayaran berhasil! Halaman dialihkan...', 'success')
@@ -752,19 +729,14 @@ onMounted(async () => {
                 return
             }
 
-            // Wait for DOM to be fully ready
             await nextTick()
             await new Promise(resolve => setTimeout(resolve, 50))
             
-            // Start countdown timer
             startCountdown()
             
-            // Start auto-reload every 15 seconds
             startAutoReload()
             
-            // Generate QR code if available, with proper delay
             if (props.qrString) {
-                // Wait a bit more to ensure DOM is ready
                 setTimeout(() => {
                     if (props.qrString && qrCodeContainer.value) {
                         generateQRCode()
@@ -772,7 +744,6 @@ onMounted(async () => {
                 }, 200)
             }
             
-            // Listen for real-time payment updates instead of polling
             if (props.order && (props.order.payment_status === 'pending' || props.order.status === 'pending')) {
                 setupPaymentStatusListener()
             }
@@ -785,17 +756,13 @@ onMounted(async () => {
     }
 })
 
-// Real-time payment status listener (no constant polling)
 const setupPaymentStatusListener = () => {
-    // Listen for Midtrans callback events via custom event
     window.addEventListener('payment-status-updated', handlePaymentStatusUpdate)
     
-    // Setup a single check after page load to ensure we have the latest status
     setTimeout(() => {
         checkPaymentStatusOnce()
     }, 2000)
     
-    // Start callback listener that only checks for Midtrans callback triggers
     startCallbackListener()
 }
 
@@ -820,7 +787,6 @@ const checkPaymentStatusOnce = async () => {
     try {
         checkingStatus.value = true
         
-        // First, check for any pending callbacks
         const callbackResponse = await fetch(`/payment/${props.order.order_number}/callback-status`, {
             method: 'GET',
             headers: {
@@ -832,7 +798,6 @@ const checkPaymentStatusOnce = async () => {
         if (callbackResponse.ok) {
             const callbackData = await callbackResponse.json()
             
-            // If there was a callback from Midtrans, handle it immediately
             if (callbackData.has_callback) {
                 if (callbackData.should_redirect) {
                     handleSuccessfulPayment({ 
@@ -846,7 +811,6 @@ const checkPaymentStatusOnce = async () => {
                 return
             }
             
-            // If no callback but payment is already paid, redirect
             if (callbackData.payment_status === 'paid') {
                 handleSuccessfulPayment({ 
                     order_number: props.order.order_number,
@@ -862,7 +826,6 @@ const checkPaymentStatusOnce = async () => {
     }
 }
 
-// Enhanced real-time monitoring that only triggers on Midtrans callbacks
 const startCallbackListener = () => {
     if (!props.order) return
     
@@ -889,7 +852,6 @@ const startCallbackListener = () => {
             if (response.ok) {
                 const data = await response.json()
                 
-                // Check if payment is already paid (even without callback flag)
                 if (data.payment_status === 'paid' || data.should_redirect) {
                     clearInterval(callbackCheckInterval)
                     handleSuccessfulPayment({ 
@@ -899,7 +861,6 @@ const startCallbackListener = () => {
                     return
                 }
                 
-                // Only act if there was an actual Midtrans callback
                 if (data.has_callback) {
                     clearInterval(callbackCheckInterval)
                     
@@ -931,12 +892,10 @@ const startCallbackListener = () => {
         // After initial fast checks, reduce frequency
         if (checkCount >= maxFastChecks) {
             clearInterval(callbackCheckInterval)
-            // Start slower checks every 30 seconds
             statusPollingInterval.value = setInterval(performCallbackCheck, 30000)
         }
     }, 5000) // Start with every 5 seconds
     
-    // Store interval ID for cleanup
     statusPollingInterval.value = callbackCheckInterval
 }
 
@@ -950,25 +909,20 @@ const handleSuccessfulPayment = (order) => {
     }, 1500)
 }
 
-// Cleanup on unmount
 onUnmounted(() => {
     try {
-        // Remove event listeners
         window.removeEventListener('payment-status-updated', handlePaymentStatusUpdate)
         
-        // Clear callback listener interval
         if (statusPollingInterval.value) {
             clearInterval(statusPollingInterval.value)
             statusPollingInterval.value = null
         }
         
-        // Clear countdown interval
         if (countdownInterval.value) {
             clearInterval(countdownInterval.value)
             countdownInterval.value = null
         }
         
-        // Clear auto-reload interval
         if (autoReloadInterval.value) {
             clearInterval(autoReloadInterval.value)
             autoReloadInterval.value = null
@@ -983,7 +937,6 @@ onUnmounted(() => {
     }
 })
 
-// Computed properties
 const hasAnyInstructions = computed(() => {
     if (!props.paymentInstructions) return false
     
@@ -1034,11 +987,9 @@ const getStatusText = (status) => {
 }
 
 const formatPrice = (price) => {
-    // Handle various price formats
     let numericPrice = 0
     
     if (typeof price === 'string') {
-        // Remove any non-numeric characters except decimal point
         const cleanPrice = price.replace(/[^\d.-]/g, '')
         numericPrice = parseFloat(cleanPrice) || 0
     } else if (typeof price === 'number') {
@@ -1070,7 +1021,6 @@ const formatExpiry = (date) => {
     return `${day} ${month} ${year} ${hours}:${minutes}`
 }
 
-// Countdown timer function
 const updateCountdown = () => {
     if (!props.order || !props.order.expires_at) {
         countdownText.value = ''
@@ -1079,13 +1029,11 @@ const updateCountdown = () => {
     
     try {
         const now = new Date().getTime()
-        // Handle both ISO string and Date object
         const expiryDate = props.order.expires_at instanceof Date 
             ? props.order.expires_at 
             : new Date(props.order.expires_at)
         const expiry = expiryDate.getTime()
         
-        // Check if date is valid
         if (isNaN(expiry)) {
             countdownText.value = 'Waktu tidak valid'
             return
@@ -1105,13 +1053,11 @@ const updateCountdown = () => {
         
         isExpired.value = false
         
-        // Calculate time components
         const days = Math.floor(difference / (1000 * 60 * 60 * 24))
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
         const seconds = Math.floor((difference % (1000 * 60)) / 1000)
         
-        // Format countdown text
         if (days > 0) {
             countdownText.value = `${days} hari ${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
         } else if (hours > 0) {
@@ -1120,19 +1066,15 @@ const updateCountdown = () => {
             countdownText.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
         }
     } catch (error) {
-        //console.error('Countdown error:', error)
         countdownText.value = 'Error menghitung waktu'
     }
 }
 
-// Start countdown timer
 const startCountdown = () => {
     if (!props.order || !props.order.expires_at) return
     
-    // Update immediately
     updateCountdown()
     
-    // Update every second
     if (countdownInterval.value) {
         clearInterval(countdownInterval.value)
     }
@@ -1145,7 +1087,6 @@ const startCountdown = () => {
 const startAutoReload = () => {
     if (!props.order) return
     
-    // Only auto-reload if payment is still pending
     if (props.order.payment_status === 'paid' || props.order.status === 'expired') {
         return
     }
@@ -1155,7 +1096,6 @@ const startAutoReload = () => {
     }
     
     autoReloadInterval.value = setInterval(() => {
-        // Only reload if payment is still pending
         if (!props.order || props.order.payment_status === 'paid' || props.order.status === 'expired') {
             if (autoReloadInterval.value) {
                 clearInterval(autoReloadInterval.value)
@@ -1164,7 +1104,6 @@ const startAutoReload = () => {
             return
         }
         
-        // Reload page
         window.location.reload()
     }, 30000) // 30 seconds
 }
@@ -1172,7 +1111,6 @@ const startAutoReload = () => {
 const getProductUrl = () => {
     if (props.order && props.order.items && props.order.items.length > 0) {
         const firstItem = props.order.items[0]
-        // Use product.slug from database (passed from backend)
         if (firstItem.product && firstItem.product.slug) {
             return `/product/${firstItem.product.slug}`
         }

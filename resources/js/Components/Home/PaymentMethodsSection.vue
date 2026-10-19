@@ -1,77 +1,71 @@
 <template>
-    <section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <section v-if="groups.length" class="py-16 bg-gray-50 dark:bg-gray-900" aria-labelledby="payment-methods-heading">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <div class="text-center mb-10">
+                <h2 id="payment-methods-heading" class="text-3xl font-bold text-gray-900 dark:text-white">
                     Metode Pembayaran
                 </h2>
+                <p class="mt-3 text-gray-600 dark:text-gray-400">
+                    Semua metode di bawah ini tersedia saat checkout.
+                </p>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                <div 
-                    v-for="method in paymentMethods" 
-                    :key="method.id"
-                    class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all duration-300 group hover:scale-105"
-                >
-                    <div class="w-16 h-16 mx-auto mb-3 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
-                        <img
-                            :src="method.logo"
-                            :alt="method.name"
-                            class="max-w-12 max-h-12 object-contain"
-                        />
-                    </div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white text-sm">
-                        {{ method.name }}
+            <div class="flex flex-wrap justify-center gap-x-12 gap-y-8">
+                <div v-for="group in groups" :key="group.label" class="w-full sm:w-auto">
+                    <h3 class="mb-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {{ group.label }}
                     </h3>
+                    <ul class="grid grid-cols-3 gap-3 sm:flex">
+                        <li
+                            v-for="method in group.methods"
+                            :key="method.id"
+                            class="flex h-16 w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-3 sm:w-32 dark:border-gray-700"
+                        >
+                            <img
+                                v-if="method.logo && !failedLogos.has(method.id)"
+                                :src="method.logo"
+                                :alt="method.name"
+                                loading="lazy"
+                                class="max-h-8 w-auto max-w-full object-contain"
+                                @error="failedLogos.add(method.id)"
+                            />
+                            <span v-else class="text-center text-xs font-semibold text-gray-900">
+                                {{ method.name }}
+                            </span>
+                        </li>
+                    </ul>
                 </div>
             </div>
-
         </div>
     </section>
 </template>
 
 <script setup>
-defineProps({
+import { computed, reactive } from 'vue'
+
+const props = defineProps({
     paymentMethods: {
         type: Array,
-        default: () => [
-            {
-                id: 1,
-                name: 'GoPay',
-                type: 'E-Wallet',
-                logo: '/storage/images/payment/gopay.png'
-            },
-            {
-                id: 2,
-                name: 'OVO',
-                type: 'E-Wallet',
-                logo: '/storage/images/payment/ovo.png'
-            },
-            {
-                id: 3,
-                name: 'DANA',
-                type: 'E-Wallet',
-                logo: '/storage/images/payment/dana.png'
-            },
-            {
-                id: 4,
-                name: 'ShopeePay',
-                type: 'E-Wallet',
-                logo: '/storage/images/payment/shopeepay.png'
-            },
-            {
-                id: 5,
-                name: 'BCA',
-                type: 'Bank',
-                logo: '/storage/images/payment/bca.png'
-            },
-            {
-                id: 6,
-                name: 'Mandiri',
-                type: 'Bank',
-                logo: '/storage/images/payment/mandiri.png'
-            }
-        ]
-    }
+        default: () => [],
+    },
+})
+
+const GROUPS = [
+    ['qris', 'QRIS'],
+    ['ewallet', 'E-Wallet'],
+    ['virtual_account', 'Virtual Account'],
+    ['bank_transfer', 'Transfer Bank'],
+]
+
+const failedLogos = reactive(new Set())
+
+const groups = computed(() => {
+    const known = GROUPS.map(([type, label]) => ({
+        label,
+        methods: props.paymentMethods.filter(method => method.type === type),
+    }))
+    const others = props.paymentMethods.filter(method => !GROUPS.some(([type]) => type === method.type))
+
+    return [...known, { label: 'Lainnya', methods: others }].filter(group => group.methods.length)
 })
 </script>

@@ -222,7 +222,7 @@
                                                     <img 
                                                         :src="method.logo" 
                                                         :alt="method.display_name"
-                                                        class="w-12 h-12 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white"
+                                                        class="w-20 sm:w-24 h-12 p-2 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white"
                                                         @error="handleImageError"
                                                     />
                                                 </div>
