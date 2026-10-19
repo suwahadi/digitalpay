@@ -28,8 +28,13 @@
                     </div>
 
                     <!-- Main Content Container -->
-                    <div class="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-8" 
+                    <div class="relative overflow-hidden rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-8" 
                          :class="{ 'mt-20': reloadProgress < 100 }">
+                        <div v-if="isLunas" class="pointer-events-none absolute right-0 top-0 h-28 w-28 overflow-hidden sm:h-32 sm:w-32" aria-hidden="true">
+                            <div class="absolute right-[-44px] top-[26px] w-[170px] rotate-45 bg-green-600 py-1.5 text-center text-sm font-bold tracking-[0.2em] text-white shadow-md sm:right-[-40px] sm:top-[30px]">
+                                LUNAS
+                            </div>
+                        </div>
                         <!-- Header -->
                         <div class="text-center mb-8">
                             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -638,6 +643,7 @@ const showCustomerInfo = ref(false)
 const copied = ref(false)
 const showPaymentSuccessNotification = ref(true)
 const isManualQris = computed(() => props.order?.payment_gateway === 'manual_qris')
+const isLunas = computed(() => props.order?.status === 'paid' || props.order?.payment_status === 'paid')
 const showQris = ref(isManualQris.value && props.order?.status === 'pending' && props.order?.payment_status === 'unpaid')
 const confirmingPayment = ref(false)
 
@@ -653,7 +659,6 @@ const confirmManualPayment = () => {
 
 let statusCheckInterval = null
 let pageReloadInterval = null
-let paymentSuccessNotificationTimeout = null
 
 const isExpired = computed(() => {
     if (!props.order || !props.order.expires_at) return false
@@ -1070,12 +1075,6 @@ onMounted(() => {
         return
     }
     
-    if (props.order.status === 'paid' || props.order.payment_status === 'paid') {
-        paymentSuccessNotificationTimeout = setTimeout(() => {
-            showPaymentSuccessNotification.value = false
-        }, 5000)
-    }
-    
     debugDigitalProducts()
     
     if (props.order.status === 'pending' && props.hasDigitalProducts) {
@@ -1105,9 +1104,6 @@ onBeforeUnmount(() => {
     }
     if (pageReloadInterval) {
         clearInterval(pageReloadInterval)
-    }
-    if (paymentSuccessNotificationTimeout) {
-        clearTimeout(paymentSuccessNotificationTimeout)
     }
 })
 </script>
