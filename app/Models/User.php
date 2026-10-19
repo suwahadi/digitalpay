@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use App\Notifications\EmailVerificationOTP;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable;
 
@@ -63,9 +65,6 @@ class User extends Authenticatable
         return $this->hasMany(Payment::class);
     }
 
-    // Laravel's Notifiable trait already provides notifications() method
-    // This method is removed to use Laravel's built-in notification system
-
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class);
@@ -81,7 +80,6 @@ class User extends Authenticatable
         return $this->hasMany(OrderMigration::class);
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -97,7 +95,6 @@ class User extends Authenticatable
         return $query->where('role', 'member');
     }
 
-    // Accessors & Helpers
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -111,6 +108,11 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin() && $this->isActive();
     }
 
     public function getDisplayNameAttribute(): string
@@ -128,7 +130,6 @@ class User extends Authenticatable
         return 'uuid';
     }
 
-    // OTP Methods
     public function generateOtpCode(): string
     {
         $this->otp_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);

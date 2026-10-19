@@ -158,7 +158,9 @@ class Product extends BaseModel
 
     public function getSeoDescriptionAttribute(): string
     {
-        return $this->meta_description ?: $this->short_description;
+        return $this->meta_description
+            ?: $this->short_description
+            ?: Str::limit(trim(strip_tags((string) $this->description)), 160, '');
     }
 
     public function isDigital(): bool
