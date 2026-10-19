@@ -7,10 +7,8 @@
 
     <title inertia>{{ $page['props']['title'] ?? \App\Helpers\ConfigHelper::siteName() }}</title>
 
-    <!-- Google Fonts - Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Poppins - self hosted -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-400.woff2" crossorigin>
 
     @php $heroImage = $page['props']['hero']['slides'][0]['image'] ?? null; @endphp
     @if($heroImage)

@@ -19,6 +19,8 @@
                     <!-- Image as clickable link -->
                     <Link :href="article.url || route('news.show', { slug: article.slug })" class="block">
                         <img
+                            loading="lazy"
+                            decoding="async"
                             :src="getImageUrl(article.featured_image || article.featured_image_url)"
                             :alt="article.title"
                             class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"

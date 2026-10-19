@@ -8,6 +8,8 @@
             <div class="relative flex items-center justify-center transition-all duration-500 rounded-t-xl">
                 <div class="w-full mx-3 -mt-16 bg-white shadow-lg animate-fade-in-fast shadow-gray-500/25 lg:mx-4 xl:mx-5 dark:from-gray-800/80 dark:to-bluegray dark:bg-gradient-to-t rounded-2xl">
                     <img 
+                        loading="lazy"
+                        decoding="async"
                         :src="product.image" 
                         :alt="product.name" 
                         class="object-cover rounded-2xl"

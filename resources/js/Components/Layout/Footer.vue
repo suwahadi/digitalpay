@@ -7,6 +7,8 @@
                     <div class="mb-4">
                         <Link href="/" :title="$page.props.settings.title">
                             <img 
+                                loading="lazy"
+                                decoding="async"
                                 :src="$page.props.settings.logo" 
                                 :alt="$page.props.settings.title"
                                 class="h-10 mb-4"
