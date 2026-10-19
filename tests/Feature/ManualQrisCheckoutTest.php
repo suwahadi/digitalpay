@@ -64,7 +64,9 @@ class ManualQrisCheckoutTest extends TestCase
         $this->assertSame(['qris'], PaymentMethod::available()->pluck('code')->all());
         $this->assertTrue($this->gopay->fresh()->is_active);
 
-        $this->checkout($this->gopay)->assertSessionHasErrors('payment_method_id');
+        $this->checkout($this->gopay)
+            ->assertRedirect(route('products.show', 'produk'))
+            ->assertSessionHas('error', 'Metode pembayaran ini sedang tidak tersedia.');
         $this->assertSame(0, Order::count());
     }
 

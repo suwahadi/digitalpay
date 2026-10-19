@@ -777,56 +777,10 @@ const confirmOrder = () => {
             console.log('[Checkout] Request started')
         },
         onSuccess: (page) => {
-            console.log('[Checkout] Request successful', page)
-            
-            let orderNumber = null
-            
-            const redirectUrl = page.url || window.location.href
-            if (redirectUrl.includes('/invoice/')) {
-                return
+            const match = (page.url || '').match(/\/payment\/([^\/?#]+)/)
+            if (match) {
+                window.location.href = `/payment/${match[1]}`
             }
-            if (redirectUrl && redirectUrl.includes('/payment/')) {
-                const orderNumberMatch = redirectUrl.match(/\/payment\/([^\/]+)/)
-                if (orderNumberMatch) {
-                    orderNumber = orderNumberMatch[1]
-                    console.log('[Checkout] Order number from URL:', orderNumber)
-                }
-            }
-            
-            if (!orderNumber && page.props?.order_number) {
-                orderNumber = page.props.order_number
-                console.log('[Checkout] Order number from props:', orderNumber)
-            }
-            
-            if (!orderNumber && page.props?.flash?.checkout_order_number) {
-                orderNumber = page.props.flash.checkout_order_number
-                console.log('[Checkout] Order number from flash:', orderNumber)
-            }
-            
-            if (orderNumber) {
-                console.log('[Checkout] Force redirecting to payment page:', orderNumber)
-                window.location.href = `/payment/${orderNumber}`
-                return
-            }
-            
-            setTimeout(() => {
-                console.log('[Checkout] Fallback: checking redirect status')
-                const currentPath = window.location.pathname
-                
-                if (currentPath.includes('/payment/')) {
-                    console.log('[Checkout] Successfully redirected to payment page')
-                    const match = currentPath.match(/\/payment\/([^\/]+)/)
-                    if (match) {
-                        console.log('[Checkout] Order number:', match[1])
-                    }
-                } else if (currentPath.includes('/checkout')) {
-                    console.warn('[Checkout] Still on checkout page, forcing reload to trigger redirect')
-                    window.location.reload()
-                } else {
-                    console.warn('[Checkout] Unexpected location:', currentPath)
-                    window.location.href = '/'
-                }
-            }, 300)
         },
         onError: (errors) => {
             console.error('[Checkout] Request failed with errors:', errors)
@@ -838,13 +792,11 @@ const confirmOrder = () => {
                 return
             }
             
-            if (errors.general) {
-                alert('Error: ' + errors.general)
-            } else if (errors.payment) {
-                alert('Error: ' + errors.payment)
+            const message = errors.general || errors.payment || Object.values(errors).flat().join(', ')
+            if (window.toast) {
+                window.toast.error('Pesanan gagal dibuat', message, 6000)
             } else {
-                const errorMessages = Object.values(errors).flat()
-                alert('Terjadi kesalahan: ' + errorMessages.join(', '))
+                alert(message)
             }
         },
         onFinish: () => {

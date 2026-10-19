@@ -294,16 +294,14 @@ class CheckoutController extends Controller
                         'success' => 'Pesanan berhasil dibuat! Silakan lakukan pembayaran.',
                     ]);
             } else {
-                $order->update(['status' => 'failed', 'payment_status' => 'failed']);
+                $order->updateQuietly(['status' => 'cancelled', 'payment_status' => 'failed']);
                 
                 \Log::error('[Checkout] Payment creation failed', [
                     'order_number' => $order->order_number,
                     'error_message' => $paymentResult['message'] ?? 'Unknown error',
                 ]);
                 
-                return back()->withErrors([
-                    'payment' => 'Terjadi kesalahan saat membuat pembayaran: ' . ($paymentResult['message'] ?? 'Unknown error')
-                ]);
+                return $this->checkoutFailed($request, 'Pembayaran tidak dapat dibuat saat ini. Silakan coba lagi beberapa saat lagi.');
             }
             
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -313,7 +311,7 @@ class CheckoutController extends Controller
                 'errors' => $e->errors(),
             ]);
             
-            return back()->withErrors($e->errors());
+            return $this->checkoutFailed($request, collect($e->errors())->flatten()->first());
             
         } catch (\Illuminate\Session\TokenMismatchException $e) {
             DB::rollBack();
@@ -335,10 +333,21 @@ class CheckoutController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             
-            return back()->withErrors([
-                'general' => 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage()
-            ]);
+            return $this->checkoutFailed($request, 'Terjadi kesalahan saat memproses pesanan. Silakan coba lagi.');
         }
+    }
+
+    /**
+     * The checkout page only renders from the product page's POST, so a
+     * failed order is sent back to the product with a toast instead of
+     * back(), which lands on GET /checkout and bounces to the home page.
+     */
+    private function checkoutFailed(Request $request, string $message)
+    {
+        $product = Product::find($request->input('product_id'));
+
+        return ($product ? redirect()->route('products.show', $product->slug) : redirect()->route('home'))
+            ->with('error', $message);
     }
 
     /**
