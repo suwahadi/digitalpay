@@ -175,9 +175,11 @@ class CheckoutController extends Controller
             $voucher = null;
             $discount = 0;
             if ($request->filled('voucher_code')) {
-                $voucher = Voucher::active()->validDate()->where('code', $request->voucher_code)->first();
+                $voucher = Voucher::active()->validDate()->where('code', $request->voucher_code)->lockForUpdate()->first();
                 if ($voucher && $voucher->isApplicable((float) $subtotal)) {
                     $discount = $voucher->calculateDiscount((float) $subtotal);
+                } else {
+                    $voucher = null;
                 }
             }
 
@@ -209,6 +211,8 @@ class CheckoutController extends Controller
                 'notes' => $request->notes,
                 'expires_at' => Carbon::now()->addMinutes(15),
             ]);
+
+            $voucher?->increment('used_count');
 
             $orderItem = OrderItem::create([
                 'order_id' => $order->id,
