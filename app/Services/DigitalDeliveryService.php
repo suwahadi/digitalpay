@@ -10,6 +10,7 @@ use App\Models\ProductVariant;
 use App\Models\GuestUser;
 use App\Notifications\DigitalDeliveryNotification;
 use App\Notifications\ManualDeliveryNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Exception;
@@ -56,6 +57,7 @@ class DigitalDeliveryService
                     'delivery_id' => $delivery->id
                 ];
             } catch (Exception $e) {
+                report($e);
                 $results[] = [
                     'order_item_id' => $orderItem->id,
                     'status' => 'failed',
@@ -96,6 +98,7 @@ class DigitalDeliveryService
                     'trigger' => 'manual'
                 ];
             } catch (Exception $e) {
+                report($e);
                 $results[] = [
                     'order_item_id' => $orderItem->id,
                     'status' => 'failed',
@@ -139,15 +142,15 @@ class DigitalDeliveryService
      */
     protected function assignAvailableStock(ProductVariant $variant, OrderItem $orderItem): ?DigitalStock
     {
-        $stock = $variant->getNextAvailableStock();
-        
-        if (!$stock || !$stock->isValid()) {
-            return null;
-        }
-        
-        $assigned = $stock->assignToOrderItem($orderItem);
-        
-        return $assigned ? $stock : null;
+        return DB::transaction(function () use ($variant, $orderItem) {
+            $stock = $variant->getNextAvailableStock(lock: true);
+
+            if (!$stock || !$stock->isValid()) {
+                return null;
+            }
+
+            return $stock->assignToOrderItem($orderItem) ? $stock : null;
+        });
     }
     
     /**
@@ -276,6 +279,7 @@ Terima kasih telah berbelanja!';
                 
             }
         } catch (Exception $e) {
+            report($e);
         }
     }
 
@@ -294,6 +298,7 @@ Terima kasih telah berbelanja!';
                 
             }
         } catch (Exception $e) {
+            report($e);
         }
     }
 }

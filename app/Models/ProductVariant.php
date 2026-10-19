@@ -38,7 +38,6 @@ class ProductVariant extends Model
         ];
     }
 
-    // Relationships
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -49,7 +48,6 @@ class ProductVariant extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -68,7 +66,6 @@ class ProductVariant extends Model
         return $query->orderBy('sort_order')->orderBy('price');
     }
 
-    // Accessors
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp ' . number_format($this->price, 0, ',', '.');
@@ -131,7 +128,7 @@ class ProductVariant extends Model
     public function decrementStock(int $quantity = 1): bool
     {
         if ($this->stock_quantity === null) {
-            return true; // Unlimited stock
+            return true;
         }
         
         if ($this->stock_quantity >= $quantity) {
@@ -141,8 +138,6 @@ class ProductVariant extends Model
         
         return false;
     }
-
-    //TAMBAHAN METHOD:
 
     public function digitalStocks()
     {
@@ -178,7 +173,7 @@ class ProductVariant extends Model
     /**
      * Get next available stock
      */
-    public function getNextAvailableStock(): ?DigitalStock
+    public function getNextAvailableStock(bool $lock = false): ?DigitalStock
     {
         return $this->digitalStocks()
             ->where('status', 'available')
@@ -186,7 +181,8 @@ class ProductVariant extends Model
                 $q->whereNull('expires_at')
                   ->orWhere('expires_at', '>', now());
             })
-            ->orderBy('added_at', 'asc') //FIFO
+            ->orderBy('added_at', 'asc')
+            ->when($lock, fn($q) => $q->lockForUpdate())
             ->first();
     }
 
