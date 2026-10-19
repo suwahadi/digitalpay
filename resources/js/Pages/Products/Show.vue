@@ -52,11 +52,7 @@
                             <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
                                 {{ product.category.name }}
                             </span>
-                            <div class="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
-                                <IconifyIcon icon="lucide:eye" width="16" />
-                                <span>{{ formatNumber(viewCount) }} Dilihat</span>
-                            </div>
-                            <div class="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
+                            <div v-if="salesCount > 0" class="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
                                 <IconifyIcon icon="lucide:shopping-bag" width="16" />
                                 <span>{{ formatNumber(salesCount) }} Terjual</span>
                             </div>
@@ -532,7 +528,6 @@ const sortedVariants = computed(() => {
     })
 })
 
-const viewCount = computed(() => props.product.view_count || 0)
 const salesCount = computed(() => props.product.sales_count || 0)
 
 const isLoggedIn = computed(() => {
@@ -563,11 +558,6 @@ const productFaqs = ref([
         id: 3,
         question: 'Apa yang harus saya lakukan jika terjadi masalah?',
         answer: 'Kamu bisa menghubungi admin dengan cara menekan icon hubungi kami yang berada di pojok kanan ya!'
-    },
-    {
-        id: 4,
-        question: 'Perbedaan 1 Profile 2 User dengan 1 Profile 1 User?',
-        answer: '1 Profile 2 User adalah jenis profil yang dapat digunakan oleh dua orang, yaitu kamu dan satu pengguna lainnya. Namun, dengan varian ini, terdapat kemungkinan terjadinya batasan layar (screen limit) ketika digunakan secara bersamaan. Sebaliknya, 1 Profile 1 User adalah jenis profil yang dirancang khusus hanya untuk kamu. Dengan profil ini, kamu tidak akan mengalami gangguan atau batasan layar saat menikmati tontonan favoritmu!'
     },
 ])
 

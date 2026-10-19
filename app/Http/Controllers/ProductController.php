@@ -17,19 +17,16 @@ class ProductController extends Controller
             $q->active()->ordered();
         }]);
         
-        // Search functionality
         if ($request->has('search') && !empty($request->search)) {
             $query->search($request->search);
         }
         
-        // Category filter
         if ($request->has('category') && !empty($request->category)) {
             $query->whereHas('category', function ($q) use ($request) {
                 $q->where('slug', $request->category);
             });
         }
         
-        // Sort functionality
         $sortBy = $request->get('sort', 'newest');
         switch ($sortBy) {
             case 'price_low':
@@ -65,7 +62,6 @@ class ProductController extends Controller
             ];
         });
         
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
         
         return Inertia::render('Products/Index', [
@@ -147,7 +143,6 @@ class ProductController extends Controller
     
     public function show(Product $product)
     {
-        // Check if product is active
         if (!$product->is_active) {
             abort(404);
         }
@@ -156,7 +151,6 @@ class ProductController extends Controller
             $q->active()->ordered();
         }]);
         
-        // Get related products
         $relatedProducts = Product::active()
             ->where('id', '!=', $product->id)
             ->where('category_id', $product->category_id)
@@ -179,15 +173,11 @@ class ProductController extends Controller
 
         $siteName = ConfigHelper::siteName();
 
-        // Calculate sales count from paid orders
         $salesCount = \App\Models\OrderItem::where('product_id', $product->id)
             ->whereHas('order', function ($query) {
                 $query->where('status', 'paid');
             })
             ->sum('quantity');
-
-        // Calculate view count (simple hash-based for consistency, can be replaced with actual tracking later)
-        $viewCount = ($product->id * 47 + 123) % 5000 + 500; // Simple hash for demo, replace with actual tracking
 
         return Inertia::render('Products/Show', [
             'title' => $product->name . ' - ' . $siteName,
@@ -231,7 +221,6 @@ class ProductController extends Controller
                 'is_featured' => $product->is_featured,
                 'seo_title' => $product->seo_title,
                 'seo_description' => $product->seo_description,
-                'view_count' => $viewCount,
                 'sales_count' => $salesCount,
             ],
             'relatedProducts' => $relatedProducts,
@@ -246,7 +235,6 @@ class ProductController extends Controller
         ]);
     }
     
-    // API Methods for AJAX calls
     public function popular()
     {
         try {
@@ -391,7 +379,7 @@ class ProductController extends Controller
                         'image' => $product->image_url,
                         'category' => $product->category->name,
                         'min_price' => $product->min_price,
-                        'price' => $product->min_price, // For search bar compatibility
+                        'price' => $product->min_price,
                         'stock_status' => $product->stock_status,
                         'url' => route('products.show', $product->slug),
                     ];

@@ -27,10 +27,10 @@ class SettingSeeder extends Seeder
             ['key_name' => 'guest_token_expiry_months', 'value' => '6', 'type' => 'number', 'group_name' => 'business', 'is_public' => false],
             ['key_name' => 'auto_delivery_enabled', 'value' => 'false', 'type' => 'boolean', 'group_name' => 'business', 'is_public' => false],
             
-            ['key_name' => 'social_instagram', 'value' => 'https://instagram.com/', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
-            ['key_name' => 'social_facebook', 'value' => 'https://facebook.com/', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
-            ['key_name' => 'social_twitter', 'value' => 'https://twitter.com/', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
-            ['key_name' => 'social_youtube', 'value' => 'https://youtube.com/@', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
+            ['key_name' => 'social_instagram', 'value' => '', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
+            ['key_name' => 'social_facebook', 'value' => '', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
+            ['key_name' => 'social_twitter', 'value' => '', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
+            ['key_name' => 'social_youtube', 'value' => '', 'type' => 'string', 'group_name' => 'social', 'is_public' => true],
         ];
 
         foreach ($settings as $setting) {
