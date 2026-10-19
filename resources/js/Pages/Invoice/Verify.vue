@@ -2,19 +2,19 @@
     <AppLayout>
         <Head :title="`Verifikasi Pesanan ${orderNumber}`" />
 
-        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-md w-full space-y-8">
+        <div class="flex justify-center px-4 pt-24 pb-10 sm:min-h-screen sm:items-center sm:py-12 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-6 sm:space-y-8">
                 <div class="text-center">
-                    <h1 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 class="text-2xl sm:mt-6 sm:text-3xl font-bold text-gray-900 dark:text-white">
                         Verifikasi Pesanan
                     </h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Untuk membuka pesanan <span class="font-semibold text-gray-900 dark:text-white">{{ orderNumber }}</span>,
+                        Untuk membuka pesanan <span class="font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ orderNumber }}</span>,
                         masukkan email yang Anda pakai saat checkout.
                     </p>
                 </div>
 
-                <form @submit.prevent="submit" class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <form @submit.prevent="submit" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Email pembeli
                     </label>
@@ -29,7 +29,7 @@
                         :aria-invalid="!!form.errors.email"
                         aria-describedby="email-error"
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                        :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': form.errors.email }"
+                        :class="{ 'border-red-500 dark:border-red-500 focus:ring-red-500 focus:border-red-500': form.errors.email }"
                     />
                     <p v-if="form.errors.email" id="email-error" class="mt-2 text-sm text-red-600 dark:text-red-400">
                         {{ form.errors.email }}

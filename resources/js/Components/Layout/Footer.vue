@@ -10,7 +10,7 @@
                                 :src="$page.props.settings.logo" 
                                 :alt="$page.props.settings.title"
                                 class="h-10 mb-4"
-                                onerror="this.src='/images/logo.png'"
+                                onerror="this.onerror=null;this.src='/images/logo.png'"
                             />
                         </Link>
                     </div>

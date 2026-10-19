@@ -13,7 +13,7 @@ class SettingSeeder extends Seeder
             ['key_name' => 'site_name', 'value' => 'DigitalPay', 'type' => 'string', 'group_name' => 'site', 'is_public' => true],
             ['key_name' => 'site_tagline', 'value' => 'Segala Kebutuhan Aplikasi Premium Ada Disini', 'type' => 'string', 'group_name' => 'site', 'is_public' => true],
             ['key_name' => 'site_description', 'value' => 'Platform terpercaya untuk kebutuhan aplikasi premium dengan harga terjangkau', 'type' => 'string', 'group_name' => 'site', 'is_public' => true],
-            ['key_name' => 'site_logo', 'value' => '/storage/images/logo.png', 'type' => 'string', 'group_name' => 'site', 'is_public' => true],
+            ['key_name' => 'site_logo', 'value' => '/images/logo.png', 'type' => 'string', 'group_name' => 'site', 'is_public' => true],
             ['key_name' => 'site_favicon', 'value' => '/storage/images/favicon.png', 'type' => 'string', 'group_name' => 'site', 'is_public' => true],
             
             ['key_name' => 'contact_email', 'value' => 'admin@digitalpay.web.id', 'type' => 'string', 'group_name' => 'contact', 'is_public' => true],

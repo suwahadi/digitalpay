@@ -12,7 +12,7 @@
                             :src="$page.props.settings.logo" 
                             :alt="$page.props.settings.title" 
                             class="h-10 image-cover"
-                            onerror="this.src='/images/logo_dp.png'"
+                            onerror="this.onerror=null;this.src='/images/logo.png'"
                         />
                     </Link>
                 </div>
@@ -48,13 +48,13 @@
                 <!-- Right Side -->
                 <div class="flex items-center gap-x-2">
                     <!-- Mobile Search Toggle -->
-                    <button 
-                        type="button" 
-                        @click="toggleMobileSearch"
+                    <Link
+                        href="/products"
                         class="btn-icon md:hidden"
+                        aria-label="Cari produk"
                     >
                         <IconifyIcon icon="lucide:search" width="18" />
-                    </button>
+                    </Link>
 
                     <!-- Dark Mode Toggle -->
                     <DarkModeToggle />
@@ -85,13 +85,4 @@ import SearchBar from './SearchBar.vue'
 import DarkModeToggle from './DarkModeToggle.vue'
 import UserMenu from './UserMenu.vue'
 import IconifyIcon from '../IconifyIcon.vue'
-
-// Remove settings prop since we're using global settings from $page.props.settings
-// defineProps({
-//     settings: Object,
-// })
-
-const toggleMobileSearch = () => {
-    // Implement mobile search toggle
-}
 </script>
