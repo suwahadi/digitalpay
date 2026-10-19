@@ -97,7 +97,7 @@ class ProductController extends Controller
             ->where('id', '!=', $product->id)
             ->where('category_id', $product->category_id)
             ->inRandomOrder()
-            ->limit(6)
+            ->limit(4)
             ->get()
             ->map(function ($relatedProduct) {
                 return [

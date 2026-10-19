@@ -11,9 +11,9 @@
                         <img
                             :src="slide.image"
                             :alt="slide.title || 'DigitalPay'"
-                            class="w-full aspect-[16/6] object-cover"
-                            width="1600"
-                            height="600"
+                            class="w-full aspect-video object-cover"
+                            width="1920"
+                            height="1080"
                             :fetchpriority="i === 0 ? 'high' : 'auto'"
                             :loading="i === 0 ? 'eager' : 'lazy'"
                             decoding="async"
