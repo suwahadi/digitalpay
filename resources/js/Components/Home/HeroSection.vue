@@ -65,6 +65,6 @@ onMounted(() => {
 })
 
 const handleImageError = (event) => {
-    onImageError(event, '/storage/images/default.jpg')
+    onImageError(event, '/images/placeholder.png')
 }
 </script>

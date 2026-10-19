@@ -22,7 +22,7 @@
                             :src="getImageUrl(article.featured_image || article.featured_image_url)"
                             :alt="article.title"
                             class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-                            @error="onImageError($event, '/images/default-article.jpg')"
+                            @error="onImageError($event, '/images/placeholder.png')"
                         />
                     </Link>
                     <div class="p-6">
@@ -74,7 +74,7 @@ defineProps({
 })
 
 const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/default-article.jpg'
+    if (!imagePath) return '/images/placeholder.png'
     
     if (imagePath.startsWith('http')) {
         return imagePath

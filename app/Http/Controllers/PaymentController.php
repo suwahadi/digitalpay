@@ -35,12 +35,10 @@ class PaymentController extends Controller
                 ->with('error', 'Payment data not found.');
         }
 
-        // Get payment instructions from session or payment data
         $paymentInstructions = session('payment_instructions');
         $paymentData = session('payment_data');
         
         if (!$paymentInstructions && $payment->gateway_response) {
-            // Extract instructions from stored payment data
             $gatewayData = is_string($payment->gateway_response) ? 
                 json_decode($payment->gateway_response, true) : 
                 $payment->gateway_response;
@@ -50,13 +48,11 @@ class PaymentController extends Controller
             }
         }
 
-        // Extract QR string for QRIS payments
         $qrString = null;
         if ($paymentInstructions && isset($paymentInstructions['qr_string'])) {
             $qrString = $paymentInstructions['qr_string'];
         }
 
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Payment/Show', [
@@ -85,9 +81,7 @@ class PaymentController extends Controller
                         'quantity' => $item->quantity,
                         'price' => (int) ceil($item->price),
                         'total' => (int) ceil($item->total),
-                        'product_image' => $item->product && $item->product->image ? 
-                            Storage::url($item->product->image) : 
-                            Storage::url('images/default-product.png'),
+                        'product_image' => $item->product?->image_url ?? '/images/placeholder.png',
                         'product' => $item->product ? [
                             'id' => $item->product->id,
                             'slug' => $item->product->slug,
@@ -131,7 +125,6 @@ class PaymentController extends Controller
         // Check if there's a payment success callback in session (from Midtrans callback)
         $successCallback = session()->get('payment_success_callback');
         if ($successCallback && $successCallback['order_number'] === $orderNumber) {
-            // Clear the session flag
             session()->forget('payment_success_callback');
             
             return response()->json([
@@ -163,7 +156,6 @@ class PaymentController extends Controller
     {
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
         
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Payment/Success', [
@@ -185,7 +177,6 @@ class PaymentController extends Controller
     {
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
         
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Payment/Failed', [

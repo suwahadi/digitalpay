@@ -311,7 +311,7 @@
                                         :src="product.image" 
                                         :alt="product.name"
                                         class="w-16 h-16 object-contain bg-gray-100 dark:bg-gray-700 rounded-lg"
-                                        @error="onImageError($event, '/storage/images/default-product.png')"
+                                        @error="onImageError($event, '/images/placeholder.png')"
                                     />
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">

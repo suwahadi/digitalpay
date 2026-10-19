@@ -54,19 +54,19 @@ class HomeController extends Controller
                 'slides' => [
                     [
                         'id' => 1,
-                        'image' => '/storage/images/default.jpg',
+                        'image' => '/images/placeholder.png',
                         'title' => 'Banner',
                         'link' => '#',
                     ],
                     [
                         'id' => 2,
-                        'image' => '/storage/images/default.jpg',
+                        'image' => '/images/placeholder.png',
                         'title' => 'Banner',
                         'link' => '#',
                     ],
                     [
                         'id' => 3,
-                        'image' => '/storage/images/default.jpg',
+                        'image' => '/images/placeholder.png',
                         'title' => 'Banner',
                         'link' => '#',
                     ],

@@ -26,3 +26,4 @@ Thumbs.db
 /bootstrap/ssr/*
 public/images/*
 !public/images/payment/
+!public/images/placeholder.png

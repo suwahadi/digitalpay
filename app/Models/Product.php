@@ -103,10 +103,12 @@ class Product extends BaseModel
     public function getImageUrlAttribute(): string
     {
         if ($this->image) {
-            return Storage::url($this->image);
+            return str_starts_with($this->image, '/') || str_starts_with($this->image, 'http')
+                ? $this->image
+                : Storage::url($this->image);
         }
-        
-        return Storage::url('images/default-product.png');
+
+        return '/images/placeholder.png';
     }
 
     public function getMinPriceAttribute(): float

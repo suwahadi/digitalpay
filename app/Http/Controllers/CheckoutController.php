@@ -112,7 +112,7 @@ class CheckoutController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'slug' => $product->slug,
-                'image' => $product->image ? Storage::url($product->image) : Storage::url('images/default-product.png'),
+                'image' => $product->image_url,
                 'category' => [
                     'id' => $product->category->id,
                     'name' => $product->category->name,

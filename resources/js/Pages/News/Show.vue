@@ -53,7 +53,7 @@
                             :src="getImageUrl(article.featured_image || article.featured_image_url)"
                             :alt="article.title"
                             class="w-full h-48 sm:h-64 lg:h-80 object-cover rounded-lg shadow-lg"
-                            @error="onImageError($event, '/images/default-article.jpg')"
+                            @error="onImageError($event, '/images/placeholder.png')"
                         />
                     </div>
 
@@ -127,7 +127,7 @@
                                         :src="getImageUrl(relatedArticle.featured_image || relatedArticle.featured_image_url)"
                                         :alt="relatedArticle.title"
                                         class="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                                        @error="onImageError($event, '/images/default-article.jpg')"
+                                        @error="onImageError($event, '/images/placeholder.png')"
                                     />
                                 </Link>
                                 <div class="p-4">
@@ -171,7 +171,7 @@ const currentUrl = computed(() => {
 })
 
 const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/default-article.jpg'
+    if (!imagePath) return '/images/placeholder.png'
     
     if (imagePath.startsWith('http')) {
         return imagePath

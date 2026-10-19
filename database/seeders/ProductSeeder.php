@@ -19,7 +19,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'netflix',
                 'short_description' => 'Platform streaming film dan series terpopuler di dunia',
                 'description' => 'Netflix adalah layanan streaming yang menawarkan berbagai acara TV pemenang penghargaan, film, anime, dokumenter, dan banyak lagi di ribuan perangkat yang terhubung ke Internet. Kamu bisa menonton sepuasnya, kapan pun kamu mau, tanpa satu iklan pun – semuanya dengan satu harga bulanan yang murah.',
-                'image' => '/images/products/netflix.png',
+                'image' => null,
                 'features' => [
                     'Streaming unlimited film dan series',
                     'Kualitas HD dan Ultra HD 4K',
@@ -37,7 +37,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'spotify',
                 'short_description' => 'Platform streaming musik dengan jutaan lagu dan podcast',
                 'description' => 'Spotify adalah platform audio digital yang memberikan akses ke jutaan lagu dan podcast dari seluruh dunia. Nikmati musik favorit tanpa iklan, download lagu untuk offline listening, dan dapatkan rekomendasi musik yang dipersonalisasi.',
-                'image' => '/images/products/spotify.png',
+                'image' => null,
                 'features' => [
                     'Streaming musik tanpa iklan',
                     'Download musik untuk offline',
@@ -55,7 +55,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'youtube-premium',
                 'short_description' => 'YouTube tanpa iklan dengan fitur premium lengkap',
                 'description' => 'YouTube Premium memberikan pengalaman menonton YouTube tanpa gangguan iklan, akses ke YouTube Music, kemampuan download video, dan fitur background play. Nikmati konten favorit dengan pengalaman yang lebih baik.',
-                'image' => '/images/products/youtube.png',
+                'image' => null,
                 'features' => [
                     'Menonton YouTube tanpa iklan',
                     'Background play (musik tetap putar)',
@@ -73,7 +73,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'canva-pro',
                 'short_description' => 'Tool desain grafis profesional dengan template premium',
                 'description' => 'Canva Pro adalah platform desain grafis yang memudahkan siapa pun untuk membuat desain yang menakjubkan. Dengan akses ke jutaan foto, elemen, dan template premium, kamu bisa membuat desain profesional dengan mudah.',
-                'image' => '/images/products/canva.png',
+                'image' => null,
                 'features' => [
                     'Akses jutaan template premium',
                     'Background remover otomatis',
@@ -91,7 +91,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'capcut-pro',
                 'short_description' => 'Editor video mobile terbaik dengan fitur profesional',
                 'description' => 'CapCut Pro adalah aplikasi edit video mobile yang powerful dengan berbagai fitur profesional. Buat video yang menakjubkan dengan effect, transition, dan tools editing yang lengkap tanpa watermark.',
-                'image' => '/images/products/capcut.png',
+                'image' => null,
                 'features' => [
                     'Edit video tanpa watermark',
                     'Template video trending',
@@ -109,7 +109,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'chatgpt-plus',
                 'short_description' => 'AI Assistant terdepan untuk produktivitas dan kreativitas',
                 'description' => 'ChatGPT Plus memberikan akses prioritas ke GPT-4, response time yang lebih cepat, dan akses ke fitur-fitur terbaru. Tingkatkan produktivitas dengan AI assistant yang paling canggih saat ini.',
-                'image' => '/images/products/chatgpt.png',
+                'image' => null,
                 'features' => [
                     'Akses ke GPT-4 model terbaru',
                     'Response time lebih cepat',
@@ -127,7 +127,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'disney-hotstar',
                 'short_description' => 'Platform streaming Disney, Marvel, Star Wars, dan konten lokal',
                 'description' => 'Disney+ Hotstar menawarkan koleksi lengkap film dan series dari Disney, Pixar, Marvel, Star Wars, National Geographic, plus konten lokal Indonesia yang eksklusif.',
-                'image' => '/images/products/disney.png',
+                'image' => null,
                 'features' => [
                     'Konten Disney, Marvel, Star Wars',
                     'Film dan series lokal Indonesia',
@@ -145,7 +145,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'apple-music',
                 'short_description' => 'Platform streaming musik premium dari Apple',
                 'description' => 'Apple Music menawarkan akses ke lebih dari 100 juta lagu, playlist yang dikurasi ahli, radio live, dan fitur spatial audio untuk pengalaman mendengar yang immersive.',
-                'image' => '/images/products/apple-music.png',
+                'image' => null,
                 'features' => [
                     'Streaming 100+ juta lagu',
                     'Spatial Audio dengan Dolby Atmos',
@@ -163,7 +163,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'crunchyroll',
                 'short_description' => 'Platform streaming anime terlengkap dengan subtitle Indonesia',
                 'description' => 'Crunchyroll adalah platform streaming anime terbesar di dunia dengan koleksi lebih dari 1000+ anime series. Nikmati anime simulcast terbaru dan series klasik dengan subtitle Indonesia.',
-                'image' => '/images/products/crunchyroll.png',
+                'image' => null,
                 'features' => [
                     'Library 1000+ anime series',
                     'Simulcast episode terbaru',
@@ -181,7 +181,7 @@ class ProductSeeder extends Seeder
                 'slug' => 'vidio-premier',
                 'short_description' => 'Platform streaming konten premium Indonesia',
                 'description' => 'Vidio Premier menawarkan konten premium Indonesia termasuk film original, series eksklusif, live sports, dan berbagai program entertainment tanpa iklan.',
-                'image' => '/images/products/vidio.png',
+                'image' => null,
                 'features' => [
                     'Konten original Indonesia',
                     'Live streaming olahraga',
@@ -210,8 +210,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => $productData['is_featured'],
                 'is_active' => true,
                 'sort_order' => $productData['sort_order'],
-                // 'meta_title' => $productData['name'] . ' Premium - DigitalPay',
-                // 'meta_description' => $productData['short_description'],
             ]);
         }
     }

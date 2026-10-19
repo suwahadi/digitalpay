@@ -95,6 +95,6 @@ const formatPrice = (price) => {
 }
 
 const handleImageError = (event) => {
-    onImageError(event, '/storage/images/default-product.png')
+    onImageError(event, '/images/placeholder.png')
 }
 </script>

@@ -27,13 +27,11 @@ class Category extends Model
         ];
     }
 
-    // Relationships
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -44,14 +42,13 @@ class Category extends Model
         return $query->orderBy('sort_order')->orderBy('name');
     }
 
-    // Accessors
     public function getIconUrlAttribute(): string
     {
         if ($this->icon) {
             return asset('storage/' . $this->icon);
         }
         
-        return asset('/storage/images/default.jpg');
+        return asset('images/placeholder.png');
     }
 
     public function getProductsCountAttribute(): int

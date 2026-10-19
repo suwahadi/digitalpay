@@ -34,13 +34,11 @@ class Article extends Model
         ];
     }
 
-    // Relationships
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    // Scopes
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
@@ -71,14 +69,13 @@ class Article extends Model
         });
     }
 
-    // Accessors
     public function getFeaturedImageUrlAttribute(): string
     {
         if ($this->featured_image) {
             return $this->featured_image;
         }
         
-        return asset('images/default-article.jpg');
+        return asset('images/placeholder.png');
     }
 
     public function getReadingTimeAttribute(): int

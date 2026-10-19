@@ -39,7 +39,7 @@
                                     :src="product.image" 
                                     :alt="product.name"
                                     class="w-full h-full object-contain"
-                                    @error="onImageError($event, '/storage/images/default-product.png')"
+                                    @error="onImageError($event, '/images/placeholder.png')"
                                 />
                             </div>
                         </div>
@@ -436,7 +436,7 @@
                                     :src="product.image" 
                                     :alt="product.name"
                                     class="w-16 h-16 object-contain bg-gray-100 dark:bg-gray-700 rounded-lg"
-                                    @error="onImageError($event, '/storage/images/default-product.png')"
+                                    @error="onImageError($event, '/images/placeholder.png')"
                                 />
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-900 dark:text-white">
