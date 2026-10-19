@@ -15,12 +15,25 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     /**
+     * Send an already signed-in user to their own area. Members go to /user;
+     * admins go to the admin panel, since /user would bounce them back here.
+     */
+    protected function redirectAuthenticated()
+    {
+        if (Auth::user()->role === 'member') {
+            return redirect('/user')->with('info', 'Anda sudah login.');
+        }
+
+        return redirect('/admin');
+    }
+
+    /**
      * Show the login form
      */
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect('/user')->with('info', 'Anda sudah login.');
+            return $this->redirectAuthenticated();
         }
         
         return inertia('Auth/Login');
@@ -94,7 +107,7 @@ class AuthController extends Controller
     public function showRegistrationForm()
     {
         if (Auth::check()) {
-            return redirect('/user')->with('info', 'Anda sudah login.');
+            return $this->redirectAuthenticated();
         }
         
         return inertia('Auth/Register');
@@ -303,7 +316,7 @@ class AuthController extends Controller
     public function showForgotPasswordForm()
     {
         if (Auth::check()) {
-            return redirect('/user')->with('info', 'Anda sudah login.');
+            return $this->redirectAuthenticated();
         }
         
         return inertia('Auth/ForgotPassword');
@@ -358,7 +371,7 @@ class AuthController extends Controller
     public function showResetPasswordForm(Request $request)
     {
         if (Auth::check()) {
-            return redirect('/user')->with('info', 'Anda sudah login.');
+            return $this->redirectAuthenticated();
         }
 
         $token = $request->query('token');

@@ -1,37 +1,5 @@
 <template>
     <AppLayout>
-        <!-- Success Notification Toast -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="transition ease-out duration-300"
-                enter-from-class="opacity-0 transform translate-y-2 translate-x-1/2"
-                enter-to-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-active-class="transition ease-in duration-200"
-                leave-from-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-to-class="opacity-0 transform translate-y-2 translate-x-1/2"
-            >
-                <div
-                    v-if="showSuccessToast"
-                    class="fixed top-4 right-4 z-50 max-w-sm w-full bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3"
-                >
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-medium">{{ message }}</p>
-                    </div>
-                    <button
-                        @click="showSuccessToast = false"
-                        class="text-white hover:text-gray-200 transition-colors"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </Transition>
-        </Teleport>
-
         <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div class="max-w-md w-full space-y-8">
                 <!-- Header -->
@@ -161,25 +129,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { router, Link, usePage } from '@inertiajs/vue3'
+import { ref, reactive } from 'vue'
+import { router, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
-// Props
 const props = defineProps({
     token: String,
     email: String,
 })
-
-// Page data
-const { props: pageProps } = usePage()
-const message = computed(() => {
-    const flashMessage = pageProps.flash?.message
-    return flashMessage && flashMessage.trim() ? flashMessage : 'Password berhasil direset! Silakan login dengan password baru Anda.'
-})
-
-// Toast notifications
-const showSuccessToast = ref(false)
 
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
@@ -194,30 +151,12 @@ const form = reactive({
 
 const errors = ref({})
 
-// Auto-hide toast notifications
-const showToast = (toastRef, duration = 4000) => {
-    toastRef.value = true
-    setTimeout(() => {
-        toastRef.value = false
-    }, duration)
-}
-
 const submit = () => {
     processing.value = true
     errors.value = {}
 
     router.post('/reset-password', form, {
-        onSuccess: (page) => {
-            processing.value = false
-            // Show toast - message will be shown via watch or default text
-            showToast(showSuccessToast, 5000)
-            // Redirect to login after 2 seconds
-            setTimeout(() => {
-                router.visit('/login')
-            }, 2000)
-        },
         onError: (serverErrors) => {
-            processing.value = false
             errors.value = serverErrors
         },
         onFinish: () => {
@@ -225,18 +164,4 @@ const submit = () => {
         }
     })
 }
-
-// Watch for success message and show toast
-watch(message, (newMessage) => {
-    if (newMessage) {
-        showToast(showSuccessToast, 5000)
-    }
-}, { immediate: true })
-
-// Show success message toast if present on mount
-onMounted(() => {
-    if (message.value) {
-        showToast(showSuccessToast, 5000)
-    }
-})
 </script>

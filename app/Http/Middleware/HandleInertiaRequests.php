@@ -42,8 +42,11 @@ class HandleInertiaRequests extends Middleware
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
             ],
-            // Provide categories globally for navigation
             'categories' => function () {
                 try {
                     return \App\Models\Category::active()
@@ -62,12 +65,10 @@ class HandleInertiaRequests extends Middleware
                     return [];
                 }
             },
-            // Provide global settings for all pages
             'settings' => function () {
                 try {
                     return ConfigHelper::globalSettings();
                 } catch (\Exception $e) {
-                    // Fallback to ConfigHelper methods with defaults
                     return [
                         'site_name' => ConfigHelper::siteName(),
                         'site_tagline' => ConfigHelper::siteTagline(),

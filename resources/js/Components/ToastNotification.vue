@@ -55,9 +55,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-
-import { h } from 'vue'
+import { ref, h, watch, onMounted, onUnmounted } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 
 const CheckCircleIcon = {
     render() {
@@ -131,8 +130,9 @@ const InformationCircleIcon = {
     }
 }
 
+const page = usePage()
 const toasts = ref([])
-let intervalId = null
+const timers = new Set()
 
 const addToast = (toast) => {
     const id = Date.now() + Math.random()
@@ -153,9 +153,11 @@ const addToast = (toast) => {
         newToast.progress -= progressStep
         if (newToast.progress <= 0) {
             clearInterval(timer)
+            timers.delete(timer)
             removeToast(id)
         }
     }, interval)
+    timers.add(timer)
 }
 
 const removeToast = (id) => {
@@ -254,28 +256,35 @@ if (typeof window !== 'undefined') {
     }
 }
 
+const flashDurations = {
+    error: 6000,
+    warning: 6000,
+    info: 4000,
+    success: 4000
+}
+
+/**
+ * Server flashes (redirect()->with('error', ...)) shown as toasts. `message` is
+ * left to the auth pages, which render their own notice for it.
+ */
+const showFlash = (flash) => {
+    if (!flash) return
+    Object.keys(flashDurations).forEach((type) => {
+        if (flash[type]) {
+            addToast({ type, title: flash[type], duration: flashDurations[type] })
+        }
+    })
+}
+
 onMounted(() => {
-    const page = window.$page || {}
-    if (page.props?.flash?.message) {
-        addToast({
-            type: 'success',
-            title: page.props.flash.message,
-            duration: 3000
-        })
-    }
-    if (page.props?.flash?.error) {
-        addToast({
-            type: 'error',
-            title: page.props.flash.error,
-            duration: 4000
-        })
-    }
+    showFlash(page.props.flash)
 })
 
+watch(() => page.props.flash, showFlash)
+
 onUnmounted(() => {
-    if (intervalId) {
-        clearInterval(intervalId)
-    }
+    timers.forEach(clearInterval)
+    timers.clear()
 })
 </script>
 
