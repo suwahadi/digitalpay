@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class BrevoService
@@ -31,7 +32,6 @@ class BrevoService
     public function sendEmail(array $data): array
     {
         if (!$this->enabled) {
-            //Log::info('Brevo email disabled, skipping email send', ['data' => $data]);
             return [
                 'success' => false,
                 'message' => 'Brevo email service is disabled'
@@ -60,16 +60,19 @@ class BrevoService
             ])->post("{$this->apiUrl}/smtp/email", $payload);
 
             if ($response->successful()) {
-                // Log::info('Email sent successfully via Brevo', [
-                //     'messageId' => $response->json('messageId')
-                // ]);
-
                 return [
                     'success' => true,
                     'message' => 'Email sent successfully',
                     'data' => $response->json()
                 ];
             }
+
+            Log::warning('Brevo API rejected email', [
+                'to' => $data['to'] ?? null,
+                'subject' => $data['subject'] ?? null,
+                'status' => $response->status(),
+                'error' => $response->json() ?? $response->body(),
+            ]);
 
             return [
                 'success' => false,
@@ -78,6 +81,12 @@ class BrevoService
             ];
 
         } catch (Exception $e) {
+            Log::warning('Brevo API request failed', [
+                'to' => $data['to'] ?? null,
+                'subject' => $data['subject'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
             return [
                 'success' => false,
                 'message' => 'Exception occurred',
@@ -102,7 +111,6 @@ class BrevoService
             'subject' => $data['subject'],
         ];
 
-        // Handle recipients
         if (isset($data['to'])) {
             if (is_string($data['to'])) {
                 $payload['to'] = [
@@ -118,12 +126,10 @@ class BrevoService
             }
         }
 
-        // Handle recipient name
         if (isset($data['recipient_name']) && isset($payload['to'][0])) {
             $payload['to'][0]['name'] = $data['recipient_name'];
         }
 
-        // Handle content - HTML or plain text
         if (isset($data['html_content'])) {
             $payload['htmlContent'] = $data['html_content'];
         }
@@ -132,7 +138,6 @@ class BrevoService
             $payload['textContent'] = $data['text_content'];
         }
 
-        // Handle template (if using Brevo templates)
         if (isset($data['template_id'])) {
             $payload['templateId'] = $data['template_id'];
             
@@ -141,7 +146,6 @@ class BrevoService
             }
         }
 
-        // Handle CC and BCC
         if (isset($data['cc'])) {
             $payload['cc'] = is_array($data['cc']) 
                 ? $data['cc'] 
@@ -154,19 +158,16 @@ class BrevoService
                 : [['email' => $data['bcc']]];
         }
 
-        // Handle reply to
         if (isset($data['reply_to'])) {
             $payload['replyTo'] = is_array($data['reply_to']) 
                 ? $data['reply_to'] 
                 : ['email' => $data['reply_to']];
         }
 
-        // Handle attachments
         if (isset($data['attachments'])) {
             $payload['attachment'] = $data['attachments'];
         }
 
-        // Handle tags
         if (isset($data['tags'])) {
             $payload['tags'] = is_array($data['tags']) ? $data['tags'] : [$data['tags']];
         }

@@ -126,10 +126,20 @@ class AuthController extends Controller
 
             $otpCode = $user->generateOtpCode();
 
-            $user->notify(new EmailVerificationOTP($otpCode, $user->name));
+            /**
+             * The account already exists at this point, so a failed OTP email must
+             * not surface as a failed registration; the user can resend from /verify.
+             */
+            try {
+                $user->notify(new EmailVerificationOTP($otpCode, $user->name));
+                $message = 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.';
+            } catch (\Exception $e) {
+                report($e);
+                $message = 'Registrasi berhasil, tetapi email kode verifikasi gagal terkirim. Silakan klik kirim ulang kode.';
+            }
 
             return redirect('/verify?email=' . urlencode($user->email))
-                ->with('message', 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.');
+                ->with('message', $message);
 
         } catch (\Exception $e) {
             return back()->withErrors([

@@ -75,40 +75,59 @@ Cek: `curl -s http://127.0.0.1:13714/health` harus `200`.
 > Alternatif: `php artisan inertia:start-ssr` (membaca `config/inertia.php`).
 > Keduanya sama; menjalankan `node bootstrap/ssr/ssr.js` langsung lebih mudah di PM2.
 
-## 5. Queue worker lewat Supervisor Manager
+## 5. Queue worker (PM2)
 
-Email OTP & reset password dikirim **sinkron** (tidak butuh worker). Tapi
-notifikasi order/delivery **di-queue**, jadi butuh worker jalan terus.
+Email OTP & reset password dikirim **sinkron** (tidak butuh worker). Notifikasi
+order (pesanan dibuat, pembayaran sukses, dibatalkan, pengiriman produk) dan
+job `ProcessDigitalDelivery` **di-queue**, jadi worker wajib jalan terus.
 
-aaPanel → **Supervisor Manager → Add**:
-
-- Name: `digitalpay-queue`
-- Run user: user web (mis. `www`)
-- Run directory: path project
-- Command: `php artisan queue:work --sleep=3 --tries=3 --max-time=3600`
-- Processes: 1
-
-## 6. Scheduler (jika dipakai)
-
-aaPanel → **Cron** → tambah tugas tiap menit:
+Worker dijalankan lewat PM2 yang sama dengan SSR, sebagai user `www`:
 
 ```bash
-php /www/wwwroot/digitalpay/artisan schedule:run >> /dev/null 2>&1
+cd /www/wwwroot/digitalpay.web.id
+sudo -u www env PM2_HOME=$PWD/.pm2 pm2 start artisan --name digitalpay-queue   --interpreter php -- queue:work --sleep=3 --tries=3 --backoff=60,300 --max-time=3600
+sudo -u www env PM2_HOME=$PWD/.pm2 pm2 save
 ```
+
+- `--tries=3 --backoff=60,300`: email yang gagal dicoba ulang setelah 1 lalu
+  5 menit; setelah 3 kali gagal masuk tabel `failed_jobs`.
+- `--max-time=3600`: worker keluar tiap jam dan PM2 menyalakannya lagi.
+- Boot otomatis lewat service `pm2-www` (`pm2 resurrect`).
+- `retry_after` antrean database 360 detik (`config/queue.php`), harus lebih
+  besar dari timeout job terpanjang (300 detik).
+
+Cek job gagal: `sudo -u www php artisan queue:failed`, ulangi dengan
+`sudo -u www php artisan queue:retry all`.
+
+## 6. Scheduler (wajib)
+
+`orders:expire` berjalan tiap menit untuk mengubah order yang lewat batas bayar
+menjadi `expired`. Pasang di crontab user `www` (bukan root, agar file cache dan
+log tetap milik `www`):
+
+```bash
+crontab -u www -e
+* * * * * cd /www/wwwroot/digitalpay.web.id && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Cek: `sudo -u www php artisan schedule:list`.
 
 ## 7. Setiap kali deploy ulang
 
+Jalankan sebagai `www`:
+
 ```bash
 git pull
-composer install --no-dev --optimize-autoloader
+composer install --no-dev --optimize-autoloader   # jika composer.lock berubah
 npm ci && npm run build
 php artisan migrate --force
-php artisan config:cache route:cache view:cache
-pm2 restart digitalpay-ssr      # WAJIB: agar SSR memakai bundle terbaru
+php artisan config:cache && php artisan route:cache && php artisan view:cache
+php artisan queue:restart       # WAJIB: worker memakai kode terbaru
+PM2_HOME=$PWD/.pm2 pm2 restart digitalpay-ssr   # WAJIB: SSR memakai bundle terbaru
 ```
 
-> `pm2 restart` penting — server SSR memuat bundle ke memori, jadi build baru
-> tidak terpakai sampai proses di-restart.
+> Worker dan server SSR memuat kode ke memori, jadi perubahan tidak terpakai
+> sampai keduanya di-restart.
 
 ## Verifikasi SSR aktif
 

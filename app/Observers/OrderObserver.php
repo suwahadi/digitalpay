@@ -19,10 +19,10 @@ class OrderObserver
             $notifiable = $this->getNotifiable($order);
             
             if ($notifiable) {
-                // Use queue to prevent blocking the main process
                 $notifiable->notify(new OrderCreatedNotification($order));
             }
         } catch (\Exception $e) {
+            report($e);
         }
     }
 
@@ -31,7 +31,6 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        // Check if payment status changed to 'paid'
         if ($order->isDirty('payment_status') && $order->payment_status === 'paid') {
             try {
                 $notifiable = $this->getNotifiable($order);
@@ -40,10 +39,10 @@ class OrderObserver
                     $notifiable->notify(new PaymentSuccessNotification($order));
                 }
             } catch (\Exception $e) {
+                report($e);
             }
         }
 
-        // Check if status changed to 'cancelled'
         if ($order->isDirty('status') && $order->status === 'cancelled') {
             try {
                 $notifiable = $this->getNotifiable($order);
@@ -53,6 +52,7 @@ class OrderObserver
                     $notifiable->notify(new OrderCancellationNotification($order, $reason));
                 }
             } catch (\Exception $e) {
+                report($e);
             }
         }
     }
@@ -62,12 +62,10 @@ class OrderObserver
      */
     protected function getNotifiable(Order $order)
     {
-        // If order has user_id, use the user
         if ($order->user_id) {
             return $order->user;
         }
 
-        // Otherwise, create a guest user for notification
         if ($order->customer_email) {
             return new GuestUser(
                 $order->customer_email,
