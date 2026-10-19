@@ -261,6 +261,7 @@ class ProductController extends Controller
                 
             return response()->json($products);
         } catch (\Exception $e) {
+            report($e);
             return response()->json([]);
         }
     }
@@ -291,6 +292,7 @@ class ProductController extends Controller
                 
             return response()->json($products);
         } catch (\Exception $e) {
+            report($e);
             return response()->json([]);
         }
     }
@@ -332,6 +334,7 @@ class ProductController extends Controller
                 
             return response()->json($categories);
         } catch (\Exception $e) {
+            report($e);
             return response()->json([]);
         }
     }
@@ -350,6 +353,7 @@ class ProductController extends Controller
                     ];
                 });
         } catch (\Exception $e) {
+            report($e);
             return [];
         }
     }
@@ -387,6 +391,7 @@ class ProductController extends Controller
                 
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
+            report($e);
             return response()->json(['products' => []], 500);
         }
     }

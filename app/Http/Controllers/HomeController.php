@@ -50,6 +50,7 @@ class HomeController extends Controller
                 'slides' => $slides
             ];
         } catch (\Exception $e) {
+            report($e);
             return [
                 'slides' => [
                     [
@@ -130,6 +131,7 @@ class HomeController extends Controller
                     ];
                 });
         } catch (\Exception $e) {
+            report($e);
             return [];
         }
     }
@@ -168,6 +170,7 @@ class HomeController extends Controller
                     ];
                 });
         } catch (\Exception $e) {
+            report($e);
             return [];
         }
     }
@@ -193,6 +196,7 @@ class HomeController extends Controller
                     ];
                 });
         } catch (\Exception $e) {
+            report($e);
             return [];
         }
     }
@@ -205,6 +209,7 @@ class HomeController extends Controller
                 ->limit(10)
                 ->get(['id', 'question', 'answer']);
         } catch (\Exception $e) {
+            report($e);
             return [];
         }
     }
@@ -224,6 +229,7 @@ class HomeController extends Controller
                     ];
                 });
         } catch (\Exception $e) {
+            report($e);
             return [];
         }
     }
@@ -233,6 +239,7 @@ class HomeController extends Controller
         try {
             return ConfigHelper::globalSettings();
         } catch (\Exception $e) {
+            report($e);
             return [
                 'site_name' => ConfigHelper::siteName(),
                 'site_tagline' => ConfigHelper::siteTagline(),
