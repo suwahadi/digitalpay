@@ -290,6 +290,25 @@ class BrevoService
     }
 
     /**
+     * Send order expired email
+     *
+     * @param array $orderData
+     * @return array
+     */
+    public function sendOrderExpired(array $orderData): array
+    {
+        $htmlContent = view('emails.order-expired', $orderData)->render();
+
+        return $this->sendEmail([
+            'to' => $orderData['customer_email'],
+            'recipient_name' => $orderData['customer_name'],
+            'subject' => 'Pesanan Kedaluwarsa - ' . $orderData['order_number'],
+            'html_content' => $htmlContent,
+            'tags' => ['order', 'expired']
+        ]);
+    }
+
+    /**
      * Get account information from Brevo
      *
      * @return array

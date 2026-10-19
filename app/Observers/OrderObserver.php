@@ -7,6 +7,7 @@ use App\Models\GuestUser;
 use App\Notifications\OrderCreatedNotification;
 use App\Notifications\PaymentSuccessNotification;
 use App\Notifications\OrderCancellationNotification;
+use App\Notifications\OrderExpiredNotification;
 
 class OrderObserver
 {
@@ -50,6 +51,18 @@ class OrderObserver
                 if ($notifiable) {
                     $reason = $order->notes ?? 'Pesanan dibatalkan';
                     $notifiable->notify(new OrderCancellationNotification($order, $reason));
+                }
+            } catch (\Exception $e) {
+                report($e);
+            }
+        }
+
+        if ($order->isDirty('status') && $order->status === 'expired') {
+            try {
+                $notifiable = $this->getNotifiable($order);
+
+                if ($notifiable) {
+                    $notifiable->notify(new OrderExpiredNotification($order));
                 }
             } catch (\Exception $e) {
                 report($e);
