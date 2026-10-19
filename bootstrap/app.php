@@ -15,14 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
         
-        // Add CORS middleware globally
         $middleware->web(prepend: [
             \App\Http\Middleware\HandleCors::class,
         ]);
         
-        // Register custom middleware
         $middleware->alias([
             'member' => \App\Http\Middleware\MemberOnly::class,
+            'order.access' => \App\Http\Middleware\EnsureOrderAccess::class,
         ]);
         
         $middleware->validateCsrfTokens(except: [
@@ -35,5 +34,4 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
     })->create();

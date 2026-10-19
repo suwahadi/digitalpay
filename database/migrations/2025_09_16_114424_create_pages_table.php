@@ -17,7 +17,9 @@ return new class extends Migration {
 
             $table->index(['slug']);
             $table->index(['is_published']);
-            $table->fullText(['title', 'content']);
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText(['title', 'content']);
+            }
         });
     }
 

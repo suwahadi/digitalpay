@@ -29,7 +29,9 @@ return new class extends Migration {
             $table->index(['category_id']);
             $table->index(['is_active', 'is_popular']);
             $table->index(['is_active', 'is_featured']);
-            $table->fullText(['name', 'description']);
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText(['name', 'description']);
+            }
         });
     }
 

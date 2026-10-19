@@ -17,42 +17,35 @@ class SecureDownloadController extends Controller
      */
     public function download(Request $request, string $token)
     {
-        // Validasi token
         $delivery = DigitalDelivery::where('download_token', $token)->first();
         
         if (!$delivery) {
             abort(404, 'File not found');
         }
         
-        // Check apakah masih bisa di-download
         if (!$delivery->canDownload()) {
-            // Check expired first - return proper error message
             if ($delivery->is_expired || $delivery->expires_at->isPast()) {
                 abort(410, 'Link Download File sudah expired. Silahkan hubungi Admin');
             }
             
-            // Check download limit
             if ($delivery->download_count >= $delivery->max_downloads) {
                 abort(429, 'Batas download telah tercapai');
             }
             
-            // Check delivery status
             if ($delivery->delivery_status !== DigitalDelivery::STATUS_COMPLETED) {
                 abort(404, 'File belum siap untuk diunduh');
             }
+
+            abort(403, 'Download tidak diizinkan');
         }
         
-        // Log download attempt
         $this->logDownloadAttempt($delivery, $request);
         
-        // Increment download count
         $delivery->incrementDownloadCount();
         
-        // Generate filename
         $orderItem = $delivery->orderItem;
         $filename = $this->generateFilename($orderItem, $delivery);
         
-        // Return file download response
         return $this->createDownloadResponse($delivery->delivery_content, $filename);
     }
     
@@ -64,7 +57,6 @@ class SecureDownloadController extends Controller
         $order = $orderItem->order;
         $product = $orderItem->productVariant->product;
         
-        // Format: SiteName_ProductName_OrderNumber.txt
         $siteName = \App\Helpers\ConfigHelper::siteName();
         $filename = sprintf(
             '%s_%s_%s.txt',

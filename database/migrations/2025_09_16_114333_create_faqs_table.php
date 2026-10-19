@@ -18,7 +18,9 @@ return new class extends Migration {
 
             $table->index(['category']);
             $table->index(['is_active', 'sort_order']);
-            $table->fullText(['question', 'answer']);
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText(['question', 'answer']);
+            }
         });
     }
 

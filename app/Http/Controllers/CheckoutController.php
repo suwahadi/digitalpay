@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Helpers\ConfigHelper;
 use App\Services\MidtransService;
+use App\Http\Middleware\EnsureOrderAccess;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -32,21 +33,17 @@ class CheckoutController extends Controller
      */
     public function index(Request $request)
     {
-        // If accessed directly without required data, redirect to home
         return redirect()->route('home')
             ->with('info', 'Silakan pilih produk terlebih dahulu untuk melanjutkan ke checkout.');
     }
     public function create(Request $request)
     {
-        // Validate required parameters
         try {
             $request->validate([
                 'product_id' => 'required|exists:products,id',
                 'variant_id' => 'required|exists:product_variants,id',
-                //'quantity' => 'required|integer|min:1|max:1',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // If validation fails, redirect to home with error message
             return redirect()->route('home')
                 ->with('error', 'Data produk tidak valid. Silakan pilih produk kembali.');
         }
@@ -89,7 +86,6 @@ class CheckoutController extends Controller
                 ];
             });
         
-        // Build available vouchers for current subtotal
         $subtotal = (float) ($selectedVariant->price);
         $availableVouchers = \App\Models\Voucher::query()
             ->where('is_active', true)
@@ -108,7 +104,6 @@ class CheckoutController extends Controller
                 'min_total' => (float) ($v->min_total ?? 0),
                 'expires_at' => optional($v->expires_at)->toDateTimeString(),
             ]; });
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Checkout/Create', [
@@ -133,7 +128,6 @@ class CheckoutController extends Controller
                 'discount_percentage' => $selectedVariant->discount_percentage,
                 'stock_status' => $selectedVariant->stock_status,
             ],
-            //'quantity' => $request->quantity,
             'paymentMethods' => $paymentMethods,
             'availableVouchers' => $availableVouchers,
             'auth' => [
@@ -165,12 +159,16 @@ class CheckoutController extends Controller
 
             DB::beginTransaction();
             
-            // Get product and variant
             $product = Product::findOrFail($request->product_id);
             $variant = ProductVariant::findOrFail($request->variant_id);
             $paymentMethod = PaymentMethod::findOrFail($request->payment_method_id);
 
-            // Calculate amounts
+            if ($variant->product_id !== $product->id || !$product->is_active || !$variant->is_active || $variant->stock_status === 'Habis') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'general' => 'Produk atau varian ini sedang tidak tersedia. Silakan pilih produk kembali.',
+                ]);
+            }
+
             $quantity = 1;
             $subtotal = $variant->price * $quantity;
 
@@ -183,20 +181,16 @@ class CheckoutController extends Controller
                 }
             }
 
-            // Round discount to avoid decimals
             $discount = ceil($discount);
             
             $discountedSubtotal = max($subtotal - $discount, 0);
             $feeAmount = $paymentMethod->calculateFee($discountedSubtotal);
             
-            // Round fee amount to avoid decimals (always round up)
             $feeAmount = ceil($feeAmount);
             
-            // Calculate final total (should be integer, no decimals)
             $totalAmount = $discountedSubtotal + $feeAmount;
             $totalAmount = ceil($totalAmount);
             
-            // Create order with Midtrans integration
             $order = Order::create([
                 'uuid' => Str::uuid(),
                 'order_number' => Order::generateOrderNumber(),
@@ -216,7 +210,6 @@ class CheckoutController extends Controller
                 'expires_at' => Carbon::now()->addMinutes(15),
             ]);
 
-            // Create order item
             $orderItem = OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $product->id,
@@ -228,19 +221,19 @@ class CheckoutController extends Controller
                 'total' => ceil($subtotal),
             ]);
 
-            // Commit order and order items first
             DB::commit();
+
+            EnsureOrderAccess::grant($request, $order->order_number);
 
             // Create Midtrans Core API payment (outside transaction)
             $paymentResult = $this->midtransService->createTransaction($order, $paymentMethod);
             
             if ($paymentResult['success']) {
-                // Create payment record (separate transaction)
                 try {
                     $payment = \App\Models\Payment::create([
                         'uuid' => \Illuminate\Support\Str::uuid(),
                         'order_id' => $order->id,
-                        'user_id' => Auth::id(), // Set user_id if user is logged in
+                        'user_id' => Auth::id(),
                         'payment_method_id' => $paymentMethod->id,
                         'amount' => ceil($order->total_amount),
                         'fee_amount' => ceil($feeAmount),
@@ -261,31 +254,25 @@ class CheckoutController extends Controller
                     ]);
                 }
 
-                // Store payment instructions in session for payment page
                 session([
                     'payment_instructions' => $paymentResult['payment_instructions'] ?? [],
                     'payment_data' => $paymentResult['payment_data'] ?? [],
-                    'checkout_order_number' => $order->order_number, // Store for frontend to retrieve
+                    'checkout_order_number' => $order->order_number,
                 ]);
 
-                // For Inertia requests, return redirect response
                 // Frontend will extract order_number and force redirect to prevent stuck loading
                 if ($request->header('X-Inertia')) {
-                    // Return redirect response - Inertia will handle this
-                    // Frontend will extract order_number from URL and force redirect immediately
                     return redirect()->route('payment.show', $order->order_number)
                         ->with([
                             'success' => 'Pesanan berhasil dibuat! Silakan lakukan pembayaran.',
                         ]);
                 }
                 
-                // For non-Inertia requests (fallback), use away redirect
                 return redirect()->away(url('/payment/' . $order->order_number))
                     ->with([
                         'success' => 'Pesanan berhasil dibuat! Silakan lakukan pembayaran.',
                     ]);
             } else {
-                // If payment creation fails, mark order as failed but keep the order
                 $order->update(['status' => 'failed', 'payment_status' => 'failed']);
                 
                 \Log::error('[Checkout] Payment creation failed', [

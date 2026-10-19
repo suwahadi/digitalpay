@@ -38,7 +38,6 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
         
-        // Check if user exists and is a member
         $user = User::where('email', $credentials['email'])->first();
         
         if (!$user) {
@@ -65,7 +64,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Attempt to login
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             
@@ -95,7 +93,6 @@ class AuthController extends Controller
      */
     public function showRegistrationForm()
     {
-        // If user is already logged in, redirect to dashboard
         if (Auth::check()) {
             return redirect('/user')->with('info', 'Anda sudah login.');
         }
@@ -117,7 +114,6 @@ class AuthController extends Controller
         ]);
 
         try {
-            // Create user with inactive status
             $user = User::create([
                 'name' => $validated['name'],
                 'username' => $validated['username'],
@@ -125,24 +121,17 @@ class AuthController extends Controller
                 'phone' => $validated['phone'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'member',
-                'status' => 'inactive', // User starts as inactive
+                'status' => 'inactive',
             ]);
 
-            // Generate OTP code
             $otpCode = $user->generateOtpCode();
 
-            // Send OTP via email (queued notification)
             $user->notify(new EmailVerificationOTP($otpCode, $user->name));
 
             return redirect('/verify?email=' . urlencode($user->email))
                 ->with('message', 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.');
 
         } catch (\Exception $e) {
-            // Log::error('Registration failed', [
-            //     'error' => $e->getMessage(),
-            //     'email' => $validated['email']
-            // ]);
-
             return back()->withErrors([
                 'general' => 'Terjadi kesalahan saat registrasi. Silakan coba lagi.'
             ])->withInput();
@@ -175,12 +164,11 @@ class AuthController extends Controller
             return redirect('/login')->with('message', 'Verifikasi email berhasil! Silakan login untuk melanjutkan.');
         }
 
-        // Calculate resend ability
         $canResendOtp = !$user->otp_expires_at || $user->isOtpExpired();
         $remainingSeconds = 0;
         
         if ($user->otp_expires_at && !$user->isOtpExpired()) {
-            $remainingSeconds = max(0, $user->otp_expires_at->diffInSeconds(now()));
+            $remainingSeconds = (int) max(0, now()->diffInSeconds($user->otp_expires_at));
         }
 
         return inertia('Auth/Verify', [
@@ -219,7 +207,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Mark email as verified and activate user
         $user->markEmailAsVerified();
 
         return redirect('/verify?status=success&email=' . urlencode($user->email));
@@ -248,9 +235,8 @@ class AuthController extends Controller
             ]);
         }
 
-        // Strict validation: Check if there's an active OTP (within 10 minutes)
         if ($user->otp_expires_at && !$user->isOtpExpired()) {
-            $remainingSeconds = max(0, $user->otp_expires_at->diffInSeconds(now()));
+            $remainingSeconds = (int) max(0, now()->diffInSeconds($user->otp_expires_at));
             
             if ($remainingSeconds <= 0) {
                 // Edge case: OTP just expired, allow resend
@@ -285,10 +271,8 @@ class AuthController extends Controller
                 'otp_expires_at' => null,
             ])->save();
 
-            // Generate new OTP code
             $otpCode = $user->generateOtpCode();
 
-            // Send OTP via email (queued notification)
             $user->notify(new EmailVerificationOTP($otpCode, $user->name));
 
             return back()->with([
@@ -308,7 +292,6 @@ class AuthController extends Controller
      */
     public function showForgotPasswordForm()
     {
-        // If user is already logged in, redirect to dashboard
         if (Auth::check()) {
             return redirect('/user')->with('info', 'Anda sudah login.');
         }
@@ -336,10 +319,8 @@ class AuthController extends Controller
             return back()->with('message', 'Link reset password telah dikirim ke email Anda.');
         }
 
-        // Generate password reset token
         $token = Str::random(64);
         
-        // Store token in password_reset_tokens table
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
@@ -348,20 +329,13 @@ class AuthController extends Controller
             ]
         );
 
-        // Build reset URL
         $resetUrl = url('/reset-password?token=' . $token . '&email=' . urlencode($user->email));
 
         try {
-            // Send password reset notification via Brevo
             $user->notify(new ForgotPasswordNotification($token, $user->name, $resetUrl));
 
             return back()->with('message', 'Jika email tersebut terdaftar, link reset password telah dikirim ke email Anda.');
         } catch (\Exception $e) {
-            // Log::error('Failed to send password reset email', [
-            //     'error' => $e->getMessage(),
-            //     'email' => $request->email
-            // ]);
-
             return back()->withErrors([
                 'general' => 'Gagal mengirim email reset password. Silakan coba lagi.'
             ]);
@@ -373,7 +347,6 @@ class AuthController extends Controller
      */
     public function showResetPasswordForm(Request $request)
     {
-        // If user is already logged in, redirect to dashboard
         if (Auth::check()) {
             return redirect('/user')->with('info', 'Anda sudah login.');
         }
@@ -387,7 +360,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Verify token
         $passwordReset = DB::table('password_reset_tokens')
             ->where('email', $email)
             ->first();
@@ -398,10 +370,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if token is valid (created within last 60 minutes)
-        $tokenAge = now()->diffInMinutes($passwordReset->created_at);
-        if ($tokenAge > 60) {
-            // Delete expired token
+        if (now()->subMinutes(60)->gt($passwordReset->created_at)) {
             DB::table('password_reset_tokens')->where('email', $email)->delete();
             
             return redirect('/forgot-password')->withErrors([
@@ -409,7 +378,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Verify token hash
         if (!Hash::check($token, $passwordReset->token)) {
             return redirect('/forgot-password')->withErrors([
                 'general' => 'Token reset password tidak valid.'
@@ -433,7 +401,6 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // Verify token
         $passwordReset = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();
@@ -444,10 +411,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if token is valid (created within last 60 minutes)
-        $tokenAge = now()->diffInMinutes($passwordReset->created_at);
-        if ($tokenAge > 60) {
-            // Delete expired token
+        if (now()->subMinutes(60)->gt($passwordReset->created_at)) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             
             return back()->withErrors([
@@ -455,14 +419,12 @@ class AuthController extends Controller
             ]);
         }
 
-        // Verify token hash
         if (!Hash::check($request->token, $passwordReset->token)) {
             return back()->withErrors([
                 'general' => 'Token reset password tidak valid.'
             ]);
         }
 
-        // Find user
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -472,20 +434,13 @@ class AuthController extends Controller
         }
 
         try {
-            // Update password
             $user->password = Hash::make($request->password);
             $user->save();
 
-            // Delete used token
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
             return redirect('/login')->with('message', 'Password berhasil direset! Silakan login dengan password baru Anda.');
         } catch (\Exception $e) {
-            // Log::error('Failed to reset password', [
-            //     'error' => $e->getMessage(),
-            //     'email' => $request->email
-            // ]);
-
             return back()->withErrors([
                 'general' => 'Gagal mereset password. Silakan coba lagi.'
             ]);
