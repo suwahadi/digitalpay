@@ -10,6 +10,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\View\PanelsRenderHook;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -54,6 +55,17 @@ class AdminPanelProvider extends PanelProvider
             )));
     }
 
+    /**
+     * Filament sizes the sidebar with h-screen (100vh). Mobile browsers measure
+     * 100vh with the address bar hidden, so while it is showing the bottom of
+     * the sidebar sits off screen and the last menu items cannot be scrolled
+     * into view. 100dvh follows the visible viewport.
+     */
+    private const MOBILE_SIDEBAR_CSS = '<style>'
+        .'@supports (height: 100dvh){.fi-sidebar{height:100dvh}}'
+        .'.fi-sidebar-nav{overscroll-behavior:contain;padding-bottom:calc(2rem + env(safe-area-inset-bottom))}'
+        .'</style>';
+
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -64,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => self::MOBILE_SIDEBAR_CSS)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
