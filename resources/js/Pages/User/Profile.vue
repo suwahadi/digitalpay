@@ -244,17 +244,20 @@ const form = reactive({
 })
 
 const submit = () => {
+    if (form.password && form.password !== form.password_confirmation) {
+        errors.value = { password_confirmation: 'Konfirmasi password tidak cocok.' }
+        return
+    }
+
     processing.value = true
     errors.value = {}
 
     router.post('/user/profile', form, {
         onSuccess: (page) => {
             processing.value = false
-            // Reset password fields after successful update
             form.password = ''
             form.password_confirmation = ''
             
-            // Show success toast
             if (window.toast) {
                 window.toast.success('Profil berhasil diperbarui', 'Perubahan telah disimpan', 3000)
             }
@@ -263,7 +266,6 @@ const submit = () => {
             processing.value = false
             errors.value = serverErrors
             
-            // Show error toast
             if (window.toast) {
                 window.toast.error('Gagal memperbarui profil', 'Periksa kembali data yang diisi', 4000)
             }

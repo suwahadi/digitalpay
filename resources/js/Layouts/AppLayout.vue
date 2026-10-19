@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import Header from '@/Components/Layout/Header.vue'
 import Footer from '@/Components/Layout/Footer.vue'
@@ -29,29 +29,40 @@ import ToastNotification from '@/Components/ToastNotification.vue'
 
 defineProps({})
 
-const isLoading = ref(true)
+/**
+ * The skeleton only covers real page-to-page navigations that are still
+ * pending after SHOW_DELAY ms. Form posts, filter/search visits that keep
+ * state and partial reloads stay on the page (the top progress bar and the
+ * buttons' own spinners cover those), and nothing is shown on first load
+ * because the page is already rendered.
+ */
+const SHOW_DELAY = 250
 
-onMounted(async () => {
-    const minLoadTime = 1500
-    const startTime = Date.now()
-    
-    await nextTick()
-    
-    const elapsedTime = Date.now() - startTime
-    const remainingTime = Math.max(0, minLoadTime - elapsedTime)
-    
-    setTimeout(() => {
-        isLoading.value = false
-    }, remainingTime)
-    
-    router.on('start', () => {
-        isLoading.value = true
-    })
-    
-    router.on('finish', () => {
-        setTimeout(() => {
+const isLoading = ref(false)
+let showTimer = null
+const unsubscribers = []
+
+const isPageNavigation = (visit) =>
+    visit.method === 'get' && !visit.preserveState && !visit.only?.length && !visit.except?.length
+
+onMounted(() => {
+    unsubscribers.push(
+        router.on('start', (event) => {
+            if (!isPageNavigation(event.detail.visit)) return
+            clearTimeout(showTimer)
+            showTimer = setTimeout(() => {
+                isLoading.value = true
+            }, SHOW_DELAY)
+        }),
+        router.on('finish', () => {
+            clearTimeout(showTimer)
             isLoading.value = false
-        }, 300)
-    })
+        }),
+    )
+})
+
+onUnmounted(() => {
+    clearTimeout(showTimer)
+    unsubscribers.forEach((off) => off())
 })
 </script>

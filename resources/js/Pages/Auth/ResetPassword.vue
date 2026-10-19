@@ -152,6 +152,11 @@ const form = reactive({
 const errors = ref({})
 
 const submit = () => {
+    if (form.password !== form.password_confirmation) {
+        errors.value = { password_confirmation: 'Konfirmasi password tidak cocok.' }
+        return
+    }
+
     processing.value = true
     errors.value = {}
 
