@@ -30,6 +30,10 @@ class AdminPanelProvider extends PanelProvider
      * Every image uploaded from the admin panel, including rich editor attachments,
      * is validated by content and re-encoded to WebP under a server-generated name.
      * A future non-image FileUpload must override saveUploadedFileUsing() itself.
+     *
+     * Registered as important: plain configureUsing() callbacks run before the
+     * component's setUp(), and FileUpload::setUp() installs its own save callback,
+     * which silently replaced this one and stored uploads unconverted.
      */
     public function boot(): void
     {
@@ -44,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 $component->getDiskName(),
                 $component->getDirectory(),
                 $component->getStatePath(),
-            )));
+            )), isImportant: true);
 
         RichEditor::configureUsing(fn (RichEditor $editor) => $editor
             ->saveUploadedFileAttachmentsUsing(static fn (RichEditor $component, TemporaryUploadedFile $file): string => WebpImage::store(
@@ -52,7 +56,7 @@ class AdminPanelProvider extends PanelProvider
                 $component->getFileAttachmentsDiskName(),
                 $component->getFileAttachmentsDirectory(),
                 $component->getStatePath(),
-            )));
+            )), isImportant: true);
     }
 
     /**

@@ -19,6 +19,8 @@ class WebpImage
 {
     public const QUALITY = 82;
 
+    public const MAX_WIDTH = 1920;
+
     public const MAX_PIXELS = 25_000_000;
 
     private const ALLOWED_TYPES = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP];
@@ -54,6 +56,11 @@ class WebpImage
 
         $image = self::applyExifOrientation($image, $path);
         imagepalettetotruecolor($image);
+
+        if (imagesx($image) > self::MAX_WIDTH) {
+            $image = imagescale($image, self::MAX_WIDTH, -1, IMG_BICUBIC);
+        }
+
         imagealphablending($image, false);
         imagesavealpha($image, true);
 

@@ -49,6 +49,35 @@ class ImageUploadTest extends TestCase
         $this->assertSame('image/webp', (new \finfo(FILEINFO_MIME_TYPE))->buffer($bytes));
     }
 
+    public function test_admin_file_and_editor_uploads_use_the_webp_saver(): void
+    {
+        $saver = fn (object $component, string $class, string $property) => (new \ReflectionFunction(
+            (new \ReflectionProperty($class, $property))->getValue($component)
+        ))->getFileName();
+
+        $this->assertStringEndsWith('AdminPanelProvider.php', $saver(
+            \Filament\Forms\Components\FileUpload::make('image'),
+            \Filament\Forms\Components\BaseFileUpload::class,
+            'saveUploadedFileUsing',
+        ));
+        $this->assertStringEndsWith('AdminPanelProvider.php', $saver(
+            \Filament\Forms\Components\RichEditor::make('body'),
+            \Filament\Forms\Components\RichEditor::class,
+            'saveUploadedFileAttachmentsUsing',
+        ));
+    }
+
+    public function test_wide_images_are_scaled_down_keeping_the_aspect_ratio(): void
+    {
+        Storage::fake('public');
+
+        $stored = WebpImage::store($this->realPng('lebar.png', 3200, 1800), 'public', 'products', 'image');
+
+        [$width, $height] = getimagesizefromstring(Storage::disk('public')->get($stored));
+        $this->assertSame(WebpImage::MAX_WIDTH, $width);
+        $this->assertSame(1080, $height);
+    }
+
     public function test_a_php_file_renamed_to_png_is_rejected(): void
     {
         Storage::fake('public');
