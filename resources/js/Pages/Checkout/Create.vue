@@ -782,6 +782,9 @@ const confirmOrder = () => {
             let orderNumber = null
             
             const redirectUrl = page.url || window.location.href
+            if (redirectUrl.includes('/invoice/')) {
+                return
+            }
             if (redirectUrl && redirectUrl.includes('/payment/')) {
                 const orderNumberMatch = redirectUrl.match(/\/payment\/([^\/]+)/)
                 if (orderNumberMatch) {

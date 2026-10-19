@@ -217,7 +217,7 @@ class HomeController extends Controller
     protected function getPaymentMethods()
     {
         try {
-            return PaymentMethod::where('is_active', true)
+            return PaymentMethod::available()
                 ->where('code', '!=', 'shopeepay')
                 ->orderBy('sort_order')
                 ->get(['id', 'name', 'icon', 'type'])

@@ -84,6 +84,7 @@ Route::post('/order/{orderNumber}/verify', [OrderAccessController::class, 'verif
 Route::prefix('invoice')->name('invoice.')->middleware('order.access')->group(function () {
     Route::get('/{orderNumber}', [InvoiceController::class, 'show'])->name('show');
     Route::get('/{orderNumber}/refresh-deliveries', [InvoiceController::class, 'refreshDigitalDeliveries'])->name('refresh-deliveries');
+    Route::post('/{orderNumber}/manual-paid', [InvoiceController::class, 'confirmManualPayment'])->middleware('throttle:6,1')->name('manual-paid');
 });
 
 Route::prefix('midtrans')->name('midtrans.')->group(function () {

@@ -43,4 +43,10 @@ return [
         'sender_name' => env('BREVO_SENDER_NAME', 'DigitalPay'),
     ],
 
+    'manual_qris' => [
+        'enabled' => env('MANUAL_QRIS_ENABLED', false),
+        'image' => '/images/payment/qris-static.webp',
+        'expires_minutes' => (int) env('MANUAL_QRIS_EXPIRES_MINUTES', 60),
+    ],
+
 ];

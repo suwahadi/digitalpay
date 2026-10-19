@@ -64,7 +64,7 @@ class CheckoutController extends Controller
             return back()->withErrors(['variant' => 'Selected variant is not available']);
         }
 
-        $paymentMethods = PaymentMethod::where('is_active', true)
+        $paymentMethods = PaymentMethod::available()
             ->orderBy('sort_order')
             ->get()
             ->map(function ($method) {
@@ -163,6 +163,14 @@ class CheckoutController extends Controller
             $variant = ProductVariant::findOrFail($request->variant_id);
             $paymentMethod = PaymentMethod::findOrFail($request->payment_method_id);
 
+            if (! PaymentMethod::available()->whereKey($paymentMethod->id)->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'payment_method_id' => 'Metode pembayaran ini sedang tidak tersedia.',
+                ]);
+            }
+
+            $manualQris = (bool) config('services.manual_qris.enabled');
+
             if ($variant->product_id !== $product->id || !$product->is_active || !$variant->is_active || $variant->stock_status === 'Habis') {
                 throw \Illuminate\Validation\ValidationException::withMessages([
                     'general' => 'Produk atau varian ini sedang tidak tersedia. Silakan pilih produk kembali.',
@@ -192,6 +200,9 @@ class CheckoutController extends Controller
             
             $totalAmount = $discountedSubtotal + $feeAmount;
             $totalAmount = ceil($totalAmount);
+
+            $uniqueCode = $manualQris ? Order::pickManualUniqueCode((int) $totalAmount) : null;
+            $totalAmount += $uniqueCode ?? 0;
             
             $order = Order::create([
                 'uuid' => Str::uuid(),
@@ -201,15 +212,17 @@ class CheckoutController extends Controller
                 'customer_email' => $request->customer_email,
                 'customer_phone' => $request->customer_phone,
                 'payment_method_id' => $request->payment_method_id,
+                'payment_gateway' => $manualQris ? Order::MANUAL_QRIS : 'midtrans',
                 'voucher_code' => $voucher?->code,
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
                 'subtotal' => ceil($subtotal),
                 'discount_amount' => $discount,
                 'fee_amount' => $feeAmount,
+                'unique_code' => $uniqueCode,
                 'total_amount' => $totalAmount,
                 'notes' => $request->notes,
-                'expires_at' => Carbon::now()->addMinutes(15),
+                'expires_at' => Carbon::now()->addMinutes($manualQris ? config('services.manual_qris.expires_minutes') : 15),
             ]);
 
             $voucher?->increment('used_count');
@@ -228,6 +241,10 @@ class CheckoutController extends Controller
             DB::commit();
 
             EnsureOrderAccess::grant($request, $order->order_number);
+
+            if ($manualQris) {
+                return redirect()->route('invoice.show', $order->order_number);
+            }
 
             // Create Midtrans Core API payment (outside transaction)
             $paymentResult = $this->midtransService->createTransaction($order, $paymentMethod);

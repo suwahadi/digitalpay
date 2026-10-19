@@ -16,6 +16,10 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
+        if ($order->isManualQris()) {
+            return;
+        }
+
         try {
             $notifiable = $this->getNotifiable($order);
             
@@ -32,6 +36,10 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
+        if ($order->isManualQris()) {
+            return;
+        }
+
         if ($order->isDirty('payment_status') && $order->payment_status === 'paid') {
             try {
                 $notifiable = $this->getNotifiable($order);

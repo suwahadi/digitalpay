@@ -10,6 +10,8 @@ use App\Jobs\ProcessDigitalDelivery;
 
 class Order extends Model
 {
+    public const MANUAL_QRIS = 'manual_qris';
+
     use HasFactory;
 
     protected $fillable = [
@@ -20,10 +22,12 @@ class Order extends Model
         'customer_email',
         'customer_phone',
         'payment_method_id',
+        'payment_gateway',
         'voucher_code',
         'subtotal',
         'discount_amount',
         'fee_amount',
+        'unique_code',
         'total_amount',
         'status',
         'payment_status',
@@ -204,6 +208,30 @@ class Order extends Model
     public function isPending()
     {
         return $this->payment_status === 'pending';
+    }
+
+    public function isManualQris(): bool
+    {
+        return $this->payment_gateway === self::MANUAL_QRIS;
+    }
+
+    /**
+     * A static QRIS carries no amount, so each pending manual order gets a
+     * 1-999 code added to its total that no other pending manual order with
+     * the same base amount uses, letting admin match an incoming transfer.
+     */
+    public static function pickManualUniqueCode(int $baseAmount): int
+    {
+        $taken = static::where('payment_gateway', self::MANUAL_QRIS)
+            ->where('status', 'pending')
+            ->whereBetween('total_amount', [$baseAmount + 1, $baseAmount + 999])
+            ->pluck('total_amount')
+            ->map(fn ($total) => (int) $total - $baseAmount)
+            ->all();
+
+        $free = array_values(array_diff(range(1, 999), $taken));
+
+        return $free ? $free[array_rand($free)] : random_int(1, 999);
     }
 
     /**

@@ -56,7 +56,34 @@
                         <!-- Order Status Alert -->
                         <div class="mb-6">
                             <!-- Pending Payment -->
-                            <div v-if="order.status === 'pending' && order.payment_status === 'pending' && !isExpired" 
+                                                        <div v-if="isManualQris && order.status === 'pending' && order.payment_status === 'unpaid' && !isExpired"
+                                 class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    <div class="flex-1">
+                                        <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                            Menunggu Pembayaran QRIS
+                                        </h3>
+                                        <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                            Bayar {{ formatPrice(order.total_amount) }} sebelum {{ formatDateTime(order.expires_at) }}, lalu tekan "Saya Sudah Bayar".
+                                        </p>
+                                    </div>
+                                    <button type="button" @click="showQris = true" class="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                                        Tampilkan QRIS
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div v-else-if="isManualQris && order.status === 'pending' && order.payment_status === 'pending'"
+                                 class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                    Menunggu Konfirmasi Admin
+                                </h3>
+                                <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                                    Pembayaran Anda sedang diperiksa. Status pesanan akan diperbarui setelah admin mengonfirmasi.
+                                </p>
+                            </div>
+
+                            <div v-else-if="order.status === 'pending' && order.payment_status === 'pending' && !isExpired" 
                                  class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,7 +441,7 @@
                                 <!-- Subtotal -->
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
-                                    <span class="text-gray-900 dark:text-white">{{ formatPrice(order.total_amount - (order.fee_amount || 0)) }}</span>
+                                    <span class="text-gray-900 dark:text-white">{{ formatPrice(order.total_amount - (order.fee_amount || 0) - (order.unique_code || 0)) }}</span>
                                 </div>
 
                                 <!-- Voucher Discount (if exists) -->
@@ -427,6 +454,11 @@
                                 <div v-if="order.fee_amount && order.fee_amount > 0" class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Fee Platform</span>
                                     <span class="text-gray-900 dark:text-white">{{ formatPrice(order.fee_amount) }}</span>
+                                </div>
+
+                                <div v-if="order.unique_code" class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Kode Unik</span>
+                                    <span class="text-gray-900 dark:text-white">{{ formatPrice(order.unique_code) }}</span>
                                 </div>
                                 
                                 <!-- Total -->
@@ -522,6 +554,43 @@
                 </div>
             </div>
         </div>
+
+        <!-- QRIS MODAL -->
+        <Teleport to="body">
+            <div v-if="showQris && isManualQris && order.payment_status === 'unpaid' && !isExpired"
+                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+                 role="dialog" aria-modal="true" aria-labelledby="qris-title"
+                 @click.self="showQris = false">
+                <div class="relative max-h-[95vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-gray-800">
+                    <button type="button" @click="showQris = false" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Tutup">
+                        <IconifyIcon icon="lucide:x" width="22" />
+                    </button>
+                    <h2 id="qris-title" class="text-lg font-semibold text-gray-900 dark:text-white">Bayar dengan QRIS</h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pindai dengan aplikasi bank atau e-wallet apa pun.</p>
+
+                    <img :src="order.manual_qris_image" alt="Kode QRIS pembayaran" width="244" height="244"
+                         class="qris-image mx-auto mt-4 h-[244px] w-[244px] rounded-lg bg-white" />
+
+                    <div class="mt-4 rounded-xl bg-gray-50 p-3 dark:bg-gray-700">
+                        <p class="text-xs text-gray-600 dark:text-gray-300">Total yang harus dibayar</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatPrice(order.total_amount) }}</p>
+                        <p v-if="order.unique_code" class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                            Ketik nominal tepat, termasuk kode unik {{ order.unique_code }}, agar pembayaran mudah dicocokkan.
+                        </p>
+                    </div>
+
+                    <a :href="order.manual_qris_image" :download="`QRIS-${order.order_number}.webp`" class="mt-3 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                        Unduh gambar QRIS
+                    </a>
+
+                    <button type="button" @click="confirmManualPayment" :disabled="confirmingPayment"
+                            class="mt-4 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
+                        {{ confirmingPayment ? 'Memproses...' : 'Saya Sudah Bayar' }}
+                    </button>
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Tekan setelah pembayaran berhasil di aplikasi Anda.</p>
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
     <div v-else class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div class="text-center">
@@ -536,7 +605,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { Head, usePage } from '@inertiajs/vue3'
+import { Head, usePage, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import axios from 'axios'
 
@@ -572,6 +641,20 @@ const reloadProgress = ref(100)
 const showCustomerInfo = ref(false)
 const copied = ref(false)
 const showPaymentSuccessNotification = ref(true)
+const isManualQris = computed(() => props.order?.payment_gateway === 'manual_qris')
+const showQris = ref(isManualQris.value && props.order?.status === 'pending' && props.order?.payment_status === 'unpaid')
+const confirmingPayment = ref(false)
+
+const confirmManualPayment = () => {
+    confirmingPayment.value = true
+    router.post(`/invoice/${props.order.order_number}/manual-paid`, {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            confirmingPayment.value = false
+        },
+    })
+}
+
 let statusCheckInterval = null
 let pageReloadInterval = null
 let paymentSuccessNotificationTimeout = null
@@ -1082,5 +1165,8 @@ button:focus {
 .status-badge {
     font-weight: 600;
     letter-spacing: 0.025em;
+}
+.qris-image {
+    image-rendering: pixelated;
 }
 </style>

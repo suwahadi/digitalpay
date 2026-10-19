@@ -55,6 +55,16 @@ class PaymentMethod extends Model
         return Storage::url($this->icon);
     }
 
+    /**
+     * Methods offered to buyers. While the temporary manual QRIS mode is on,
+     * only the QRIS method is offered; the others stay active in the database.
+     */
+    public function scopeAvailable($query)
+    {
+        return $query->where('is_active', true)
+            ->when(config('services.manual_qris.enabled'), fn ($q) => $q->where('code', 'qris'));
+    }
+
     public function calculateFee($amount)
     {
         if ($this->fee_type === 'fixed') {

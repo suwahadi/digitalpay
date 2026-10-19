@@ -155,18 +155,19 @@ class OrderResource extends Resource
                         'expired' => 'gray',
                         default => 'gray'
                     }),
-                // TextColumn::make('payment_status')
-                //     ->label('Pembayaran')
-                //     ->badge()
-                //     ->color(fn ($state) => match($state) {
-                //         'unpaid' => 'gray',
-                //         'pending' => 'warning',
-                //         'paid' => 'success',
-                //         'cancelled' => 'danger',
-                //         'expired' => 'gray',
-                //         'failed' => 'danger',
-                //         default => 'gray'
-                //     }),
+                TextColumn::make('payment_status')
+                    ->label('Pembayaran')
+                    ->badge()
+                    ->formatStateUsing(fn ($state, $record) => $record->isManualQris() && $state === 'pending' ? 'Menunggu Konfirmasi' : ucfirst((string) $state))
+                    ->color(fn ($state) => match($state) {
+                        'unpaid' => 'gray',
+                        'pending' => 'warning',
+                        'paid' => 'success',
+                        'cancelled' => 'danger',
+                        'expired' => 'gray',
+                        'failed' => 'danger',
+                        default => 'gray'
+                    }),
                 TextColumn::make('paymentMethod.name')
                     ->label('Metode')
                     ->badge()

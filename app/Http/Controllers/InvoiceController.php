@@ -106,6 +106,9 @@ class InvoiceController extends Controller
                 'customer_phone' => $order->customer_phone,
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
+                'payment_gateway' => $order->payment_gateway,
+                'unique_code' => $order->unique_code,
+                'manual_qris_image' => $order->isManualQris() ? config('services.manual_qris.image') : null,
                 'subtotal' => (int) ceil($order->subtotal),
                 'tax_amount' => (int) ceil($order->tax_amount ?? 0),
                 'fee_amount' => (int) ceil($order->fee_amount ?? 0),
@@ -200,6 +203,30 @@ class InvoiceController extends Controller
         return Inertia::render('Invoice/Print', [
             'order' => $order
         ]);
+    }
+
+    /**
+     * Buyer's "Saya Sudah Bayar" on a manual QRIS order: hand it to admin for
+     * review and stop the unpaid-order expiry, since admin may take a while.
+     */
+    public function confirmManualPayment(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+
+        if (! $order->isManualQris() || $order->status !== 'pending' || $order->payment_status !== 'unpaid') {
+            return redirect()->route('invoice.show', $orderNumber)
+                ->with('error', 'Pesanan ini tidak dapat dikonfirmasi.');
+        }
+
+        if ($order->expires_at?->isPast()) {
+            return redirect()->route('invoice.show', $orderNumber)
+                ->with('error', 'Batas waktu pembayaran sudah lewat. Silakan buat pesanan baru.');
+        }
+
+        $order->update(['payment_status' => 'pending', 'expires_at' => null]);
+
+        return redirect()->route('invoice.show', $orderNumber)
+            ->with('success', 'Terima kasih! Pembayaran Anda sedang menunggu konfirmasi admin.');
     }
 
     /**
