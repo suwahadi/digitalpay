@@ -176,27 +176,28 @@
                 </div>
 
                 <!-- Contact Section -->
-                <div class="mt-16 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-8 text-center">
+                <div class="mt-16 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 text-center sm:p-8">
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                         Masih Ada Pertanyaan?
                     </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">
                         Tim dukungan kami siap membantu Anda. Jangan ragu untuk menghubungi kami.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div class="mx-auto grid max-w-md grid-cols-2 gap-3 sm:gap-4">
                         <a
                             :href="`mailto:${$page.props.settings?.contact?.email || 'admin@digitalpay.web.id'}`"
-                            class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-blue-600 px-2 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:px-6 sm:text-base"
                         >
-                            <IconifyIcon icon="lucide:mail" width="20" class="mr-2" />
+                            <IconifyIcon icon="lucide:mail" width="18" class="shrink-0" />
                             Email Support
                         </a>
                         <a
                             :href="`https://wa.me/${$page.props.settings?.contact?.whatsapp || '6281234567890'}`"
                             target="_blank"
-                            class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                            rel="noopener"
+                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-green-600 px-2 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 sm:px-6 sm:text-base"
                         >
-                            <IconifyIcon icon="lucide:message-circle" width="20" class="mr-2" />
+                            <IconifyIcon icon="simple-icons:whatsapp" width="18" class="shrink-0" />
                             WhatsApp
                         </a>
                     </div>

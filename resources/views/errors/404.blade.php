@@ -20,9 +20,9 @@
             font-display: swap;
             src: url('/fonts/poppins-700.woff2') format('woff2');
         }
-        :root { --bg: #f9fafb; --surface: #ffffff; --text: #111827; --muted: #6b7280; --brand: #2563eb; --brand-ink: #ffffff; --border: #e5e7eb; }
+        :root { --bg: #f9fafb; --surface: #ffffff; --text: #111827; --muted: #6b7280; --brand: #2563eb; --brand-ink: #ffffff; --brand-soft: #eff6ff; --border: #e5e7eb; }
         @media (prefers-color-scheme: dark) {
-            :root { --bg: #0b1120; --surface: #111827; --text: #f3f4f6; --muted: #9ca3af; --brand: #3b82f6; --brand-ink: #0b1120; --border: #1f2937; }
+            :root { --bg: #0b1120; --surface: #111827; --text: #f3f4f6; --muted: #9ca3af; --brand: #3b82f6; --brand-ink: #0b1120; --brand-soft: rgba(59, 130, 246, 0.12); --border: #1f2937; }
         }
         * { box-sizing: border-box; }
         html, body { margin: 0; height: 100%; }
@@ -60,13 +60,13 @@
             border-radius: 10px;
             font-weight: 500;
             text-decoration: none;
-            border: 1px solid transparent;
+            border: 2px solid var(--brand);
             transition: background .2s, border-color .2s;
         }
         .btn-primary { background: var(--brand); color: var(--brand-ink); }
         .btn-primary:hover { filter: brightness(1.08); }
-        .btn-ghost { color: var(--text); border-color: var(--border); background: var(--surface); }
-        .btn-ghost:hover { border-color: var(--muted); }
+        .btn-ghost { color: var(--brand); background: var(--surface); }
+        .btn-ghost:hover { background: var(--brand-soft); }
     </style>
 </head>
 <body>
