@@ -14,16 +14,17 @@
                 <p v-if="order_number" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     Nomor pesanan: <span class="font-semibold text-gray-900 dark:text-white">{{ order_number }}</span>
                 </p>
-                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-                    <Link href="/" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
-                        Kembali ke Beranda
+                <div class="mt-8 grid grid-cols-2 gap-3">
+                    <Link href="/" class="px-4 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-center text-white font-medium hover:bg-blue-700 hover:border-blue-700 transition-colors">
+                        Halaman Utama
                     </Link>
                     <a
                         :href="`https://wa.me/${$page.props.settings?.contact?.whatsapp || '6281234567890'}`"
                         target="_blank"
                         rel="noopener"
-                        class="px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-2 py-3 rounded-xl border-2 border-green-600 bg-green-600 text-white font-medium hover:bg-green-700 hover:border-green-700 transition-colors sm:px-4"
                     >
+                        <IconifyIcon icon="simple-icons:whatsapp" width="18" class="shrink-0" />
                         Hubungi Admin
                     </a>
                 </div>
