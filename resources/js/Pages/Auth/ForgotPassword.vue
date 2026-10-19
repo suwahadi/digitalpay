@@ -117,11 +117,9 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
-// Page data
 const { props: pageProps } = usePage()
 const message = computed(() => pageProps.flash?.message)
 
-// Toast notifications
 const showSuccessToast = ref(false)
 const toastMessage = ref('')
 
@@ -131,9 +129,8 @@ const form = reactive({
     email: '',
 })
 
-const errors = ref({})
+const errors = ref({ ...(pageProps.errors || {}) })
 
-// Auto-hide toast notifications
 const showToast = (toastRef, duration = 4000) => {
     toastRef.value = true
     setTimeout(() => {
@@ -148,7 +145,6 @@ const submit = () => {
     router.post('/forgot-password', form, {
         onSuccess: (page) => {
             processing.value = false
-            // Set toast message from response or default message
             toastMessage.value = page.props.flash?.message || 'Jika email tersebut terdaftar, link reset password telah dikirim ke email Anda.'
             showToast(showSuccessToast, 5000)
         },
@@ -162,7 +158,6 @@ const submit = () => {
     })
 }
 
-// Watch for success message and show toast
 watch(message, (newMessage) => {
     if (newMessage) {
         toastMessage.value = newMessage
@@ -170,7 +165,6 @@ watch(message, (newMessage) => {
     }
 }, { immediate: true })
 
-// Show success message toast if present on mount
 onMounted(() => {
     if (message.value) {
         toastMessage.value = message.value
