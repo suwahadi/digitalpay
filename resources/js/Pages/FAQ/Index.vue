@@ -48,6 +48,7 @@
                                         @input="handleSearch"
                                         type="text"
                                         placeholder="Cari pertanyaan atau jawaban..."
+                                        aria-label="Cari pertanyaan"
                                         class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
@@ -58,6 +59,7 @@
                                 <select
                                     v-model="selectedCategory"
                                     @change="handleCategoryChange"
+                                    aria-label="Kategori pertanyaan"
                                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
                                     <option value="">Semua Kategori</option>
@@ -114,9 +116,9 @@
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 pr-4">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                         {{ faq.question }}
-                                    </h3>
+                                    </h2>
                                     <div v-if="faq.category" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                         {{ faq.category }}
                                     </div>
@@ -161,9 +163,9 @@
                 <!-- No Results -->
                 <div v-else class="text-center py-16">
                     <IconifyIcon icon="lucide:help-circle" width="64" class="mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                         Tidak Ada FAQ Ditemukan
-                    </h3>
+                    </h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-8">
                         Coba ubah kata kunci pencarian atau kategori yang dipilih.
                     </p>
@@ -177,9 +179,9 @@
 
                 <!-- Contact Section -->
                 <div class="mt-16 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 text-center sm:p-8">
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                         Masih Ada Pertanyaan?
-                    </h3>
+                    </h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">
                         Tim dukungan kami siap membantu Anda. Jangan ragu untuk menghubungi kami.
                     </p>

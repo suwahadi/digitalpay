@@ -1,5 +1,5 @@
 <template>
-    <section class="w-full mx-auto max-w-[85rem] p-4 mt-20 sm:mt-28">
+    <section class="mx-auto mt-20 w-full max-w-7xl px-4 py-4 sm:mt-28 sm:px-6 lg:px-8">
         <div
             v-if="slides?.length"
             ref="swiperContainer"
@@ -48,10 +48,12 @@ onMounted(async () => {
     const { Swiper } = await import('swiper')
     const { Pagination, Autoplay } = await import('swiper/modules')
 
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     new Swiper(swiperContainer.value, {
         modules: [Pagination, Autoplay],
         loop: true,
-        autoplay: { delay: 5000, disableOnInteraction: false },
+        autoplay: reduceMotion ? false : { delay: 5000, disableOnInteraction: false },
         pagination: { el: '.swiper-pagination', clickable: true },
     })
 })

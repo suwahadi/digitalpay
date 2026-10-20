@@ -22,6 +22,7 @@
                                 v-model="searchQuery"
                                 @input="handleSearch"
                                 placeholder="Cari..."
+                                aria-label="Cari berita"
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800 dark:text-white bg-white text-gray-900 transition-all duration-200"
                             />
                             <IconifyIcon 
@@ -36,6 +37,7 @@
                             <select
                                 v-model="selectedCategory"
                                 @change="handleCategoryFilter"
+                                aria-label="Kategori berita"
                                 class="w-full px-4 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800 dark:text-white bg-white text-gray-900 appearance-none transition-all duration-200"
                             >
                                 <option value="">Semua Kategori</option>

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Order;
 use App\Models\User;
-use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -24,21 +23,6 @@ class UserController extends Controller
         $user = Auth::user();
         
         $status = $request->get('status', 'pending');
-        
-        $successfulTransactionsToday = $user->orders()
-            ->where('status', 'paid')
-            ->whereDate('created_at', Carbon::today())
-            ->sum('total_amount');
-        
-        $transactionCountThisMonth = $user->orders()
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->count();
-        
-        $totalTransactionsThisMonth = $user->orders()
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->sum('total_amount');
 
         $query = $user->orders()
             ->with(['items.product', 'payment'])
@@ -61,9 +45,6 @@ class UserController extends Controller
             'currentStatus' => $status,
             'stats' => [
                 'totalOrders' => $totalOrders,
-                'successfulTransactionsToday' => $successfulTransactionsToday,
-                'transactionCountThisMonth' => $transactionCountThisMonth,
-                'totalTransactionsThisMonth' => $totalTransactionsThisMonth,
                 'pendingOrders' => $pendingOrders,
                 'paidOrders' => $paidOrders,
                 'cancelledOrders' => $cancelledOrders,

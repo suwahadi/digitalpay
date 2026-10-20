@@ -11,7 +11,7 @@
                     <div class="mt-4 sm:mt-0 flex space-x-3">
                         <Link
                             href="/user/history"
-                            class="inline-flex items-center px-4 py-2 border border-white/20 text-sm font-medium rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                            class="inline-flex min-h-[44px] items-center px-4 py-2 border border-white/30 text-sm font-medium rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                         >
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>

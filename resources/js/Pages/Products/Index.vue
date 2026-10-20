@@ -40,6 +40,7 @@
                                     @input="handleSearch"
                                     type="text"
                                     placeholder="Cari produk..."
+                                    aria-label="Cari produk"
                                     class="block w-full h-10 pl-10 pr-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
@@ -98,6 +99,7 @@
                 </div>
 
                 <!-- Products Grid - 6 Columns Desktop, 2 Columns Mobile -->
+                <h2 class="sr-only">Daftar produk</h2>
                 <div v-if="products.data.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <ProductCard 
                         v-for="product in products.data" 

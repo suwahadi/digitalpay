@@ -1,6 +1,7 @@
 <template>
     <AppLayout :settings="settings">
         <Head :title="sitetagline" />
+        <h1 class="sr-only">{{ $page.props.settings.title }}, toko akun aplikasi premium dan layanan digital</h1>
 
         <!-- Hero Section -->
         <HeroSection :slides="hero.slides" />

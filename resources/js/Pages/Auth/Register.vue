@@ -4,9 +4,9 @@
             <div class="max-w-md w-full space-y-8">
                 <!-- Header -->
                 <div class="text-center">
-                    <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
                         Daftar Member
-                    </h2>
+                    </h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         Buat akun member baru
                     </p>
@@ -89,7 +89,9 @@
                                 <button
                                     type="button"
                                     @click="showPassword = !showPassword"
-                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                                    :aria-pressed="showPassword"
+                                    class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                                 >
                                     <svg v-if="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -123,7 +125,9 @@
                                 <button
                                     type="button"
                                     @click="showPasswordConfirmation = !showPasswordConfirmation"
-                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    :aria-label="showPasswordConfirmation ? 'Sembunyikan konfirmasi password' : 'Tampilkan konfirmasi password'"
+                                    :aria-pressed="showPasswordConfirmation"
+                                    class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                                 >
                                     <svg v-if="!showPasswordConfirmation" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -206,7 +210,7 @@
 
                 <!-- Back to Home -->
                 <div class="text-center">
-                    <Link href="/" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                    <Link href="/" class="inline-block py-3 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300">
                         ← Kembali ke Halaman Utama
                     </Link>
                 </div>

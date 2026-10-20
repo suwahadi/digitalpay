@@ -6,6 +6,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Cari produk..."
+                aria-label="Cari produk"
                 :class="['pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400', mobile ? 'w-full py-3 text-base' : 'w-80 py-2 text-sm']"
                 @keyup.enter="performSearch"
             />

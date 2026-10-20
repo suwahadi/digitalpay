@@ -11,22 +11,13 @@
                     <div class="mt-4 sm:mt-0 flex space-x-3">
                         <Link
                             href="/user"
-                            class="inline-flex items-center px-4 py-2 border border-white/20 text-sm font-medium rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                            class="inline-flex min-h-[44px] items-center px-4 py-2 border border-white/30 text-sm font-medium rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                         >
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
                             Kembali
                         </Link>
-                        <button
-                            @click="logout"
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                            Logout
-                        </button>
                     </div>
                 </div>
             </div>
@@ -38,7 +29,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <!-- Avatar Section -->
-                    <div class="flex items-center space-x-6 mb-8">
+                    <div class="mb-8 flex items-center gap-4 sm:gap-6">
                         <div class="flex-shrink-0">
                             <Avatar 
                                 :name="user.name" 
@@ -48,9 +39,9 @@
                                 border-color="border-gray-200 dark:border-gray-600"
                             />
                         </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.name }}</h2>
-                            <p class="text-gray-600 dark:text-gray-400">{{ user.email }}</p>
+                        <div class="min-w-0">
+                            <h2 class="break-words text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">{{ user.name }}</h2>
+                            <p class="break-all text-gray-600 dark:text-gray-400">{{ user.email }}</p>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 mt-2">
                                 Terdaftar: {{ formatRegistrationDate(user.created_at) }}
                             </span>
@@ -134,7 +125,7 @@
                                         v-model="form.password"
                                         :type="showPassword ? 'text' : 'password'"
                                         class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                                        placeholder="Masukkan password baru (minimal 6 karakter)"
+                                        placeholder="Minimal 6 karakter"
                                         :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.password }"
                                     />
                                     <button
@@ -291,9 +282,5 @@ const formatRegistrationDate = (dateString) => {
         month: 'short',
         year: 'numeric',
     })
-}
-
-const logout = () => {
-    router.post('/logout')
 }
 </script>

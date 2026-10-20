@@ -57,7 +57,7 @@
 
                 <!-- Quick Links -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Tautan Cepat</h3>
+                    <h2 class="text-lg font-semibold mb-4">Tautan Cepat</h2>
                     <ul class="space-y-2">
                         <li>
                             <Link href="/" class="text-gray-400 hover:text-white transition-colors">
@@ -84,7 +84,7 @@
 
                 <!-- Support -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Bantuan</h3>
+                    <h2 class="text-lg font-semibold mb-4">Bantuan</h2>
                     <ul class="space-y-2">
                         <li>
                             <Link href="/faq" class="text-gray-400 hover:text-white transition-colors">

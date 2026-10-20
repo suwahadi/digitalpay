@@ -10,7 +10,7 @@
         </div>
 
         <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
-            <div class="w-full mx-auto max-w-[85rem] px-4 py-12 sm:px-6 lg:px-8">
+            <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="mb-8">
                     <nav class="flex mb-4" aria-label="Breadcrumb">

@@ -1,17 +1,19 @@
 <template>
     <header 
         id="navbar"
-        class="fixed top-0 z-50 flex flex-wrap w-full text-sm transition-colors duration-500 bg-transparent backdrop-blur-md dark:border-gray-700 sm:justify-start sm:flex-nowrap sm:py-0"
+        class="fixed top-0 z-50 flex w-full border-b border-gray-200 bg-white text-sm dark:border-gray-800 dark:bg-gray-900"
     >
-        <nav class="relative max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center md:px-8 sm:justify-between sm:px-6 lg:px-16 xl:px-0 sm:gap-5">
-            <div class="flex items-center justify-between py-3 overflow-hidden transition-all duration-300 basis-full grow">
+        <nav class="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between gap-4 py-3">
                 <!-- Logo -->
-                <div class="bg-gradient-to-br bg-clip-text box-decoration-clone from-blue-400 to-blue-700 font-bold text-transparent !no-underline text-xl lowercase font-poppins text-2xl">
-                    <Link href="/" :title="$page.props.settings.title">
+                <div class="shrink-0">
+                    <Link href="/" :title="$page.props.settings.title" class="block">
                         <img 
                             :src="$page.props.settings.logo" 
                             :alt="$page.props.settings.title" 
-                            class="h-10 image-cover"
+                            class="h-10 w-auto"
+                            width="185"
+                            height="40"
                             onerror="this.onerror=null;this.src='/images/logo.png'"
                         />
                     </Link>
@@ -63,7 +65,7 @@
                     <!-- Login Button -->
                     <Link 
                         v-if="!$page.props.auth.user"
-                        class="btn px-4 py-2 btn-primary" 
+                        class="btn btn-primary inline-flex min-h-[44px] items-center px-4 py-2"
                         :href="route('login')"
                     >
                         Masuk
