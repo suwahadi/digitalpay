@@ -105,7 +105,6 @@ HTML;
     private function terms(): string
     {
         return <<<'HTML'
-<p><em>Terakhir diperbarui: 20 Oktober 2026</em></p>
 <p>Syarat dan ketentuan ini berlaku untuk penggunaan website digitalpay.web.id dan setiap pesanan yang dibuat di dalamnya. Dengan membuat pesanan, Anda dianggap telah membaca dan menyetujui ketentuan ini.</p>
 
 <h2>1. Pesanan</h2>
@@ -148,7 +147,7 @@ HTML;
 </ul>
 
 <h2>7. Perubahan ketentuan</h2>
-<p>Kami dapat memperbarui syarat dan ketentuan ini sewaktu-waktu. Versi terbaru selalu tersedia di halaman ini, dengan tanggal pembaruan di bagian atas.</p>
+<p>Kami dapat memperbarui syarat dan ketentuan ini sewaktu-waktu. Versi terbaru selalu tersedia di halaman ini.</p>
 
 <h2>8. Kontak</h2>
 <p>Pertanyaan tentang ketentuan ini dapat dikirim ke <a href="mailto:admin@digitalpay.web.id">admin@digitalpay.web.id</a>.</p>
@@ -158,7 +157,6 @@ HTML;
     private function privacy(): string
     {
         return <<<'HTML'
-<p><em>Terakhir diperbarui: 20 Oktober 2026</em></p>
 <p>Kebijakan ini menjelaskan data yang dikumpulkan DigitalPay saat Anda menggunakan digitalpay.web.id, untuk apa data itu dipakai, dan pihak lain yang ikut memprosesnya.</p>
 
 <h2>Data yang kami kumpulkan</h2>
@@ -197,7 +195,7 @@ HTML;
 </ul>
 
 <h2>Perubahan kebijakan</h2>
-<p>Jika kebijakan ini berubah, versi terbaru dan tanggal pembaruannya akan tercantum di halaman ini.</p>
+<p>Jika kebijakan ini berubah, versi terbarunya akan tercantum di halaman ini.</p>
 
 <h2>Kontak</h2>
 <p>Pertanyaan tentang privasi dapat dikirim ke <a href="mailto:admin@digitalpay.web.id">admin@digitalpay.web.id</a>.</p>
