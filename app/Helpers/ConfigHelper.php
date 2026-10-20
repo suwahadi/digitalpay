@@ -137,7 +137,7 @@ class ConfigHelper
      */
     public static function siteFavicon()
     {
-        return self::get('site_favicon', '/images/favicon.png');
+        return self::get('site_favicon', '/favicon.ico');
     }
 
     /**

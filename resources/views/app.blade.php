@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title inertia>{{ $page['props']['title'] ?? \App\Helpers\ConfigHelper::siteName() }}</title>
+    <link rel="icon" href="{{ \App\Helpers\ConfigHelper::siteFavicon() }}" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <!-- Poppins - self hosted -->
     <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-400.woff2" crossorigin>

@@ -5,7 +5,7 @@ return [
     'site_tagline' => 'Segala Kebutuhan Aplikasi Premium Ada Disini',
     'site_description' => 'Platform terpercaya untuk kebutuhan aplikasi premium',
     'site_logo' => '/images/logo.png',
-    'site_favicon' => '/images/favicon.png',
+    'site_favicon' => '/favicon.ico',
 
     'contact_email' => 'admin@digitalpay.web.id',
     'contact_phone' => '081234567890',
