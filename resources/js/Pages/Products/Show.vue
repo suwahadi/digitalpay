@@ -314,7 +314,9 @@
                             >
                                 <div v-if="openFaqs.includes(faq.id)" class="overflow-hidden">
                                     <div class="px-4 py-3 bg-white dark:bg-gray-800 border-t dark:border-gray-600">
-                                        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ faq.answer }}</p>
+                                        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                            {{ faq.answer }}<template v-if="faq.link"> (<Link :href="faq.link.href" class="font-medium text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">{{ faq.link.label }}</Link>)</template>
+                                        </p>
                                     </div>
                                 </div>
                             </Transition>
@@ -555,7 +557,8 @@ const productFaqs = ref([
     {
         id: 3,
         question: 'Apa yang harus saya lakukan jika terjadi masalah?',
-        answer: 'Kamu bisa menghubungi admin dengan cara menekan icon hubungi kami yang berada di pojok kanan ya!'
+        answer: 'Kamu bisa menghubungi admin melalui kanal kontak yang tersedia',
+        link: { href: '/contact', label: 'klik disini' }
     },
 ])
 
