@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\WebpImage;
 use App\Models\BaseModel;
 use App\Traits\DeletesReplacedFiles;
 use App\Traits\Sluggable;
@@ -113,6 +114,24 @@ class Product extends BaseModel
         }
 
         return '/images/placeholder.png';
+    }
+
+    /**
+     * A 640px copy for cards and lists; the product page keeps the full image.
+     */
+    public function getThumbUrlAttribute(): string
+    {
+        if (!$this->image || str_starts_with($this->image, '/') || str_starts_with($this->image, 'http')) {
+            return $this->image_url;
+        }
+
+        try {
+            return Storage::url(WebpImage::thumbnail($this->image));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $this->image_url;
+        }
     }
 
     public function getMinPriceAttribute(): float

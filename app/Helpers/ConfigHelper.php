@@ -129,7 +129,7 @@ class ConfigHelper
      */
     public static function siteLogo()
     {
-        return self::get('site_logo', '/images/logo.png');
+        return self::get('site_logo', '/images/logo.webp');
     }
 
     /**

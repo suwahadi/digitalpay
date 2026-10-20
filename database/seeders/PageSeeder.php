@@ -182,7 +182,6 @@ HTML;
 <ul>
 <li>Brevo, layanan pengiriman email, menerima nama dan email Anda untuk mengirim email terkait pesanan.</li>
 <li>Midtrans, penyedia gateway pembayaran, memproses data transaksi jika Anda membayar dengan metode yang dilayani Midtrans.</li>
-<li>Iconify, penyedia ikon, menerima permintaan dari browser Anda, termasuk alamat IP, saat ikon di website dimuat.</li>
 </ul>
 
 <h2>Penyimpanan di browser</h2>

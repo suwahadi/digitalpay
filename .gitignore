@@ -27,3 +27,5 @@ Thumbs.db
 public/images/*
 !public/images/payment/
 !public/images/placeholder.png
+!public/images/logo.webp
+!public/images/logo-mark.webp

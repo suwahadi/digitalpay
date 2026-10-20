@@ -81,7 +81,7 @@ class PaymentController extends Controller
                         'quantity' => $item->quantity,
                         'price' => (int) ceil($item->price),
                         'total' => (int) ceil($item->total),
-                        'product_image' => $item->product?->image_url ?? '/images/placeholder.png',
+                        'product_image' => $item->product?->thumb_url ?? '/images/placeholder.png',
                         'product' => $item->product ? [
                             'id' => $item->product->id,
                             'slug' => $item->product->slug,

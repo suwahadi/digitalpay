@@ -4,7 +4,7 @@ return [
     'site_name' => env('APP_NAME', 'DigitalPay'),
     'site_tagline' => 'Segala Kebutuhan Aplikasi Premium Ada Disini',
     'site_description' => 'Platform terpercaya untuk kebutuhan aplikasi premium',
-    'site_logo' => '/images/logo.png',
+    'site_logo' => '/images/logo.webp',
     'site_favicon' => '/favicon.ico',
 
     'contact_email' => 'admin@digitalpay.web.id',

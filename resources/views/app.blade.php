@@ -44,9 +44,6 @@
 
     @vite('resources/js/app.js')
     @inertiaHead
-
-    <!-- Iconify -->
-    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js" async></script>
 </head>
 <body class="font-sans antialiased">
     @inertia

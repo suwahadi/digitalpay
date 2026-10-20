@@ -112,7 +112,7 @@ class CheckoutController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'slug' => $product->slug,
-                'image' => $product->image_url,
+                'image' => $product->thumb_url,
                 'category' => [
                     'id' => $product->category->id,
                     'name' => $product->category->name,

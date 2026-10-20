@@ -125,7 +125,7 @@ class HomeController extends Controller
                         'uuid' => $product->uuid,
                         'name' => $product->name,
                         'slug' => $product->slug,
-                        'image' => $product->image_url,
+                        'image' => $product->thumb_url,
                         'category' => $product->category->name,
                         'min_price' => $product->min_price,
                         'stock_status' => $product->stock_status,
@@ -164,7 +164,7 @@ class HomeController extends Controller
                                 'uuid' => $product->uuid,
                                 'name' => $product->name,
                                 'slug' => $product->slug,
-                                'image' => $product->image_url,
+                                'image' => $product->thumb_url,
                                 'min_price' => $product->min_price,
                                 'stock_status' => $product->stock_status,
                             ];

@@ -8,13 +8,20 @@
                 <!-- Logo -->
                 <div class="shrink-0">
                     <Link href="/" :title="$page.props.settings.title" class="block">
-                        <img 
-                            :src="$page.props.settings.logo" 
-                            :alt="$page.props.settings.title" 
-                            class="h-10 w-auto"
+                        <img
+                            :src="$page.props.settings.logo"
+                            :alt="$page.props.settings.title"
+                            class="hidden h-8 w-auto min-[360px]:block sm:h-10"
                             width="185"
                             height="40"
                             onerror="this.onerror=null;this.src='/images/logo.png'"
+                        />
+                        <img
+                            src="/images/logo-mark.webp"
+                            :alt="$page.props.settings.title"
+                            class="h-9 w-9 min-[360px]:hidden"
+                            width="36"
+                            height="36"
                         />
                     </Link>
                 </div>
@@ -48,7 +55,7 @@
                 <SearchBar />
 
                 <!-- Right Side -->
-                <div class="flex items-center gap-x-2">
+                <div class="flex items-center gap-x-1 sm:gap-x-2">
                     <!-- Mobile Search Toggle -->
                     <button
                         type="button"
@@ -65,7 +72,7 @@
                     <!-- Login Button -->
                     <Link 
                         v-if="!$page.props.auth.user"
-                        class="btn btn-primary inline-flex min-h-[44px] items-center px-4 py-2"
+                        class="btn btn-primary inline-flex min-h-[44px] items-center px-3 py-2 sm:px-4"
                         :href="route('login')"
                     >
                         Masuk

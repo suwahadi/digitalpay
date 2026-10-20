@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Helpers\WebpImage;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -34,6 +35,6 @@ trait DeletesReplacedFiles
             return;
         }
 
-        Storage::disk('public')->delete($path);
+        Storage::disk('public')->delete([$path, WebpImage::thumbPath($path)]);
     }
 }

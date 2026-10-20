@@ -1,13 +1,23 @@
 <template>
-    <i 
-        :data-icon="icon" 
-        :style="{ width: width + 'px', height: height + 'px', fontSize: width + 'px' }"
-        class="iconify inline-block"
-        v-bind="$attrs"
-    ></i>
+    <Icon
+        :icon="icon"
+        :width="width"
+        :height="height ?? undefined"
+        :ssr="true"
+        class="inline-block align-middle"
+    />
 </template>
 
+<script>
+import { addCollection } from '@iconify/vue'
+import collections from '@/icons.json'
+
+collections.forEach((collection) => addCollection(collection))
+</script>
+
 <script setup>
+import { Icon } from '@iconify/vue'
+
 defineProps({
     icon: {
         type: String,
@@ -23,10 +33,3 @@ defineProps({
     }
 })
 </script>
-
-<style>
-.iconify {
-    display: inline-block;
-    vertical-align: middle;
-}
-</style>
