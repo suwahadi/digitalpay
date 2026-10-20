@@ -16,10 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register Brevo Service
         $this->app->singleton(BrevoService::class);
-        
-        // Register Midtrans Service
         $this->app->singleton(MidtransService::class);
     }
 
@@ -29,14 +26,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->singleton(DigitalDeliveryService::class);
-        
-        // Register custom Brevo notification channel
+
         Notification::extend('brevo', function ($app) {
             return new BrevoChannel();
         });
-        
-        // Register Observers
+
         \App\Models\Order::observe(\App\Observers\OrderObserver::class);
         \App\Models\DigitalDelivery::observe(\App\Observers\DigitalDeliveryObserver::class);
+
+        // Carbon abbreviates August as "Agt"; the browser's id-ID Intl uses "Agu", so align server dates with it.
+        \Illuminate\Support\Carbon::getTranslator()->setMessages('id', [
+            'months_short' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+        ]);
     }
 }

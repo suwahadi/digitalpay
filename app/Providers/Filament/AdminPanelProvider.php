@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
 use App\Helpers\WebpImage;
 use Closure;
 use Filament\Forms\Components\FileUpload;
@@ -76,11 +77,12 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::Blue,
             ])
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => self::MOBILE_SIDEBAR_CSS)
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.auth.login-style'), scopes: Login::class)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
