@@ -12,12 +12,9 @@
             <span class="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ user.name }}
             </span>
-            <IconifyIcon 
-                icon="lucide:chevron-down" 
-                width="16" 
-                :class="{ 'rotate-180': isMenuOpen }"
-                class="transition-transform duration-200"
-            />
+            <span class="inline-flex transition-transform duration-200" :class="{ 'rotate-180': isMenuOpen }">
+                <IconifyIcon icon="lucide:chevron-down" width="16" />
+            </span>
         </button>
 
         <!-- Dropdown Menu -->
@@ -98,7 +95,6 @@ const toggleMenu = async (event) => {
     isMenuOpen.value = !isMenuOpen.value
     
     if (isMenuOpen.value) {
-        // await nextTick()
         updateDropdownPosition(event)
     }
 }
@@ -110,7 +106,6 @@ const updateDropdownPosition = (event) => {
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
     
-    // Calculate horizontal position
     let left = rect.right - dropdownWidth
     if (left < 8) { // 8px margin from edge
         left = rect.left
@@ -119,7 +114,6 @@ const updateDropdownPosition = (event) => {
         left = viewportWidth - dropdownWidth - 8
     }
     
-    // Calculate vertical position
     let top = rect.bottom + 8 // 8px gap
     const dropdownHeight = 200 // Estimated height
     if (top + dropdownHeight > viewportHeight - 8) {
@@ -133,7 +127,6 @@ const logout = () => {
     router.post(route('logout'))
 }
 
-// Close menu when clicking outside
 const handleClickOutside = (event) => {
     const userMenu = event.target.closest('.relative')
     const dropdown = event.target.closest('[data-dropdown]')
@@ -143,7 +136,6 @@ const handleClickOutside = (event) => {
     }
 }
 
-// Handle window resize
 const handleResize = () => {
     if (isMenuOpen.value) {
         isMenuOpen.value = false

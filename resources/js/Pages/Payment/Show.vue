@@ -129,7 +129,9 @@
                         :disabled="checkingStatus"
                         class="w-full inline-flex items-center justify-center px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm sm:text-base font-semibold rounded-lg transition-colors"
                     >
-                        <IconifyIcon :icon="checkingStatus ? 'lucide:loader-2' : 'lucide:refresh-cw'" :class="{'animate-spin': checkingStatus}" width="18" class="mr-2" />
+                        <span :key="checkingStatus ? 'checking' : 'idle'" class="inline-flex mr-2" :class="{ 'animate-spin': checkingStatus }">
+                            <IconifyIcon :icon="checkingStatus ? 'lucide:loader-2' : 'lucide:refresh-cw'" width="18" />
+                        </span>
                         {{ checkingStatus ? 'Mengecek Status...' : 'Cek Status Pembayaran' }}
                     </button>
                     
@@ -685,7 +687,6 @@ const generateQRCode = async () => {
         if (qrCodeContainer.value && document.contains(qrCodeContainer.value)) {
             showNotification('Gagal membuat QR Code: ' + error.message, 'error')
             
-            // Fallback: show QR string as text
             qrCodeContainer.value.innerHTML = `
                 <div class="text-center p-4 bg-gray-100 dark:bg-gray-700 rounded">
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">QR Code tidak dapat dimuat</p>

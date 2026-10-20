@@ -121,12 +121,12 @@
                                         {{ faq.category }}
                                     </div>
                                 </div>
-                                <IconifyIcon 
-                                    icon="lucide:chevron-down" 
-                                    width="24"
+                                <span
+                                    class="flex transition-transform duration-500 ease-in-out flex-shrink-0 mt-1"
                                     :class="{ 'rotate-180': openFaqs.includes(faq.id) }"
-                                    class="transition-all duration-500 ease-in-out text-gray-400 dark:text-gray-500 flex-shrink-0 mt-1"
-                                />
+                                >
+                                    <IconifyIcon icon="lucide:chevron-down" width="24" class="text-gray-400 dark:text-gray-500" />
+                                </span>
                             </div>
                         </button>
                         

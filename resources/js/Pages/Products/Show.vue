@@ -295,12 +295,12 @@
                             >
                                 <div class="flex items-center justify-between">
                                     <span class="font-medium text-gray-900 dark:text-white">{{ faq.question }}</span>
-                                    <IconifyIcon 
-                                        icon="lucide:chevron-down" 
-                                        width="18"
+                                    <span
+                                        class="flex transition-transform duration-200 text-gray-500"
                                         :class="{ 'rotate-180': openFaqs.includes(faq.id) }"
-                                        class="transition-transform duration-200 text-gray-500"
-                                    />
+                                    >
+                                        <IconifyIcon icon="lucide:chevron-down" width="18" />
+                                    </span>
                                 </div>
                             </button>
                             <Transition

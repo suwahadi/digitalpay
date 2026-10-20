@@ -24,12 +24,12 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
                                 {{ faq.question }}
                             </h3>
-                            <IconifyIcon 
-                                icon="lucide:chevron-down" 
-                                width="20"
+                            <span
+                                class="flex transition-transform duration-500 ease-in-out flex-shrink-0"
                                 :class="{ 'rotate-180': openFaqs.includes(faq.id) }"
-                                class="transition-all duration-500 ease-in-out text-gray-500 dark:text-gray-400 flex-shrink-0"
-                            />
+                            >
+                                <IconifyIcon icon="lucide:chevron-down" width="20" class="text-gray-500 dark:text-gray-400" />
+                            </span>
                         </div>
                     </button>
                     
