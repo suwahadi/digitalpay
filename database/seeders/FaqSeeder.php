@@ -35,12 +35,6 @@ class FaqSeeder extends Seeder
                 'sort_order' => 4,
             ],
             [
-                'question' => 'Apa yang dimaksud dengan "1 Profile 2 User"?',
-                'answer' => '1 Profile 2 User adalah jenis akun yang dapat digunakan oleh dua orang secara bersamaan. Namun, ada kemungkinan terjadinya batasan layar (screen limit) saat digunakan bersamaan.',
-                'category' => 'Produk',
-                'sort_order' => 5,
-            ],
-            [
                 'question' => 'Apakah ada garansi jika akun bermasalah?',
                 'answer' => 'Ya, kami memberikan garansi sesuai dengan durasi yang Anda beli. Jika terjadi masalah pada akun, silakan hubungi customer service kami untuk mendapatkan bantuan.',
                 'category' => 'Garansi',

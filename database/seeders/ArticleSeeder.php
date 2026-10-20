@@ -23,7 +23,7 @@ class ArticleSeeder extends Seeder
                 'category' => 'Pengumuman',
                 'is_published' => true,
                 'is_featured' => true,
-                'published_at' => now()->subDays(2),
+                'published_at' => now()->subDays(8),
             ],
             [
                 'title' => 'Cara Order Produk Di DigitalPay.web.id',
@@ -44,7 +44,7 @@ class ArticleSeeder extends Seeder
                 'category' => 'Tutorial',
                 'is_published' => true,
                 'is_featured' => false,
-                'published_at' => now()->subDays(5),
+                'published_at' => now()->subDays(19),
             ],
             [
                 'title' => 'Tips Hemat Berlangganan Aplikasi Premium',
@@ -61,7 +61,7 @@ class ArticleSeeder extends Seeder
                 'category' => 'Tips',
                 'is_published' => true,
                 'is_featured' => false,
-                'published_at' => now()->subDays(10),
+                'published_at' => now()->subDays(13),
             ],
         ];
 
