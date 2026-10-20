@@ -27,7 +27,7 @@ class ProductController extends Controller
             });
         }
         
-        $sortBy = $request->get('sort', 'newest');
+        $sortBy = $request->get('sort', 'recommended');
         switch ($sortBy) {
             case 'price_low':
                 $query->orderByRaw('(SELECT MIN(price) FROM product_variants WHERE product_id = products.id AND is_active = 1) ASC');
@@ -39,8 +39,11 @@ class ProductController extends Controller
                 $query->popular()->latest();
                 break;
             case 'newest':
-            default:
                 $query->latest();
+                break;
+            default:
+                $sortBy = 'recommended';
+                $query->orderBy('sort_order')->orderBy('id');
                 break;
         }
         

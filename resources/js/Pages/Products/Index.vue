@@ -66,6 +66,7 @@
                                 aria-label="Urutkan"
                                 class="block w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 lg:w-44"
                             >
+                                <option value="recommended">Rekomendasi</option>
                                 <option value="newest">Terbaru</option>
                                 <option value="popular">Terpopuler</option>
                                 <option value="price_low">Harga Terendah</option>
@@ -219,7 +220,7 @@ const props = defineProps({
 
 const searchQuery = ref(props.filters.search || '')
 const selectedCategory = ref(props.filters.category || '')
-const sortBy = ref(props.filters.sort || 'newest')
+const sortBy = ref(props.filters.sort || 'recommended')
 const showFilters = ref(false)
 
 let searchTimeout = null
@@ -249,7 +250,7 @@ const applyFilters = () => {
         params.category = selectedCategory.value
     }
     
-    if (sortBy.value !== 'newest') {
+    if (sortBy.value !== 'recommended') {
         params.sort = sortBy.value
     }
 
@@ -262,8 +263,8 @@ const applyFilters = () => {
 const clearFilters = () => {
     searchQuery.value = ''
     selectedCategory.value = ''
-    sortBy.value = 'newest'
-    
+    sortBy.value = 'recommended'
+
     router.get('/products', {}, {
         preserveState: false,
         preserveScroll: false,
@@ -278,7 +279,7 @@ const getCategoryName = (slug) => {
 watch(() => props.filters, (newFilters) => {
     searchQuery.value = newFilters.search || ''
     selectedCategory.value = newFilters.category || ''
-    sortBy.value = newFilters.sort || 'newest'
+    sortBy.value = newFilters.sort || 'recommended'
 }, { immediate: true })
 </script>
 
