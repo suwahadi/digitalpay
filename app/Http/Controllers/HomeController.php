@@ -192,7 +192,7 @@ class HomeController extends Controller
                         'slug' => $article->slug,
                         'excerpt' => $article->excerpt,
                         'featured_image' => $article->featured_image_url,
-                        'published_date' => $article->published_at->format('d M Y'),
+                        'published_date' => $article->published_at->translatedFormat('d M Y'),
                         'author' => $article->author->name,
                         'url' => route('news.show', $article->slug),
                     ];

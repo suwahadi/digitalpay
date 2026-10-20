@@ -166,7 +166,7 @@ class DigitalDeliveryService
         
         $replacements = [
             '{order_number}' => $order->order_number,
-            '{order_date}' => $order->created_at->format('d M Y H:i'),
+            '{order_date}' => $order->created_at->translatedFormat('d M Y H:i'),
             '{customer_name}' => $order->customer_name,
             '{customer_email}' => $order->customer_email,
             '{product_name}' => $product->name,

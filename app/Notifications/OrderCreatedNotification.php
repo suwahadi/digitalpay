@@ -77,7 +77,7 @@ class OrderCreatedNotification extends Notification implements ShouldQueue
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
             'customer_phone' => $this->order->customer_phone,
-            'order_date' => $this->order->created_at->format('d M Y H:i'),
+            'order_date' => $this->order->created_at->translatedFormat('d M Y H:i'),
             'items' => $this->order->items->map(function ($item) {
                 return [
                     'product_name' => $item->product_name,
@@ -96,7 +96,7 @@ class OrderCreatedNotification extends Notification implements ShouldQueue
             'formatted_fee_amount' => $this->order->formatted_fee_amount,
             'formatted_total_amount' => $this->order->formatted_total_amount,
             'payment_method' => $this->order->paymentMethod->name ?? 'N/A',
-            'expires_at' => $this->order->expires_at->format('d M Y H:i'),
+            'expires_at' => $this->order->expires_at->translatedFormat('d M Y H:i'),
             'time_remaining' => $this->order->time_remaining,
             'payment_url' => $this->order->payment?->getMidtransPaymentUrl(),
         ];

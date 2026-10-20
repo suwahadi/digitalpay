@@ -78,8 +78,8 @@ class OrderCancellationNotification extends Notification implements ShouldQueue
             'order_number' => $this->order->order_number,
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
-            'order_date' => $this->order->created_at->format('d M Y H:i'),
-            'cancellation_date' => now()->format('d M Y H:i'),
+            'order_date' => $this->order->created_at->translatedFormat('d M Y H:i'),
+            'cancellation_date' => now()->translatedFormat('d M Y H:i'),
             'reason' => $this->reason,
             'items' => $this->order->items->map(function ($item) {
                 return [

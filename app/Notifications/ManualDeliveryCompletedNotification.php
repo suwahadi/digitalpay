@@ -79,12 +79,11 @@ class ManualDeliveryCompletedNotification extends Notification implements Should
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
             'customer_phone' => $this->order->customer_phone,
-            'order_date' => $this->order->created_at->format('d M Y H:i'),
-            'payment_date' => $this->order->midtrans_paid_at?->format('d M Y H:i') ?? now()->format('d M Y H:i'),
-            'delivery_date' => now()->format('d M Y H:i'),
+            'order_date' => $this->order->created_at->translatedFormat('d M Y H:i'),
+            'payment_date' => $this->order->midtrans_paid_at?->translatedFormat('d M Y H:i') ?? now()->translatedFormat('d M Y H:i'),
+            'delivery_date' => now()->translatedFormat('d M Y H:i'),
             'items' => $this->order->items
                 ->filter(function ($item) {
-                    // Only include manual delivery items that have delivery_content
                     $delivery = $item->digitalDelivery;
                     return $delivery 
                         && $delivery->delivery_trigger === 'manual' 

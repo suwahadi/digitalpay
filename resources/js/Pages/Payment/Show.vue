@@ -1005,7 +1005,7 @@ const formatPrice = (price) => {
 const formatDate = (date) => {
     const d = new Date(date)
     const day = String(d.getDate()).padStart(2, '0')
-    const month = d.toLocaleDateString('en-US', { month: 'short' })
+    const month = d.toLocaleDateString('id-ID', { month: 'short' })
     const year = d.getFullYear()
     const hours = String(d.getHours()).padStart(2, '0')
     const minutes = String(d.getMinutes()).padStart(2, '0')
@@ -1015,7 +1015,7 @@ const formatDate = (date) => {
 const formatExpiry = (date) => {
     const d = new Date(date)
     const day = String(d.getDate()).padStart(2, '0')
-    const month = d.toLocaleDateString('en-US', { month: 'short' })
+    const month = d.toLocaleDateString('id-ID', { month: 'short' })
     const year = d.getFullYear()
     const hours = String(d.getHours()).padStart(2, '0')
     const minutes = String(d.getMinutes()).padStart(2, '0')

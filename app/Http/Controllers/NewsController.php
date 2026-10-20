@@ -13,12 +13,10 @@ class NewsController extends Controller
     {
         $query = Article::published()->with('author');
         
-        // Search functionality
         if ($request->has('search') && !empty($request->search)) {
             $query->search($request->search);
         }
         
-        // Category filter
         if ($request->has('category') && !empty($request->category)) {
             $query->category($request->category);
         }
@@ -34,7 +32,7 @@ class NewsController extends Controller
                 'slug' => $article->slug,
                 'excerpt' => $article->excerpt,
                 'featured_image' => $article->featured_image_url,
-                'published_date' => $article->published_at->format('d M Y'),
+                'published_date' => $article->published_at->translatedFormat('d M Y'),
                 'author' => $article->author->name,
                 'category' => $article->category,
                 'reading_time' => $article->reading_time,
@@ -42,7 +40,6 @@ class NewsController extends Controller
             ];
         });
         
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
         
         return Inertia::render('News/Index', [
@@ -58,14 +55,12 @@ class NewsController extends Controller
     
     public function show(Article $article)
     {
-        // Check if article is published
         if (!$article->is_published || $article->published_at > now()) {
             abort(404);
         }
         
         $article->load('author');
         
-        // Get related articles
         $relatedArticles = Article::published()
             ->where('id', '!=', $article->id)
             ->where('category', $article->category)
@@ -79,12 +74,11 @@ class NewsController extends Controller
                     'slug' => $relatedArticle->slug,
                     'excerpt' => $relatedArticle->excerpt,
                     'featured_image' => $relatedArticle->featured_image_url,
-                    'published_date' => $relatedArticle->published_at->format('d M Y'),
+                    'published_date' => $relatedArticle->published_at->translatedFormat('d M Y'),
                     'url' => route('news.show', $relatedArticle->slug),
                 ];
             });
         
-        // Get site name for title
         $siteName = ConfigHelper::siteName();
         
         return Inertia::render('News/Show', [
@@ -96,7 +90,7 @@ class NewsController extends Controller
                 'excerpt' => $article->excerpt,
                 'content' => $article->content,
                 'featured_image' => $article->featured_image_url,
-                'published_date' => $article->published_at->format('d M Y'),
+                'published_date' => $article->published_at->translatedFormat('d M Y'),
                 'author' => $article->author->name,
                 'category' => $article->category,
                 'reading_time' => $article->reading_time,

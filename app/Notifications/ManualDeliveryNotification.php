@@ -79,9 +79,9 @@ class ManualDeliveryNotification extends Notification implements ShouldQueue
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
             'customer_phone' => $this->order->customer_phone,
-            'order_date' => $this->order->created_at->format('d M Y H:i'),
-            'payment_date' => $this->order->midtrans_paid_at?->format('d M Y H:i') ?? now()->format('d M Y H:i'),
-            'delivery_date' => now()->format('d M Y H:i'),
+            'order_date' => $this->order->created_at->translatedFormat('d M Y H:i'),
+            'payment_date' => $this->order->midtrans_paid_at?->translatedFormat('d M Y H:i') ?? now()->translatedFormat('d M Y H:i'),
+            'delivery_date' => now()->translatedFormat('d M Y H:i'),
             'items' => $this->order->items
                 ->filter(function ($item) {
                     return !($item->productVariant?->auto_delivery ?? true);
@@ -90,7 +90,6 @@ class ManualDeliveryNotification extends Notification implements ShouldQueue
                     $delivery = $item->digitalDelivery;
                     $digitalCode = null;
                     
-                    // Get digital content if delivery exists and is manual
                     if ($delivery && $delivery->delivery_trigger === 'manual' && $delivery->delivery_content) {
                         $digitalCode = $delivery->delivery_content;
                     } else {

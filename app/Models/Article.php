@@ -95,6 +95,6 @@ class Article extends Model
 
     public function getFormattedPublishedDateAttribute(): string
     {
-        return $this->published_at ? $this->published_at->format('d M Y') : '';
+        return $this->published_at ? $this->published_at->translatedFormat('d M Y') : '';
     }
 }

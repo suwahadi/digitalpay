@@ -169,7 +169,7 @@ class VoucherResource extends Resource
                 TextColumn::make('expires_at')
                     ->label('Berakhir')
                     ->dateTime('d M Y')
-                    ->formatStateUsing(fn ($state) => $state ? $state->format('d M Y') : 'Unlimited')
+                    ->formatStateUsing(fn ($state) => $state ? $state->translatedFormat('d M Y') : 'Unlimited')
                     ->badge()
                     ->color(fn ($state) => 
                         !$state ? 'gray' : ($state->isPast() ? 'danger' : 'success')
@@ -200,11 +200,6 @@ class VoucherResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
-            // ->bulkActions([
-            //     Tables\Actions\BulkActionGroup::make([
-            //         Tables\Actions\DeleteBulkAction::make(),
-            //     ]),
-            // ])
             ->defaultSort('created_at', 'desc')
             ->searchPlaceholder('Cari');
     }

@@ -75,7 +75,6 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
      */
     protected function prepareDeliveryData(): array
     {
-        // Load relationships including digital deliveries
         $this->order->load([
             'items.productVariant.product',
             'items.digitalDelivery'
@@ -85,15 +84,13 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
             'order_number' => $this->order->order_number,
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
-            'order_date' => $this->order->created_at->format('d M Y H:i'),
-            'delivery_date' => now()->format('d M Y H:i'),
+            'order_date' => $this->order->created_at->translatedFormat('d M Y H:i'),
+            'delivery_date' => now()->translatedFormat('d M Y H:i'),
             'items' => $this->order->items
                 ->filter(function ($item) {
-                    // Include all items with digital products
                     return $item->productVariant?->product?->is_digital ?? false;
                 })
                 ->map(function ($item) {
-                    // Get the actual delivery content from DigitalDelivery
                     $digitalCode = 'Akan dikirim terpisah';
                     if ($item->digitalDelivery && $item->digitalDelivery->delivery_content) {
                         $digitalCode = $item->digitalDelivery->delivery_content;

@@ -25,37 +25,31 @@ class UserController extends Controller
         
         $status = $request->get('status', 'pending');
         
-        // Statistics: Transaksi Sukses (nominal orders paid today)
         $successfulTransactionsToday = $user->orders()
             ->where('status', 'paid')
             ->whereDate('created_at', Carbon::today())
             ->sum('total_amount');
         
-        // Statistics: Jumlah Transaksi (count orders this month)
         $transactionCountThisMonth = $user->orders()
             ->whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
             ->count();
         
-        // Statistics: Transaksi Bulan ini (nominal all orders this month)
         $totalTransactionsThisMonth = $user->orders()
             ->whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
             ->sum('total_amount');
 
-        // Get orders filtered by status
         $query = $user->orders()
             ->with(['items.product', 'payment'])
             ->latest();
 
-        // Filter by status
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
         $recentOrders = $query->take(5)->get();
 
-        // Get order status counts
         $pendingOrders = $user->orders()->where('status', 'pending')->count();
         $paidOrders = $user->orders()->where('status', 'paid')->count();
         $cancelledOrders = $user->orders()->where('status', 'cancelled')->count();
@@ -81,7 +75,7 @@ class UserController extends Controller
                     'order_number' => $order->order_number,
                     'total_amount' => $order->total_amount,
                     'status' => $order->status,
-                    'created_at' => $order->created_at->format('d M Y H:i'),
+                    'created_at' => $order->created_at->translatedFormat('d M Y H:i'),
                     'items_count' => $order->items->count(),
                     'first_product' => $order->items->first()?->product?->name,
                 ];
@@ -102,14 +96,12 @@ class UserController extends Controller
             ->with(['items.product', 'payment', 'items.productVariant'])
             ->latest();
 
-        // Filter by status
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
         $orders = $query->paginate($perPage);
 
-        // Get status counts for tabs
         $statusCounts = [
             'all' => $user->orders()->count(),
             'pending' => $user->orders()->where('status', 'pending')->count(),
@@ -171,21 +163,18 @@ class UserController extends Controller
             'phone' => 'required|string|max:20',
         ];
 
-        // Add password validation only if password is provided
         if ($request->filled('password')) {
             $rules['password'] = 'required|string|min:6|confirmed';
         }
 
         $validated = $request->validate($rules);
 
-        // Update basic profile fields
         User::where('id', $user->id)->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
         ]);
 
-        // Update password if provided
         if ($request->filled('password')) {
             User::where('id', $user->id)->update([
                 'password' => Hash::make($validated['password'])
