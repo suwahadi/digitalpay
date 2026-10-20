@@ -107,13 +107,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Custom prose styles for better readability */
 .prose {
     color: #374151;
     line-height: 1.7;
 }
 
-/* Ensure dynamic HTML content inherits prose styles */
 .prose-content :deep(p) {
     margin-bottom: 1.25rem;
     color: inherit;
@@ -170,6 +168,14 @@ onMounted(() => {
 .prose-content :deep(ol) {
     margin: 1.25rem 0;
     padding-left: 1.5rem;
+}
+
+.prose-content :deep(ul) {
+    list-style-type: disc;
+}
+
+.prose-content :deep(ol) {
+    list-style-type: decimal;
 }
 
 .prose-content :deep(li) {
