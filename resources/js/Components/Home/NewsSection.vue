@@ -2,12 +2,9 @@
     <section class="py-16 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
                     Berita & Update Terbaru
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400">
-                    Tetap update dengan informasi terbaru dari {{ $page.props.settings?.title || 'DigitalPay' }}
-                </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">

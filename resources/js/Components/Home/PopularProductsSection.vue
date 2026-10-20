@@ -6,7 +6,7 @@
                     Produk Populer
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-400">
-                    Produk terlaris dan paling diminati pelanggan
+                    Produk terlaris dan paling diminati
                 </p>
             </div>
 

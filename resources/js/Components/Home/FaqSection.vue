@@ -2,12 +2,9 @@
     <section class="py-16 bg-white dark:bg-gray-800">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
                     Pertanyaan yang Sering Diajukan
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400">
-                    Temukan jawaban untuk pertanyaan umum seputar layanan kami
-                </p>
             </div>
 
             <div class="space-y-4">
