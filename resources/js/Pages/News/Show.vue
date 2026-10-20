@@ -66,45 +66,29 @@
                     </div>
 
                     <!-- Share Section -->
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
-                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
-                            Bagikan Artikel
-                        </h3>
-                        <div class="grid grid-cols-4 gap-2">
+                    <div class="flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4 sm:pt-6 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Bagikan</span>
+                        <div class="flex flex-wrap gap-2">
                             <a
-                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`"
+                                v-for="share in shareLinks"
+                                :key="share.name"
+                                :href="share.href"
                                 target="_blank"
-                                class="flex items-center justify-center px-2 py-2 sm:px-3 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
-                                title="Bagikan ke Facebook"
+                                rel="noopener"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                :aria-label="`Bagikan ke ${share.name}`"
+                                :title="`Bagikan ke ${share.name}`"
                             >
-                                <IconifyIcon icon="lucide:facebook" width="16" class="sm:mr-1.5" />
-                                <span class="hidden sm:inline">Facebook</span>
-                            </a>
-                            <a
-                                :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(article.title)}`"
-                                target="_blank"
-                                class="flex items-center justify-center px-2 py-2 sm:px-3 sm:py-2.5 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors text-xs sm:text-sm"
-                                title="Bagikan ke Twitter"
-                            >
-                                <IconifyIcon icon="lucide:twitter" width="16" class="sm:mr-1.5" />
-                                <span class="hidden sm:inline">Twitter</span>
-                            </a>
-                            <a
-                                :href="`https://wa.me/?text=${encodeURIComponent(article.title + ' - ' + currentUrl)}`"
-                                target="_blank"
-                                class="flex items-center justify-center px-2 py-2 sm:px-3 sm:py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-xs sm:text-sm"
-                                title="Bagikan ke WhatsApp"
-                            >
-                                <IconifyIcon icon="simple-icons:whatsapp" width="16" class="sm:mr-1.5" />
-                                <span class="hidden sm:inline">WhatsApp</span>
+                                <IconifyIcon :icon="share.icon" width="18" />
                             </a>
                             <button
+                                type="button"
                                 @click="copyToClipboard"
-                                class="flex items-center justify-center px-2 py-2 sm:px-3 sm:py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs sm:text-sm"
-                                title="Salin Link"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                aria-label="Salin link"
+                                title="Salin link"
                             >
-                                <IconifyIcon icon="lucide:copy" width="16" class="sm:mr-1.5" />
-                                <span class="hidden sm:inline">Copy</span>
+                                <IconifyIcon icon="lucide:copy" width="18" />
                             </button>
                         </div>
                     </div>
@@ -192,12 +176,22 @@ const getImageUrl = (imagePath) => {
     return '/storage/' + imagePath
 }
 
+const shareLinks = computed(() => {
+    const url = encodeURIComponent(currentUrl.value)
+    const title = encodeURIComponent(props.article.title)
+    return [
+        { name: 'Facebook', icon: 'simple-icons:facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${url}` },
+        { name: 'X', icon: 'simple-icons:x', href: `https://twitter.com/intent/tweet?url=${url}&text=${title}` },
+        { name: 'WhatsApp', icon: 'simple-icons:whatsapp', href: `https://wa.me/?text=${title}%20-%20${url}` },
+    ]
+})
+
 const copyToClipboard = async () => {
     try {
         await navigator.clipboard.writeText(currentUrl.value)
-        alert('Link berhasil disalin!')
-    } catch (err) {
-        console.error('Failed to copy: ', err)
+        window.toast?.success('Link berhasil disalin', 'Siap untuk dibagikan', 3000)
+    } catch {
+        window.toast?.error('Gagal menyalin link', 'Salin alamat halaman ini secara manual dari browser.')
     }
 }
 
