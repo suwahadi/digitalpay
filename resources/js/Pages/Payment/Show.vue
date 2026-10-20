@@ -372,61 +372,6 @@
             </div>
         </div>
 
-        <!-- Toast Notifications - Top Right -->
-        <div class="fixed top-20 right-4 z-50 max-w-sm space-y-2">
-            <TransitionGroup
-                enter-active-class="transform transition-all duration-500 ease-out"
-                enter-from-class="translate-x-full opacity-0 scale-90"
-                enter-to-class="translate-x-0 opacity-100 scale-100"
-                leave-active-class="transform transition-all duration-300 ease-in"
-                leave-from-class="translate-x-0 opacity-100 scale-100"
-                leave-to-class="translate-x-full opacity-0 scale-90"
-                move-class="transition-transform duration-300"
-            >
-                <div
-                    v-for="notification in visibleNotifications"
-                    :key="notification.id"
-                    :class="[
-                        'p-4 rounded-lg shadow-2xl border-l-4 backdrop-blur-sm',
-                        'bg-white/95 dark:bg-gray-800/95 border-r border-t border-b border-gray-200 dark:border-gray-700',
-                        notification.type === 'success' ? 'border-l-green-500' :
-                        notification.type === 'error' ? 'border-l-red-500' :
-                        'border-l-blue-500'
-                    ]"
-                >
-                    <div class="flex items-start space-x-3">
-                        <div :class="[
-                            'flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5',
-                            notification.type === 'success' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                            notification.type === 'error' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-                            'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                        ]">
-                            <IconifyIcon 
-                                :icon="notification.type === 'success' ? 'lucide:check' : 
-                                       notification.type === 'error' ? 'lucide:x' : 'lucide:info'"
-                                width="16"
-                            />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white leading-relaxed">
-                                {{ notification.message }}
-                            </p>
-                        </div>
-                        <button
-                            @click="removeNotification(notification.id)"
-                            :class="[
-                                'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-1',
-                                'hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200',
-                                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                            ]"
-                        >
-                            <IconifyIcon icon="lucide:x" width="14" />
-                        </button>
-                    </div>
-                </div>
-            </TransitionGroup>
-        </div>
-
         <!-- Redirect Overlay -->
         <Transition
             enter-active-class="transition-opacity duration-300"
@@ -490,7 +435,6 @@ const props = defineProps({
 const showInstructions = ref(false)
 const checkingStatus = ref(false)
 const qrCodeContainer = ref(null)
-const notifications = ref([])
 const isRedirecting = ref(false)
 const qrCodeGenerated = ref(false)
 const qrCodeLoading = ref(false)
@@ -501,35 +445,8 @@ const autoReloadInterval = ref(null)
 const isExpired = ref(false)
 
 const showNotification = (message, type = 'info') => {
-    if (notifications.value.length >= 5) {
-        removeNotification(notifications.value[0].id)
-    }
-    
-    const id = Date.now() + Math.random()
-    const notification = {
-        id,
-        message,
-        type,
-        timestamp: Date.now()
-    }
-    
-    notifications.value.push(notification)
-    
-    setTimeout(() => {
-        removeNotification(id)
-    }, 5000)
+    window.toast?.[type]?.(message, null, 5000)
 }
-
-const removeNotification = (id) => {
-    const index = notifications.value.findIndex(n => n.id === id)
-    if (index > -1) {
-        notifications.value.splice(index, 1)
-    }
-}
-
-const visibleNotifications = computed(() => {
-    return notifications.value
-})
 
 const copyToClipboard = async (text, type) => {
     if (!text) {
@@ -932,7 +849,6 @@ onUnmounted(() => {
         if (qrCodeContainer.value) {
             qrCodeContainer.value.innerHTML = ''
         }
-        notifications.value = []
     } catch (error) {
         // Silent error handling
     }

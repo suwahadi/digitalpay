@@ -1,44 +1,13 @@
 <template>
     <AppLayout>
-        <!-- Success Notification Toast -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="transition ease-out duration-300"
-                enter-from-class="opacity-0 transform translate-y-2 translate-x-1/2"
-                enter-to-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-active-class="transition ease-in duration-200"
-                leave-from-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-to-class="opacity-0 transform translate-y-2 translate-x-1/2"
-            >
-                <div
-                    v-if="showSuccessToast"
-                    class="fixed top-4 right-4 z-50 max-w-sm w-full bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3"
-                >
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-medium">{{ toastMessage || message }}</p>
-                    </div>
-                    <button
-                        @click="showSuccessToast = false"
-                        class="text-white hover:text-gray-200 transition-colors"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </Transition>
-        </Teleport>
 
         <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div class="max-w-md w-full space-y-8">
                 <!-- Header -->
                 <div class="text-center">
-                    <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
                         Lupa Password
-                    </h2>
+                    </h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         Masukkan email Anda untuk menerima link reset password
                     </p>
@@ -103,7 +72,7 @@
 
                 <!-- Back to Login Link -->
                 <div class="text-center">
-                    <Link href="/login" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                    <Link href="/login" class="inline-block py-3 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300">
                         ← Kembali ke Login
                     </Link>
                 </div>
@@ -113,15 +82,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const { props: pageProps } = usePage()
 const message = computed(() => pageProps.flash?.message)
 
-const showSuccessToast = ref(false)
-const toastMessage = ref('')
 
 const processing = ref(false)
 
@@ -131,11 +98,10 @@ const form = reactive({
 
 const errors = ref({ ...(pageProps.errors || {}) })
 
-const showToast = (toastRef, duration = 4000) => {
-    toastRef.value = true
-    setTimeout(() => {
-        toastRef.value = false
-    }, duration)
+const notify = (text) => {
+    if (text) {
+        window.toast?.success(text, null, 5000)
+    }
 }
 
 const submit = () => {
@@ -145,8 +111,7 @@ const submit = () => {
     router.post('/forgot-password', form, {
         onSuccess: (page) => {
             processing.value = false
-            toastMessage.value = page.props.flash?.message || 'Jika email tersebut terdaftar, link reset password telah dikirim ke email Anda.'
-            showToast(showSuccessToast, 5000)
+            notify(page.props.flash?.message)
         },
         onError: (serverErrors) => {
             processing.value = false
@@ -158,17 +123,5 @@ const submit = () => {
     })
 }
 
-watch(message, (newMessage) => {
-    if (newMessage) {
-        toastMessage.value = newMessage
-        showToast(showSuccessToast, 5000)
-    }
-}, { immediate: true })
-
-onMounted(() => {
-    if (message.value) {
-        toastMessage.value = message.value
-        showToast(showSuccessToast, 5000)
-    }
-})
+onMounted(() => notify(message.value))
 </script>

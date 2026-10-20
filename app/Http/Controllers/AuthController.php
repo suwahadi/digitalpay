@@ -330,14 +330,11 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
+        $sentMessage = 'Jika email tersebut terdaftar, link reset password telah dikirim ke email Anda.';
 
-        if (!$user) {
-            // Return success even if user doesn't exist (security best practice)
-            return back()->with('message', 'Email belum terdaftar member.');
-        }
-
-        if ($user->role !== 'member') {
-            return back()->with('message', 'Link reset password telah dikirim ke email Anda.');
+        // Same reply whether or not the email exists, so the form cannot be used to find accounts.
+        if (!$user || $user->role !== 'member') {
+            return back()->with('message', $sentMessage);
         }
 
         $token = Str::random(64);
@@ -355,7 +352,7 @@ class AuthController extends Controller
         try {
             $user->notify(new ForgotPasswordNotification($token, $user->name, $resetUrl));
 
-            return back()->with('message', 'Jika email tersebut terdaftar, link reset password telah dikirim ke email Anda.');
+            return back()->with('message', $sentMessage);
         } catch (\Exception $e) {
             return back()->withErrors([
                 'general' => 'Gagal mengirim email reset password. Silakan coba lagi.'

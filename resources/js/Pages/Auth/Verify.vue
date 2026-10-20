@@ -1,68 +1,5 @@
 <template>
     <AppLayout>
-        <!-- Success Notification Toast -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="transition ease-out duration-300"
-                enter-from-class="opacity-0 transform translate-y-2 translate-x-1/2"
-                enter-to-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-active-class="transition ease-in duration-200"
-                leave-from-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-to-class="opacity-0 transform translate-y-2 translate-x-1/2"
-            >
-                <div
-                    v-if="showSuccessToast"
-                    class="fixed top-4 right-4 z-50 max-w-sm w-full bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3"
-                >
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-medium">{{ message }}</p>
-                    </div>
-                    <button
-                        @click="showSuccessToast = false"
-                        class="text-white hover:text-gray-200 transition-colors"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </Transition>
-        </Teleport>
-
-        <!-- OTP Resend Notification Toast -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="transition ease-out duration-300"
-                enter-from-class="opacity-0 transform translate-y-2 translate-x-1/2"
-                enter-to-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-active-class="transition ease-in duration-200"
-                leave-from-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-to-class="opacity-0 transform translate-y-2 translate-x-1/2"
-            >
-                <div
-                    v-if="showResendToast"
-                    class="fixed top-4 right-4 z-50 max-w-sm w-full bg-blue-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3"
-                >
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-medium">Kode OTP telah dikirimkan ke {{ email }}</p>
-                    </div>
-                    <button
-                        @click="showResendToast = false"
-                        class="text-white hover:text-gray-200 transition-colors"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </Transition>
-        </Teleport>
 
         <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
             <div class="max-w-md w-full">
@@ -243,11 +180,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
-// Props from server
 const props = defineProps({
     email: String,
     status: String,
@@ -258,24 +194,17 @@ const props = defineProps({
     }
 })
 
-// Page data
 const { props: pageProps } = usePage()
 const message = computed(() => pageProps.flash?.message)
 
-// Toast notifications
-const showSuccessToast = ref(false)
-const showResendToast = ref(false)
 
-// Form state
 const processing = ref(false)
 const resendProcessing = ref(false)
 const errors = ref({})
 
-// Resend OTP Timer (10 minutes = 600 seconds)
 const resendCountdown = ref(0)
 const resendTimer = ref(null)
 
-// OTP handling
 const otpDigits = reactive(['', '', '', '', '', ''])
 const otpInputs = ref([])
 
@@ -287,7 +216,6 @@ const fullOtpCode = computed(() => {
     return otpDigits.join('')
 })
 
-// Timer utilities
 const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
@@ -295,13 +223,13 @@ const formatTime = (seconds) => {
 }
 
 const startResendTimer = (seconds = 600) => {
-    resendCountdown.value = seconds // Default 10 minutes in seconds
+    resendCountdown.value = seconds
     resendTimer.value = setInterval(() => {
         resendCountdown.value--
         if (resendCountdown.value <= 0) {
             clearInterval(resendTimer.value)
             resendTimer.value = null
-            resendCountdown.value = 0 // Ensure it's exactly 0
+            resendCountdown.value = 0
         }
     }, 1000)
 }
@@ -314,19 +242,15 @@ const clearResendTimer = () => {
     resendCountdown.value = 0
 }
 
-// Auto-hide toast notifications
-const showToast = (toastRef, duration = 3000) => {
-    toastRef.value = true
-    setTimeout(() => {
-        toastRef.value = false
-    }, duration)
+const notifyRegistered = () => {
+    if (message.value?.includes('Registrasi berhasil')) {
+        window.toast?.success(message.value, null, 3000)
+    }
 }
 
-// OTP input handling
 const handleOtpInput = (index, event) => {
     const value = event.target.value
     
-    // Only allow numbers
     if (!/^\d*$/.test(value)) {
         event.target.value = otpDigits[index]
         return
@@ -334,7 +258,6 @@ const handleOtpInput = (index, event) => {
     
     otpDigits[index] = value
     
-    // Move to next input if value is entered
     if (value && index < 5) {
         nextTick(() => {
             otpInputs.value[index + 1]?.focus()
@@ -343,14 +266,12 @@ const handleOtpInput = (index, event) => {
 }
 
 const handleKeyDown = (index, event) => {
-    // Handle backspace
     if (event.key === 'Backspace' && !otpDigits[index] && index > 0) {
         nextTick(() => {
             otpInputs.value[index - 1]?.focus()
         })
     }
     
-    // Handle arrow keys
     if (event.key === 'ArrowLeft' && index > 0) {
         nextTick(() => {
             otpInputs.value[index - 1]?.focus()
@@ -375,7 +296,6 @@ const handlePaste = (event) => {
         }
     })
     
-    // Focus on next empty input or last input
     const nextEmptyIndex = otpDigits.findIndex(digit => digit === '')
     const focusIndex = nextEmptyIndex !== -1 ? nextEmptyIndex : 5
     
@@ -384,7 +304,6 @@ const handlePaste = (event) => {
     })
 }
 
-// Submit verification
 const submit = () => {
     if (!isOtpComplete.value) return
     
@@ -403,7 +322,6 @@ const submit = () => {
             processing.value = false
             errors.value = serverErrors
             
-            // Clear OTP on error
             otpDigits.fill('')
             nextTick(() => {
                 otpInputs.value[0]?.focus()
@@ -415,7 +333,6 @@ const submit = () => {
     })
 }
 
-// Resend OTP
 const resendOtp = () => {
     // Validation: prevent spam clicking
     if (resendProcessing.value || resendCountdown.value > 0) {
@@ -431,17 +348,14 @@ const resendOtp = () => {
         onSuccess: (page) => {
             resendProcessing.value = false
             
-            // Clear existing OTP
             otpDigits.fill('')
             nextTick(() => {
                 otpInputs.value[0]?.focus()
             })
             
-            // Start countdown timer
             startResendTimer()
             
-            // Show success toast
-            showToast(showResendToast, 4000)
+            window.toast?.success(`Kode OTP telah dikirimkan ke ${props.email}`, null, 4000)
         },
         onError: (serverErrors) => {
             resendProcessing.value = false
@@ -453,31 +367,18 @@ const resendOtp = () => {
     })
 }
 
-// Watch for success message and show toast
-watch(message, (newMessage) => {
-    if (newMessage && newMessage.includes('Registrasi berhasil')) {
-        showToast(showSuccessToast, 3000)
-    }
-}, { immediate: true })
-
-// Initialize countdown from server data
 onMounted(() => {
     nextTick(() => {
         otpInputs.value[0]?.focus()
     })
     
-    // Set countdown from server if OTP is still active
     if (props.remainingSeconds > 0) {
         startResendTimer(props.remainingSeconds)
     }
     
-    // Show success message toast if present
-    if (message.value && message.value.includes('Registrasi berhasil')) {
-        showToast(showSuccessToast, 3000)
-    }
+    notifyRegistered()
 })
 
-// Cleanup timer on unmount
 onUnmounted(() => {
     clearResendTimer()
 })

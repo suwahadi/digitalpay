@@ -341,42 +341,6 @@
             </div>
         </div>
 
-        <!-- Notification Toast -->
-        <Transition
-            name="toast"
-            enter-active-class="transition-all duration-300 ease-out"
-            leave-active-class="transition-all duration-200 ease-in"
-            enter-from-class="opacity-0 translate-y-2 scale-95"
-            enter-to-class="opacity-100 translate-y-0 scale-100"
-            leave-from-class="opacity-100 translate-y-0 scale-100"
-            leave-to-class="opacity-0 translate-y-2 scale-95"
-        >
-            <div 
-                v-if="showNotification"
-                class="fixed top-24 right-4 z-50 flex items-center space-x-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-4 py-3 min-w-[280px]"
-            >
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                        <IconifyIcon icon="lucide:check" width="18" class="text-green-600 dark:text-green-400" />
-                    </div>
-                </div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        Link berhasil disalin!
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Siap untuk dibagikan
-                    </p>
-                </div>
-                <button 
-                    @click="showNotification = false"
-                    class="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                    <IconifyIcon icon="lucide:x" width="16" />
-                </button>
-            </div>
-        </Transition>
-
         <!-- Order Confirmation Modal -->
         <Transition
             name="modal"
@@ -514,7 +478,6 @@ const props = defineProps({
 const selectedVariant = ref(null)
 const openFaqs = ref([])
 const showConfirmationModal = ref(false)
-const showNotification = ref(false)
 
 const sortedVariants = computed(() => {
     if (!props.product.variants) return []
@@ -619,14 +582,9 @@ const shareProduct = (platform) => {
             window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`)
             break
         case 'copy':
-            navigator.clipboard.writeText(url).then(() => {
-                showNotification.value = true
-                setTimeout(() => {
-                    showNotification.value = false
-                }, 3000)
-            }).catch(() => {
-                alert('Gagal menyalin link')
-            })
+            navigator.clipboard.writeText(url)
+                .then(() => window.toast?.success('Link berhasil disalin', 'Siap untuk dibagikan', 3000))
+                .catch(() => window.toast?.error('Gagal menyalin link', 'Salin alamat halaman ini secara manual dari browser.'))
             break
     }
 }

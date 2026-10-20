@@ -1,44 +1,12 @@
 <template>
     <AppLayout>
-        <!-- Success Notification Toast -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="transition ease-out duration-300"
-                enter-from-class="opacity-0 transform translate-y-2 translate-x-1/2"
-                enter-to-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-active-class="transition ease-in duration-200"
-                leave-from-class="opacity-100 transform translate-y-0 translate-x-1/2"
-                leave-to-class="opacity-0 transform translate-y-2 translate-x-1/2"
-            >
-                <div
-                    v-if="showSuccessToast"
-                    class="fixed top-4 right-4 z-50 max-w-sm w-full bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3"
-                >
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-medium">{{ message }}</p>
-                    </div>
-                    <button
-                        @click="showSuccessToast = false"
-                        class="text-white hover:text-gray-200 transition-colors"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </Transition>
-        </Teleport>
-
         <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div class="max-w-md w-full space-y-8">
                 <!-- Header -->
                 <div class="text-center">
-                    <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
                         Login Member
-                    </h2>
+                    </h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         Masuk ke akun member Anda
                     </p>
@@ -84,7 +52,9 @@
                                 <button
                                     type="button"
                                     @click="showPassword = !showPassword"
-                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                                    :aria-pressed="showPassword"
+                                    class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                                 >
                                     <svg v-if="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -114,7 +84,7 @@
                                 </label>
                             </div>
                             <div class="text-sm">
-                                <Link href="/forgot-password" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+                                <Link href="/forgot-password" class="inline-block py-2 font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
                                     Lupa Password Anda?
                                 </Link>
                             </div>
@@ -166,7 +136,7 @@
 
                 <!-- Back to Home -->
                 <div class="text-center">
-                    <Link href="/" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                    <Link href="/" class="inline-block py-3 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300">
                         ← Kembali ke Halaman Utama
                     </Link>
                 </div>
@@ -180,12 +150,8 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
-// Page data
 const { props: pageProps } = usePage()
 const message = computed(() => pageProps.flash?.message)
-
-// Toast notifications
-const showSuccessToast = ref(false)
 
 const showPassword = ref(false)
 const processing = ref(false)
@@ -198,12 +164,10 @@ const form = reactive({
 
 const errors = ref({})
 
-// Auto-hide toast notifications
-const showToast = (toastRef, duration = 4000) => {
-    toastRef.value = true
-    setTimeout(() => {
-        toastRef.value = false
-    }, duration)
+const notify = (text) => {
+    if (text) {
+        window.toast?.success(text, null, 4000)
+    }
 }
 
 const submit = () => {
@@ -224,17 +188,7 @@ const submit = () => {
     })
 }
 
-// Watch for success message and show toast
-watch(message, (newMessage) => {
-    if (newMessage) {
-        showToast(showSuccessToast, 4000)
-    }
-}, { immediate: true })
+watch(message, notify)
 
-// Show success message toast if present on mount
-onMounted(() => {
-    if (message.value) {
-        showToast(showSuccessToast, 4000)
-    }
-})
+onMounted(() => notify(message.value))
 </script>
