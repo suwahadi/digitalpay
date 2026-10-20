@@ -61,7 +61,7 @@
                     <ul class="space-y-2">
                         <li>
                             <Link href="/" class="text-gray-400 hover:text-white transition-colors">
-                                Home
+                                Beranda
                             </Link>
                         </li>
                         <li>

@@ -10,11 +10,12 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="flex flex-wrap justify-center gap-4">
                 <ProductCard
                     v-for="product in products"
                     :key="product.id"
                     :product="product"
+                    class="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.667rem)] lg:w-[calc(25%-0.75rem)]"
                 />
             </div>
 

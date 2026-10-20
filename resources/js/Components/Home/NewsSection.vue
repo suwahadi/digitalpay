@@ -43,7 +43,7 @@
                         </p>
                         <Link
                             :href="article.url || route('news.show', { slug: article.slug })"
-                            class="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center"
+                            class="inline-flex min-h-[44px] items-center font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                             Baca Selengkapnya
                             <IconifyIcon icon="lucide:arrow-right" width="16" class="ml-1" />

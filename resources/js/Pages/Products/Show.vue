@@ -47,52 +47,110 @@
 
                     <!-- Product Info -->
                     <div class="space-y-6">
-                        <!-- Category Badge -->
                         <div class="flex items-center space-x-2">
                             <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
                                 {{ product.category.name }}
                             </span>
-                            <div v-if="salesCount > 0" class="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
+                            <div v-if="salesCount > 0" class="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
                                 <IconifyIcon icon="lucide:shopping-bag" width="16" />
                                 <span>{{ formatNumber(salesCount) }} Terjual</span>
                             </div>
                         </div>
 
-                        <!-- Product Title -->
                         <div>
                             <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                 {{ product.name }}
                             </h1>
                             <div class="flex items-center gap-0.5 mb-2" aria-label="Rating 5 dari 5">
                                 <IconifyIcon v-for="n in 5" :key="n" icon="material-symbols:star-rounded" width="20" class="text-amber-400" />
-                                <span class="ml-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">5.0</span>
+                                <span class="ml-1.5 text-sm font-medium text-gray-600 dark:text-gray-400">5.0</span>
                             </div>
                             <p class="text-gray-600 dark:text-gray-400" v-if="product.short_description">
                                 {{ product.short_description }}
                             </p>
                         </div>
 
-                        <!-- Sharing Buttons -->
+                        <!-- Product Variants -->
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
-                                Bagikan:
-                            </h3>
-                            <div class="grid grid-cols-6 gap-2">
-                                <button 
-                                    v-for="social in socialButtons" 
-                                    :key="social.name"
-                                    @click="shareProduct(social.platform)"
-                                    class="flex items-center justify-center px-1.5 py-2 sm:px-2 sm:py-1.5 rounded-lg transition-colors text-xs sm:text-xs"
-                                    :class="getSocialButtonClass(social.platform)"
-                                    :title="`Bagikan ke ${social.name}`"
+                            <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-3">
+                                Pilih Paket
+                            </h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button
+                                    v-for="variant in sortedVariants"
+                                    :key="variant.id"
+                                    type="button"
+                                    :disabled="!variant.is_active || variant.stock_status === 'Habis'"
+                                    :aria-pressed="selectedVariant?.id === variant.id"
+                                    class="w-full rounded-lg border p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    :class="selectedVariant?.id === variant.id
+                                        ? 'border-blue-600 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                        : 'border-gray-200 bg-white hover:border-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-blue-500'"
+                                    @click="selectVariant(variant)"
                                 >
-                                    <!-- Mobile Icon -->
-                                    <IconifyIcon :icon="social.icon" width="14" class="sm:hidden" />
-                                    <!-- Desktop Icon -->
-                                    <IconifyIcon :icon="social.icon" width="12" class="hidden sm:block sm:mr-1" />
-                                    <span class="hidden sm:inline text-[10px]">{{ social.name }}</span>
+                                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">
+                                        {{ variant.name }}
+                                    </span>
+                                    <span class="mt-2 flex flex-wrap items-center gap-2">
+                                        <span class="rounded px-2 py-1 text-xs" :class="getStockStatusClass(variant.stock_status)">
+                                            {{ variant.stock_status }}
+                                        </span>
+                                        <span v-if="variant.auto_delivery === true" class="flex items-center gap-1 text-green-700 dark:text-green-400">
+                                            <IconifyIcon icon="lucide:zap" width="14" />
+                                            <span class="text-xs font-medium">Instan</span>
+                                        </span>
+                                        <span v-else class="flex items-center gap-1 text-amber-700 dark:text-amber-400">
+                                            <IconifyIcon icon="lucide:user-check" width="14" />
+                                            <span class="text-xs font-medium">Manual</span>
+                                        </span>
+                                    </span>
+                                    <span class="mt-3 flex flex-wrap items-baseline gap-x-2">
+                                        <span class="text-lg font-bold text-gray-900 dark:text-white">
+                                            {{ formatPrice(variant.price) }}
+                                        </span>
+                                        <span
+                                            v-if="variant.original_price && variant.original_price > variant.price"
+                                            class="text-sm text-gray-600 line-through dark:text-gray-400"
+                                        >
+                                            {{ formatPrice(variant.original_price) }}
+                                        </span>
+                                    </span>
+                                    <span v-if="variant.discount_percentage" class="mt-1 block text-xs font-medium text-red-700 dark:text-red-400">
+                                        Diskon {{ variant.discount_percentage }}%
+                                    </span>
                                 </button>
                             </div>
+                        </div>
+
+                        <!-- Selected Variant Actions -->
+                        <div v-if="selectedVariant" class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">
+                                {{ selectedVariant.name }}
+                            </h3>
+                            <div class="mt-1 mb-3 text-gray-600 dark:text-gray-400" v-html="selectedVariant.description"></div>
+                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                    {{ formatPrice(selectedVariant.price) }}
+                                </span>
+                                <span
+                                    v-if="selectedVariant.original_price && selectedVariant.original_price > selectedVariant.price"
+                                    class="text-base text-gray-600 line-through dark:text-gray-400"
+                                >
+                                    {{ formatPrice(selectedVariant.original_price) }}
+                                </span>
+                                <span v-if="selectedVariant.discount_percentage" class="text-sm font-medium text-red-700 dark:text-red-400">
+                                    Hemat {{ selectedVariant.discount_percentage }}%
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                @click="showOrderConfirmation"
+                                :disabled="!selectedVariant.is_active || selectedVariant.stock_status === 'Habis'"
+                                class="mt-4 w-full btn btn-primary min-h-[52px] text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                <IconifyIcon icon="lucide:shopping-cart" width="20" />
+                                <span>{{ selectedVariant.stock_status === 'Habis' ? 'Stok Habis' : 'Beli Sekarang' }}</span>
+                            </button>
                         </div>
 
                         <!-- Login Status Notice -->
@@ -104,145 +162,27 @@
                                         Login member dan nikmati kemudahan berbelanja.
                                     </p>
                                     <p class="text-blue-700 dark:text-blue-300 mt-1">
-                                        <Link href="/login" class="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                                        <Link href="/login" class="font-semibold text-blue-700 dark:text-blue-300 underline-offset-2 hover:underline">
                                             Klik di sini untuk login</Link>.</p>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Logged In Notice -->
-                        <div v-else class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                            <div class="flex items-start space-x-3">
-                                <IconifyIcon icon="lucide:user-check" width="20" class="text-green-600 dark:text-green-400 mt-0.5" />
-                                <div class="text-sm">
-                                    <p class="text-green-800 dark:text-green-200 font-medium">
-                                        Halo, {{ $page.props.auth?.user?.name || 'User' }}
-                                    </p>
-                                    <p class="text-green-700 dark:text-green-300 mt-1">
-                                        Silahkan pilih varian produk untuk melanjutkan pemesanan.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Product Variants -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-                <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm overflow-hidden">
-                    <div class="p-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                            {{ product.name }}
-                        </h2>
-
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div 
-                                v-for="variant in sortedVariants" 
-                                :key="variant.id"
-                                class="border dark:border-gray-600 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer"
-                                :class="{ 
-                                    'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20': selectedVariant?.id === variant.id,
-                                    'opacity-50 cursor-not-allowed': !variant.is_active || variant.stock_status === 'Habis'
-                                }"
-                                @click="selectVariant(variant)"
-                            >
-                                <div class="space-y-3">
-                                    <div>
-                                        <h3 class="font-semibold text-gray-900 dark:text-white text-sm">
-                                            {{ variant.name }}
-                                        </h3>
-                                        <div class="flex flex-wrap items-center gap-2 mt-2">
-                                            <span 
-                                                class="text-xs px-2 py-1 rounded"
-                                                :class="getStockStatusClass(variant.stock_status)"
-                                            >
-                                                {{ variant.stock_status }}
-                                            </span>
-                                            <div 
-                                                v-if="variant.auto_delivery === true" 
-                                                class="flex items-center space-x-1 text-green-600 dark:text-green-400"
-                                            >
-                                                <IconifyIcon icon="lucide:zap" width="14" />
-                                                <span class="text-xs font-medium">Instan</span>
-                                            </div>
-                                            <div 
-                                                v-else 
-                                                class="flex items-center space-x-1 text-yellow-600 dark:text-yellow-400"
-                                            >
-                                                <IconifyIcon icon="lucide:user-check" width="14" />
-                                                <span class="text-xs font-medium">Manual</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-lg font-bold text-gray-900 dark:text-white">
-                                                {{ formatPrice(variant.price) }}
-                                            </span>
-                                            <span 
-                                                v-if="variant.original_price && variant.original_price > variant.price" 
-                                                class="text-sm text-gray-500 line-through"
-                                            >
-                                                {{ formatPrice(variant.original_price) }}
-                                            </span>
-                                        </div>
-                                        <div 
-                                            v-if="variant.discount_percentage" 
-                                            class="text-xs text-red-600 dark:text-red-400 font-medium"
-                                        >
-                                            Disc {{ variant.discount_percentage }}%
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Selected Variant Actions -->
-                        <div v-if="selectedVariant" class="mt-6 pt-6 border-t dark:border-gray-600">
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
-                                    {{ product.name }} - {{ selectedVariant.name }}
-                                </h4>
-
-                                <div class="text-gray-600 dark:text-gray-400 mb-2 mt-1" v-html="selectedVariant.description"></div>
-                                
-                                <div class="space-y-4">
-                                    <!-- Price Section -->
-                                    <div class="text-center sm:text-left">
-                                        <span class="text-sm text-gray-600 dark:text-gray-400">Harga:</span>
-                                        <div class="flex items-center justify-center sm:justify-start space-x-2 mt-1">
-                                            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                                {{ formatPrice(selectedVariant.price) }}
-                                            </span>
-                                            <span 
-                                                v-if="selectedVariant.original_price && selectedVariant.original_price > selectedVariant.price" 
-                                                class="text-lg text-gray-500 line-through"
-                                            >
-                                                {{ formatPrice(selectedVariant.original_price) }}
-                                            </span>
-                                        </div>
-                                        <div 
-                                            v-if="selectedVariant.discount_percentage" 
-                                            class="text-sm text-red-600 dark:text-red-400 font-medium mt-1"
-                                        >
-                                            Hemat {{ selectedVariant.discount_percentage }}%!
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Buy Button -->
-                                    <div class="w-full">
-                                        <button 
-                                            @click="showOrderConfirmation"
-                                            :disabled="!selectedVariant.is_active || selectedVariant.stock_status === 'Habis'"
-                                            class="w-full btn btn-primary py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                                        >
-                                            <IconifyIcon icon="lucide:shopping-cart" width="20" />
-                                            <span>{{ selectedVariant.stock_status === 'Habis' ? 'Stok Habis' : 'Beli Sekarang' }}</span>
-                                        </button>
-                                    </div>
-                                </div>
-
+                        <!-- Sharing Buttons -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Bagikan</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    v-for="social in socialButtons"
+                                    :key="social.platform"
+                                    type="button"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                    :aria-label="social.platform === 'copy' ? 'Salin link' : `Bagikan ke ${social.name}`"
+                                    :title="social.platform === 'copy' ? 'Salin link' : `Bagikan ke ${social.name}`"
+                                    @click="shareProduct(social.platform)"
+                                >
+                                    <IconifyIcon :icon="social.icon" width="18" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -252,7 +192,7 @@
             <!-- Product Description -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Deskripsi Produk</h3>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Deskripsi Produk</h2>
                     
                     <div class="prose dark:prose-invert max-w-none">
                         <div class="text-gray-600 dark:text-gray-400" v-if="product.description" v-html="product.description"></div>
@@ -263,7 +203,7 @@
                     
                     <!-- Product Features -->
                     <div v-if="product.features && product.features.length > 0" class="mt-6">
-                        <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Fitur Unggulan:</h4>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Fitur Unggulan:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div 
                                 v-for="(feature, index) in product.features" 
@@ -281,7 +221,7 @@
             <!-- FAQ Section -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Kamu Punya Pertanyaan?</h3>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Kamu Punya Pertanyaan?</h2>
                     
                     <div class="space-y-4">
                         <div 
@@ -328,7 +268,7 @@
             <!-- Related Products -->
             <div v-if="relatedProducts.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Produk Terkait</h3>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Produk Terkait</h2>
                     
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         <ProductCard 
@@ -386,9 +326,11 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                 Konfirmasi Pembelian
                             </h3>
-                            <button 
+                            <button
+                                type="button"
                                 @click="closeConfirmationModal"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 hover:rotate-90"
+                                aria-label="Tutup"
+                                class="-m-2 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
                             >
                                 <IconifyIcon icon="lucide:x" width="24" />
                             </button>
@@ -499,11 +441,11 @@ const isLoggedIn = computed(() => {
 
 const socialButtons = [
     { name: 'Facebook', platform: 'facebook', icon: 'simple-icons:facebook', color: 'text-blue-600' },
-    { name: 'Twitter', platform: 'twitter', icon: 'simple-icons:x', color: 'text-gray-900 dark:text-white' },
+    { name: 'X', platform: 'twitter', icon: 'simple-icons:x', color: 'text-gray-900 dark:text-white' },
     { name: 'Telegram', platform: 'telegram', icon: 'simple-icons:telegram', color: 'text-blue-500' },
     { name: 'WhatsApp', platform: 'whatsapp', icon: 'simple-icons:whatsapp', color: 'text-green-500' },
     { name: 'Email', platform: 'email', icon: 'lucide:mail', color: 'text-gray-600' },
-    { name: 'Copy', platform: 'copy', icon: 'lucide:copy', color: 'text-gray-600' },
+    { name: 'Salin link', platform: 'copy', icon: 'lucide:copy', color: 'text-gray-600' },
 ]
 
 const productFaqs = ref([
@@ -515,7 +457,7 @@ const productFaqs = ref([
     {
         id: 2,
         question: 'Apakah ini aman dan bergaransi?',
-        answer: 'Yes, kamu akan mendapatkan garansi sesuai durasi yang kamu beli'
+        answer: 'Ya, kamu akan mendapatkan garansi sesuai durasi yang kamu beli.'
     },
     {
         id: 3,
@@ -586,25 +528,6 @@ const shareProduct = (platform) => {
                 .then(() => window.toast?.success('Link berhasil disalin', 'Siap untuk dibagikan', 3000))
                 .catch(() => window.toast?.error('Gagal menyalin link', 'Salin alamat halaman ini secara manual dari browser.'))
             break
-    }
-}
-
-const getSocialButtonClass = (platform) => {
-    switch (platform) {
-        case 'facebook':
-            return 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700'
-        case 'twitter':
-            return 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-500 dark:hover:bg-sky-600'
-        case 'telegram':
-            return 'bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600'
-        case 'whatsapp':
-            return 'bg-green-500 text-white hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600'
-        case 'email':
-            return 'bg-gray-600 text-white hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700'
-        case 'copy':
-            return 'bg-gray-600 text-white hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700'
-        default:
-            return 'bg-gray-600 text-white hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700'
     }
 }
 

@@ -246,6 +246,8 @@
                                     type="text"
                                     v-model="voucherCode"
                                     placeholder="Masukkan kode voucher..."
+                                    aria-label="Kode voucher"
+                                    autocomplete="off"
                                     class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm sm:text-base"
                                 />
                                 <button
@@ -261,7 +263,7 @@
                                     </template>
                                 </button>
                             </div>
-                            <p v-if="voucherChecked && calculateVoucherDiscount() > 0" class="text-sm text-green-600 dark:text-green-400 mt-2">Diskon {{ formatPrice(calculateVoucherDiscount()) }} berhasil diterapkan.</p>
+                            <p v-if="voucherChecked && calculateVoucherDiscount() > 0" class="text-sm text-green-700 dark:text-green-400 mt-2">Diskon {{ formatPrice(calculateVoucherDiscount()) }} berhasil diterapkan.</p>
                             <p v-if="voucherChecked && voucherErrorText" class="text-sm text-red-600 dark:text-red-400 mt-2">{{ voucherErrorText }}</p>
                             <div class="mt-3">
                                 <button @click="openVoucherModal" class="inline-flex items-center px-3 py-2 text-sm rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">
@@ -274,7 +276,7 @@
 
                     <!-- Order Summary -->
                     <div class="lg:col-span-1">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6 sticky top-24">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6 lg:sticky lg:top-24">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Ringkasan Pesanan
                             </h2>
@@ -316,7 +318,7 @@
 
                                 <div v-if="calculateVoucherDiscount() > 0" class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Voucher Diskon:</span>
-                                    <span class="text-green-600 dark:text-green-400">-{{ formatPrice(calculateVoucherDiscount()) }}</span>
+                                    <span class="text-green-700 dark:text-green-400">-{{ formatPrice(calculateVoucherDiscount()) }}</span>
                                 </div>
                                 
                                 <div v-if="selectedPaymentMethod && selectedPaymentMethod.fee_type !== 'none'" class="flex justify-between text-sm">
@@ -324,7 +326,7 @@
                                     <span class="text-gray-900 dark:text-white">{{ formatPrice(calculatePaymentFee()) }}</span>
                                 </div>
                                 
-                                <div v-if="selectedVariant.original_price && selectedVariant.original_price > selectedVariant.price" class="flex justify-between text-sm text-green-600 dark:text-green-400">
+                                <div v-if="selectedVariant.original_price && selectedVariant.original_price > selectedVariant.price" class="flex justify-between text-sm text-green-700 dark:text-green-400">
                                     <span>Hemat:</span>
                                     <span>-{{ formatPrice(selectedVariant.original_price - selectedVariant.price) }}</span>
                                 </div>
@@ -340,11 +342,11 @@
                                 v-if="selectedVariant.auto_delivery === true" 
                                 class="mt-6 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
                             >
-                                <div class="flex items-center space-x-2 text-green-600 dark:text-green-400">
+                                <div class="flex items-center space-x-2 text-green-700 dark:text-green-400">
                                     <IconifyIcon icon="lucide:zap" width="16" />
                                     <span class="text-sm font-medium">Pengiriman Instan</span>
                                 </div>
-                                <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                <p class="text-xs text-green-700 dark:text-green-400 mt-1">
                                     Produk akan dikirim otomatis setelah pembayaran dikonfirmasi
                                 </p>
                             </div>
@@ -352,29 +354,59 @@
                                 v-else 
                                 class="mt-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
                             >
-                                <div class="flex items-center space-x-2 text-yellow-600 dark:text-yellow-400">
+                                <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400">
                                     <IconifyIcon icon="lucide:user-check" width="16" />
                                     <span class="text-sm font-medium">Pengiriman Manual</span>
                                 </div>
-                                <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
                                     Produk akan diproses dan dikirim secara manual oleh Admin
                                 </p>
                             </div>
 
                             <!-- Submit Button -->
-                            <button 
-                                @click="submitOrder"
-                                :disabled="!canSubmit || processing"
-                                class="w-full mt-6 bg-blue-600 text-white py-4 px-6 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center space-x-2 transition-colors
-                                       lg:static lg:rounded-lg lg:shadow-none
-                                       sticky -bottom-px rounded-none shadow-lg"
-                                style="top: auto;"
-                            >
-                                <IconifyIcon v-if="processing" icon="lucide:loader-2" width="20" class="animate-spin" />
-                                <span>{{ processing ? 'Memproses...' : 'Buat Pesanan' }}</span>
-                            </button>
+                            <div class="mt-6 hidden lg:block">
+                                <button
+                                    type="button"
+                                    @click="submitOrder"
+                                    :disabled="!canSubmit || processing"
+                                    :aria-describedby="submitHint ? 'checkout-hint' : undefined"
+                                    class="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-600 dark:disabled:bg-gray-700 dark:disabled:text-gray-300"
+                                >
+                                    <IconifyIcon v-if="processing" icon="lucide:loader-2" width="20" class="animate-spin" />
+                                    <span>{{ processing ? 'Memproses...' : 'Buat Pesanan' }}</span>
+                                </button>
+                                <p v-if="submitHint" id="checkout-hint" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                                    {{ submitHint }}
+                                </p>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Mobile Order Bar -->
+                <div
+                    class="sticky bottom-0 z-30 -mx-4 mt-6 border-t border-gray-200 bg-white px-4 pt-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)] dark:border-gray-700 dark:bg-gray-900 sm:-mx-6 sm:px-6 lg:hidden"
+                    style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));"
+                >
+                    <div class="flex items-center gap-4">
+                        <div class="shrink-0">
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                            <p class="text-lg font-semibold text-blue-600 dark:text-blue-400">{{ formatPrice(calculateTotal()) }}</p>
+                        </div>
+                        <button
+                            type="button"
+                            @click="submitOrder"
+                            :disabled="!canSubmit || processing"
+                            :aria-describedby="submitHint ? 'checkout-hint-mobile' : undefined"
+                            class="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-600 dark:disabled:bg-gray-700 dark:disabled:text-gray-300"
+                        >
+                            <IconifyIcon v-if="processing" icon="lucide:loader-2" width="20" class="animate-spin" />
+                            <span>{{ processing ? 'Memproses...' : 'Buat Pesanan' }}</span>
+                        </button>
+                    </div>
+                    <p v-if="submitHint" id="checkout-hint-mobile" class="mt-1.5 text-xs text-gray-600 dark:text-gray-400">
+                        {{ submitHint }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -431,7 +463,7 @@
 
                                     <div v-if="calculateVoucherDiscount() > 0" class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Voucher Diskon:</span>
-                                        <span class="font-medium text-green-600 dark:text-green-400">-{{ formatPrice(calculateVoucherDiscount()) }}</span>
+                                        <span class="font-medium text-green-700 dark:text-green-400">-{{ formatPrice(calculateVoucherDiscount()) }}</span>
                                     </div>
 
                                     <div class="flex justify-between">
@@ -484,7 +516,7 @@
                                                     <span class="text-gray-900 dark:text-white text-right break-all">{{ form.customer_email }}</span>
                                                 </div>
                                                 <div class="flex justify-between gap-3">
-                                                    <span class="text-gray-600 dark:text-gray-400">Phone:</span>
+                                                    <span class="text-gray-600 dark:text-gray-400">No. WhatsApp:</span>
                                                     <span class="text-gray-900 dark:text-white text-right break-all">{{ form.customer_phone }}</span>
                                                 </div>
                                             </div>
@@ -612,10 +644,20 @@ const selectedPaymentMethod = computed(() => {
 })
 
 const canSubmit = computed(() => {
-    return form.value.customer_name && 
-           form.value.customer_email && 
-           form.value.customer_phone && 
+    return form.value.customer_name &&
+           form.value.customer_email &&
+           form.value.customer_phone &&
            form.value.payment_method_id
+})
+
+const submitHint = computed(() => {
+    if (!form.value.customer_name || !form.value.customer_email || !form.value.customer_phone) {
+        return 'Lengkapi nama, email, dan nomor WhatsApp untuk melanjutkan.'
+    }
+    if (!form.value.payment_method_id) {
+        return 'Pilih metode pembayaran untuk melanjutkan.'
+    }
+    return ''
 })
 
 const selectPaymentMethod = (paymentMethod) => {

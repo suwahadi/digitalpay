@@ -31,7 +31,7 @@
                     <div class="relative overflow-hidden rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-8" 
                          :class="{ 'mt-20': reloadProgress < 100 }">
                         <div v-if="isLunas" class="pointer-events-none absolute right-0 top-0 h-28 w-28 overflow-hidden sm:h-32 sm:w-32" aria-hidden="true">
-                            <div class="absolute right-[-44px] top-[26px] w-[170px] rotate-45 bg-green-600 py-1.5 text-center text-sm font-bold tracking-[0.2em] text-white shadow-md sm:right-[-40px] sm:top-[30px]">
+                            <div class="absolute right-[-44px] top-[26px] w-[170px] rotate-45 bg-green-700 py-1.5 text-center text-sm font-bold tracking-[0.2em] text-white shadow-md sm:right-[-40px] sm:top-[30px]">
                                 LUNAS
                             </div>
                         </div>
@@ -44,8 +44,9 @@
                                 <span class="text-sm sm:text-base">Order ID: #{{ order.order_number }}</span>
                                 
                                 <!-- Copy Order Number Button -->
-                                <button @click="copyOrderNumber" 
-                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                <button type="button" @click="copyOrderNumber"
+                                        :aria-label="copied ? 'Nomor pesanan tersalin' : 'Salin nomor pesanan'"
+                                        class="inline-flex min-h-[32px] items-center px-2.5 py-1.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                                         :class="{ 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200': copied }">
                                     <svg v-if="!copied" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -53,7 +54,7 @@
                                     <svg v-else class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
-                                    {{ copied ? 'Copied!' : 'Copy' }}
+                                    {{ copied ? 'Tersalin' : 'Salin' }}
                                 </button>
                             </div>
                             <span class="text-sm sm:text-base text-gray-600 dark:text-gray-300">{{ formatDateTime(order.created_at) }}</span>
@@ -274,7 +275,7 @@
                                         <button v-if="canDownloadFile(delivery)"
                                                 @click="downloadFile(delivery)"
                                                 :disabled="downloading === delivery.id || isDeliveryExpired(delivery)"
-                                                class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                                class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                             <svg v-if="downloading === delivery.id" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -522,10 +523,10 @@
                                             <a :href="`mailto:${$page.props.settings?.contact?.email || 'admin@digitalpay.web.id'}`"
                                                class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-blue-600 px-2 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:px-4">
                                                 <IconifyIcon icon="lucide:mail" width="18" class="shrink-0" />
-                                                Email Support
+                                                Email
                                             </a>
                                             <a :href="whatsappSupportUrl" target="_blank" rel="noopener"
-                                               class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-green-600 px-2 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-700 sm:px-4">
+                                               class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-green-700 px-2 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-800 sm:px-4">
                                                 <IconifyIcon icon="simple-icons:whatsapp" width="18" class="shrink-0" />
                                                 WhatsApp
                                             </a>
@@ -546,7 +547,7 @@
                                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Download Berhasil!</h3>
                                 <p class="text-gray-600 dark:text-gray-300 mb-4">File telah diunduh ke perangkat Anda</p>
                                 <button @click="showSuccessModal = false" 
-                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                                        class="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 transition-colors">
                                     OK
                                 </button>
                             </div>
@@ -563,7 +564,7 @@
                  role="dialog" aria-modal="true" aria-labelledby="qris-title"
                  @click.self="showQris = false">
                 <div class="relative max-h-[95vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-gray-800">
-                    <button type="button" @click="showQris = false" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Tutup">
+                    <button type="button" @click="showQris = false" class="absolute right-2 top-2 rounded-lg p-2.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" aria-label="Tutup">
                         <IconifyIcon icon="lucide:x" width="22" />
                     </button>
                     <h2 id="qris-title" class="text-lg font-semibold text-gray-900 dark:text-white">Bayar dengan QRIS</h2>
@@ -580,7 +581,7 @@
                         </p>
                     </div>
 
-                    <a :href="order.manual_qris_image" :download="`QRIS-${order.order_number}.webp`" class="mt-3 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                    <a :href="order.manual_qris_image" :download="`QRIS-${order.order_number}.webp`" class="mt-1 inline-flex min-h-[44px] items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
                         Unduh gambar QRIS
                     </a>
 

@@ -195,7 +195,7 @@
                             :href="`https://wa.me/${$page.props.settings?.contact?.whatsapp || '6281234567890'}`"
                             target="_blank"
                             rel="noopener"
-                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-green-600 px-2 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 sm:px-6 sm:text-base"
+                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-green-700 px-2 py-3 text-sm font-medium text-white transition-colors hover:bg-green-800 sm:px-6 sm:text-base"
                         >
                             <IconifyIcon icon="simple-icons:whatsapp" width="18" class="shrink-0" />
                             WhatsApp

@@ -1,50 +1,36 @@
 <template>
-    <Link 
-        :href="route('products.show', { slug: product.slug })" 
-        class="flex group"
+    <Link
+        :href="route('products.show', { slug: product.slug })"
+        class="group flex"
     >
-        <div class="relative p-0 mt-16 shadow-none card dark:from-gray-800/80 dark:to-gray-800/30 dark:bg-gradient-to-t rounded-2xl">
-            <!-- Product Image -->
-            <div class="relative flex items-center justify-center transition-all duration-500 rounded-t-xl">
-                <div class="w-full mx-3 -mt-16 bg-white shadow-lg animate-fade-in-fast shadow-gray-500/25 lg:mx-4 xl:mx-5 dark:from-gray-800/80 dark:to-bluegray dark:bg-gradient-to-t rounded-2xl">
-                    <img 
-                        loading="lazy"
-                        decoding="async"
-                        :src="product.image" 
-                        :alt="product.name" 
-                        class="aspect-video w-full object-cover rounded-2xl"
-                        @error="handleImageError"
-                    />
-                </div>
-            </div>
+        <div
+            class="card flex w-full flex-col overflow-hidden rounded-2xl transition-shadow duration-200 group-hover:shadow-md"
+            :class="{ 'opacity-75': isOutOfStock }"
+        >
+            <img
+                loading="lazy"
+                decoding="async"
+                :src="product.image"
+                :alt="product.name"
+                width="640"
+                height="360"
+                class="aspect-video w-full object-cover"
+                :class="{ grayscale: isOutOfStock }"
+                @error="handleImageError"
+            />
 
-            <!-- Stock Status -->
-            <div class="relative w-full text-xs transition-all duration-500 flex justify-center mt-2">
-                <span 
-                    :class="stockStatusClass"
-                    class="px-3 py-1 text-white rounded-lg animate-slit-in-horizontal-fast"
-                >
+            <div class="flex flex-1 flex-col items-center px-3 pt-3 pb-5 text-center">
+                <span :class="stockStatusClass" class="rounded-md px-2.5 py-0.5 text-xs font-medium text-white">
                     {{ stockStatusText }}
                 </span>
-            </div>
-
-            <!-- Product Info -->
-            <div class="relative px-3 pt-2 pb-5 rounded-b-xl">
-                <!-- Category -->
-                <div class="text-xs font-light text-center text-gray-600 md:text-sm dark:text-gray-300/80">
+                <div class="mt-2 text-xs text-gray-600 md:text-sm dark:text-gray-300">
                     {{ product.category }}
                 </div>
-
-                <!-- Product Name -->
-                <div class="text-sm font-medium leading-5 text-center capitalize md:text-base dark:text-gray-100">
+                <h3 class="text-sm font-medium leading-5 text-gray-900 md:text-base dark:text-gray-100">
                     {{ product.name }}
-                </div>
-                
-                <!-- Price -->
-                <div v-if="product.min_price" class="text-center mt-2">
-                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                        Mulai {{ formatPrice(product.min_price) }}
-                    </span>
+                </h3>
+                <div v-if="product.min_price" class="mt-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    Mulai {{ formatPrice(product.min_price) }}
                 </div>
             </div>
         </div>
@@ -60,17 +46,16 @@ const props = defineProps({
     product: Object,
 })
 
+const isOutOfStock = computed(() => props.product.stock_status === 'out_of_stock')
+
 const stockStatusClass = computed(() => {
     switch (props.product.stock_status) {
-        case 'in_stock':
-        case 'unlimited':
-            return 'bg-blue-500'
         case 'low_stock':
-            return 'bg-yellow-500'
+            return 'bg-amber-700'
         case 'out_of_stock':
-            return 'bg-red-500'
+            return 'bg-red-600'
         default:
-            return 'bg-blue-500'
+            return 'bg-blue-600'
     }
 })
 

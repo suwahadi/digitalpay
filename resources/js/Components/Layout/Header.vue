@@ -24,7 +24,7 @@
                         class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
                         :class="{ 'text-blue-600 dark:text-blue-400': $page.url === '/' }"
                     >
-                        Home
+                        Beranda
                     </Link>
                     <Link 
                         href="/products" 

@@ -112,7 +112,7 @@
                             <div class="flex items-center justify-between">
                                 <Link
                                     :href="article.url"
-                                    class="text-blue-600 hover:text-blue-700 font-semibold text-sm inline-flex items-center"
+                                    class="inline-flex min-h-[44px] items-center text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                                 >
                                     Baca Selengkapnya
                                     <IconifyIcon icon="lucide:arrow-right" width="16" class="ml-1" />

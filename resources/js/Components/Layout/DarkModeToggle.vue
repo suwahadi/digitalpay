@@ -1,13 +1,14 @@
 <template>
     <button
+        type="button"
         @click="toggleDarkMode"
         class="btn-icon"
-        :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        :aria-label="isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'"
+        :title="isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'"
     >
-        <IconifyIcon 
-            :icon="isDark ? 'lucide:sun' : 'lucide:moon'" 
-            width="18" 
-        />
+        <span :key="isDark ? 'sun' : 'moon'" class="inline-flex">
+            <IconifyIcon :icon="isDark ? 'lucide:sun' : 'lucide:moon'" width="18" />
+        </span>
     </button>
 </template>
 
@@ -29,7 +30,6 @@ const toggleDarkMode = () => {
 }
 
 onMounted(() => {
-    // Check for saved theme preference or default to light mode
     const savedTheme = localStorage.getItem('theme')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     
