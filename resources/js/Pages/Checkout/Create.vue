@@ -408,87 +408,107 @@
                         >
                             <div 
                                 v-if="showConfirmationModal"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="confirm-order-title"
                                 class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6"
                             >
-                                <div class="text-center mb-6">
-                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 mb-4">
+                                <div class="text-center mb-5">
+                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 mb-3">
                                         <IconifyIcon icon="lucide:receipt" width="24" class="text-blue-600 dark:text-blue-400" />
                                     </div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                        Rincian Pembayaran
+                                    <h3 id="confirm-order-title" class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Data Sudah Benar?
                                     </h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Pastikan data pesanan Anda sudah benar
-                                    </p>
                                 </div>
-                                
+
                                 <!-- Order Details -->
-                                <div class="space-y-4 mb-6">
-                                    <!-- Subtotal -->
-                                    <div class="flex justify-between text-sm">
+                                <div class="space-y-2 mb-4 text-sm">
+                                    <div class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Subtotal:</span>
                                         <span class="font-medium text-gray-900 dark:text-white">{{ formatPrice(selectedVariant.price) }}</span>
                                     </div>
-                                    
-                                    <!-- Voucher Discount -->
-                                    <div v-if="calculateVoucherDiscount() > 0" class="flex justify-between text-sm">
+
+                                    <div v-if="calculateVoucherDiscount() > 0" class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Voucher Diskon:</span>
                                         <span class="font-medium text-green-600 dark:text-green-400">-{{ formatPrice(calculateVoucherDiscount()) }}</span>
                                     </div>
-                                    
-                                    <!-- Admin Fee -->
-                                    <div class="flex justify-between text-sm">
+
+                                    <div class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Fee Platform:</span>
                                         <span class="font-medium text-gray-900 dark:text-white">{{ formatPrice(calculatePaymentFee()) }}</span>
                                     </div>
-                                    
-                                    <!-- Total -->
-                                    <div class="flex justify-between text-lg font-semibold pt-2 border-t dark:border-gray-700">
+
+                                    <div class="flex justify-between items-baseline text-lg font-semibold pt-2 border-t dark:border-gray-700">
                                         <span class="text-gray-900 dark:text-white">Total Bayar:</span>
                                         <span class="text-blue-600 dark:text-blue-400">{{ formatPrice(calculateTotal()) }}</span>
                                     </div>
-                                    
-                                    <!-- Payment Method -->
-                                    <div class="flex justify-between text-sm pt-2">
+
+                                    <div class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Metode Pembayaran:</span>
                                         <span class="font-medium text-gray-900 dark:text-white">{{ selectedPaymentMethod?.name }}</span>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Contact Information -->
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
-                                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Informasi Kontak:</h4>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600 dark:text-gray-400">Nama:</span>
-                                            <span class="text-gray-900 dark:text-white">{{ form.customer_name }}</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600 dark:text-gray-400">Email:</span>
-                                            <span class="text-gray-900 dark:text-white">{{ form.customer_email }}</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600 dark:text-gray-400">Phone:</span>
-                                            <span class="text-gray-900 dark:text-white">{{ form.customer_phone }}</span>
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg mb-5">
+                                    <button
+                                        type="button"
+                                        class="w-full min-h-[44px] flex items-center justify-between px-4 text-sm font-medium text-gray-900 dark:text-white rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                        :aria-expanded="showContactInfo"
+                                        aria-controls="confirm-contact-info"
+                                        @click="showContactInfo = !showContactInfo"
+                                    >
+                                        <span>Informasi Kontak</span>
+                                        <span
+                                            class="flex text-gray-500 dark:text-gray-400 transition-transform duration-200 motion-reduce:transition-none"
+                                            :class="{ 'rotate-180': showContactInfo }"
+                                        >
+                                            <IconifyIcon icon="lucide:chevron-down" width="18" />
+                                        </span>
+                                    </button>
+                                    <div
+                                        id="confirm-contact-info"
+                                        class="grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none"
+                                        :class="showContactInfo ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
+                                        :inert="!showContactInfo || undefined"
+                                    >
+                                        <div class="min-h-0 overflow-hidden">
+                                            <div class="space-y-1.5 text-sm px-4 pb-3">
+                                                <div class="flex justify-between gap-3">
+                                                    <span class="text-gray-600 dark:text-gray-400">Nama:</span>
+                                                    <span class="text-gray-900 dark:text-white text-right break-all">{{ form.customer_name }}</span>
+                                                </div>
+                                                <div class="flex justify-between gap-3">
+                                                    <span class="text-gray-600 dark:text-gray-400">Email:</span>
+                                                    <span class="text-gray-900 dark:text-white text-right break-all">{{ form.customer_email }}</span>
+                                                </div>
+                                                <div class="flex justify-between gap-3">
+                                                    <span class="text-gray-600 dark:text-gray-400">Phone:</span>
+                                                    <span class="text-gray-900 dark:text-white text-right break-all">{{ form.customer_phone }}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Action Buttons -->
-                                <div class="flex space-x-3">
+                                <div class="flex gap-3">
                                     <button
+                                        type="button"
                                         @click="closeConfirmationModal"
-                                        class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        class="flex-1 min-h-[44px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     >
                                         Batal
                                     </button>
                                     <button
+                                        type="button"
                                         @click="confirmOrder"
                                         :disabled="processing"
-                                        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                                        class="flex-1 min-h-[44px] px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                                     >
                                         <IconifyIcon v-if="processing" icon="lucide:loader-2" width="16" class="animate-spin" />
-                                        <span>{{ processing ? 'Memproses...' : 'Konfirmasi' }}</span>
+                                        <span>{{ processing ? 'Memproses...' : 'Sudah Benar' }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -552,7 +572,6 @@ onMounted(() => {
             },
             onError: (error) => {
                 console.error('Error redirecting:', error)
-                // Fallback: use window.location if router fails
                 window.location.href = '/'
             }
         })
@@ -573,6 +592,7 @@ const form = ref({
 
 const processing = ref(false)
 const showConfirmationModal = ref(false)
+const showContactInfo = ref(false)
 const voucherCode = ref('')
 const appliedVoucher = ref(null)
 const showVoucherModal = ref(false)
@@ -737,6 +757,7 @@ const formatPrice = (price) => {
 const submitOrder = () => {
     if (!canSubmit.value || processing.value) return
 
+    showContactInfo.value = false
     showConfirmationModal.value = true
 }
 
