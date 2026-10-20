@@ -18,7 +18,7 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => 'Apakah layanan ini aman dan terpercaya?',
-                'answer' => 'Ya, kami adalah platform yang aman dan terpercaya. Kami telah melayani ribuan transaksi dengan tingkat kepuasan customer yang tinggi.',
+                'answer' => 'Ya, kami adalah platform yang aman dan terpercaya. Kami telah melayani ratusan transaksi dengan tingkat kepuasan customer yang tinggi.',
                 'category' => 'Keamanan',
                 'sort_order' => 2,
             ],
@@ -54,7 +54,7 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => 'Bagaimana cara menghubungi customer service?',
-                'answer' => 'Anda bisa menghubungi customer service kami melalui WhatsApp, Telegram, atau live chat di website. Layanan customer service tersedia 24/7 untuk membantu Anda.',
+                'answer' => 'Anda bisa menghubungi customer service kami melalui WhatsApp atau email ke admin@digitalpay.web.id. Layanan customer service tersedia 24/7 untuk membantu Anda.',
                 'category' => 'Customer Service',
                 'sort_order' => 8,
             ],
