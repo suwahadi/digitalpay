@@ -40,7 +40,8 @@
             max-width: 480px;
             text-align: center;
         }
-        .logo { height: 40px; margin-bottom: 32px; }
+        .logo-link { display: inline-block; margin-bottom: 32px; }
+        .logo { display: block; height: 40px; }
         .code {
             font-size: clamp(72px, 22vw, 120px);
             font-weight: 700;
@@ -71,7 +72,7 @@
 </head>
 <body>
     <main class="card">
-        <a href="/"><img class="logo" src="{{ \App\Helpers\ConfigHelper::siteLogo() }}" alt="{{ \App\Helpers\ConfigHelper::siteName() }}" onerror="this.onerror=null;this.src='/images/logo.png'"></a>
+        <a href="/" class="logo-link"><img class="logo" src="{{ \App\Helpers\ConfigHelper::siteLogo() }}" alt="{{ \App\Helpers\ConfigHelper::siteName() }}" onerror="this.onerror=null;this.src='/images/logo.png'"></a>
         <div class="code">404</div>
         <h1>Halaman tidak ditemukan</h1>
         <p>Halaman yang kamu cari mungkin sudah dipindahkan atau tidak pernah ada. Yuk kembali dan lanjutkan dari sini.</p>

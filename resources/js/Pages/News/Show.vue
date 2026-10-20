@@ -11,7 +11,7 @@
                         <ol class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                             <li>
                                 <Link href="/" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                    Home
+                                    Beranda
                                 </Link>
                             </li>
                             <li class="text-gray-400">/</li>
