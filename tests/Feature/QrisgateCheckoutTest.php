@@ -44,7 +44,7 @@ class QrisgateCheckoutTest extends TestCase
             'category_id' => $category->id, 'name' => 'Produk', 'slug' => 'produk', 'is_active' => true,
         ]);
         $this->variant = ProductVariant::create([
-            'product_id' => $product->id, 'name' => 'Paket', 'price' => 100000, 'is_active' => true,
+            'product_id' => $product->id, 'name' => 'Paket', 'price' => 100000, 'is_active' => true, 'delivery_type' => 'manual',
         ]);
         $this->qris = PaymentMethod::create([
             'code' => 'qris', 'name' => 'QRIS', 'type' => 'qris', 'provider' => 'midtrans',

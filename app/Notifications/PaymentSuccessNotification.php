@@ -72,8 +72,7 @@ class PaymentSuccessNotification extends Notification implements ShouldQueue
                     'total' => $item->quantity * $item->price,
                     'formatted_price' => 'Rp ' . number_format($item->price, 0, ',', '.'),
                     'formatted_total' => 'Rp ' . number_format($item->quantity * $item->price, 0, ',', '.'),
-                    'is_digital' => $item->productVariant?->product?->is_digital ?? false,
-                    'auto_delivery' => $item->productVariant?->auto_delivery ?? false,
+                    'auto_delivery' => (bool) $item->productVariant?->isAutoDelivery(),
                 ];
             })->toArray(),
             'subtotal' => $this->order->subtotal,

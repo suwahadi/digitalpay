@@ -48,7 +48,7 @@
     @if($needs_manual_delivery)
     <div class="alert alert-warning">
         <p style="margin: 0;"><strong>Perlu Pengiriman Manual</strong></p>
-        <p style="margin: 5px 0 0 0;">Pesanan ini berisi produk yang harus dikirim manual oleh admin.</p>
+        <p style="margin: 5px 0 0 0;">Pesanan ini harus dikirim manual oleh admin (varian manual atau stok otomatis habis). Buka pesanan lalu tekan Kirim Manual.</p>
     </div>
     @endif
 

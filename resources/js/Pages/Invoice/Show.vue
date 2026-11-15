@@ -150,9 +150,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div>
-                                        <h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">File Digital Sedang Diproses...</h3>
+                                        <h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">{{ order.needs_manual_delivery ? 'Pesanan Sedang Diproses Admin' : 'File Digital Sedang Diproses...' }}</h3>
                                         <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
-                                            Pembayaran Anda telah berhasil! File digital sedang diproses dan akan tersedia dalam beberapa saat.
+                                            {{ order.needs_manual_delivery
+                                                ? 'Pembayaran Anda telah berhasil! Admin sedang menyiapkan produk Anda dan akan mengirimkannya ke halaman ini serta email Anda.'
+                                                : 'Pembayaran Anda telah berhasil! File digital sedang diproses dan akan tersedia dalam beberapa saat.' }}
                                         </p>
                                         <button @click="refreshDeliveries" 
                                                 class="inline-flex items-center px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-md text-sm font-medium text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/50 hover:bg-yellow-200 dark:hover:bg-yellow-900/70 transition-colors">

@@ -22,7 +22,6 @@ class InvoiceController extends Controller
         try {
             $order = Order::with([
                 'orderItems.productVariant.product',
-                'orderItems.productVariant.digitalStocks',
                 'paymentMethod',
                 'payment'
             ])->where('order_number', $orderNumber)->firstOrFail();
@@ -48,7 +47,7 @@ class InvoiceController extends Controller
                         'product' => [
                             'id' => $item->productVariant->product->id,
                             'name' => $item->productVariant->product->name,
-                            'is_digital' => $item->productVariant->product->is_digital ?? false
+                            'is_digital' => true
                         ]
                     ]
                 ];
@@ -92,6 +91,7 @@ class InvoiceController extends Controller
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
                 'unique_code' => $order->unique_code,
+                'needs_manual_delivery' => (bool) $order->needs_manual_delivery,
                 'qris' => $this->qrisPayload($order),
                 'subtotal' => (int) ceil($order->subtotal),
                 'tax_amount' => (int) ceil($order->tax_amount ?? 0),

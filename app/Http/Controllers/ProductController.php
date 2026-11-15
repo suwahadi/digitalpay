@@ -16,17 +16,17 @@ class ProductController extends Controller
         $query = Product::active()->with(['category', 'variants' => function ($q) {
             $q->active()->ordered();
         }]);
-        
+
         if ($request->has('search') && !empty($request->search)) {
             $query->search($request->search);
         }
-        
+
         if ($request->has('category') && !empty($request->category)) {
             $query->whereHas('category', function ($q) use ($request) {
                 $q->where('slug', $request->category);
             });
         }
-        
+
         $sortBy = $request->get('sort', 'recommended');
         switch ($sortBy) {
             case 'price_low':
@@ -46,9 +46,9 @@ class ProductController extends Controller
                 $query->orderBy('sort_order')->orderBy('id');
                 break;
         }
-        
+
         $products = $query->paginate(36)->withQueryString();
-        
+
         $products->getCollection()->transform(function ($product) {
             return [
                 'id' => $product->id,
@@ -64,9 +64,9 @@ class ProductController extends Controller
                 'url' => route('products.show', $product->slug),
             ];
         });
-        
+
         $siteName = ConfigHelper::siteName();
-        
+
         return Inertia::render('Products/Index', [
             'title' => 'Produk - ' . $siteName,
             'products' => $products,
@@ -78,24 +78,24 @@ class ProductController extends Controller
             ],
         ]);
     }
-    
+
     public function byCategory(Category $category, Request $request)
     {
         $request->merge(['category' => $category->slug]);
 
         return $this->index($request);
     }
-    
+
     public function show(Product $product)
     {
         if (!$product->is_active) {
             abort(404);
         }
-        
+
         $product->load(['category', 'variants' => function ($q) {
             $q->active()->ordered();
         }]);
-        
+
         $relatedProducts = Product::active()
             ->where('id', '!=', $product->id)
             ->where('category_id', $product->category_id)
@@ -154,7 +154,7 @@ class ProductController extends Controller
                         'is_active' => $variant->is_active,
                         'sort_order' => $variant->sort_order,
                         'formatted_price' => $variant->formatted_price,
-                        'auto_delivery' => $variant->auto_delivery,
+                        'auto_delivery' => $variant->isAutoDelivery(),
                         'formatted_original_price' => $variant->formatted_original_price,
                         'duration_text' => $variant->duration_text,
                     ];
@@ -179,7 +179,7 @@ class ProductController extends Controller
             ],
         ]);
     }
-    
+
     public function popular()
     {
         try {
@@ -203,14 +203,14 @@ class ProductController extends Controller
                         'url' => route('products.show', $product->slug),
                     ];
                 });
-                
+
             return response()->json($products);
         } catch (\Exception $e) {
             report($e);
             return response()->json([]);
         }
     }
-    
+
     public function featured()
     {
         try {
@@ -234,14 +234,14 @@ class ProductController extends Controller
                         'url' => route('products.show', $product->slug),
                     ];
                 });
-                
+
             return response()->json($products);
         } catch (\Exception $e) {
             report($e);
             return response()->json([]);
         }
     }
-    
+
     public function groupedByCategory()
     {
         try {
@@ -276,14 +276,14 @@ class ProductController extends Controller
                         }),
                     ];
                 });
-                
+
             return response()->json($categories);
         } catch (\Exception $e) {
             report($e);
             return response()->json([]);
         }
     }
-    
+
     private function getCategories()
     {
         try {
@@ -302,16 +302,16 @@ class ProductController extends Controller
             return [];
         }
     }
-    
+
     public function search(Request $request)
     {
         try {
             $query = $request->get('q', '');
-            
+
             if (empty($query) || strlen($query) < 2) {
                 return response()->json(['products' => []]);
             }
-            
+
             $products = Product::active()
                 ->search($query)
                 ->with(['category', 'variants' => function ($q) {
@@ -333,7 +333,7 @@ class ProductController extends Controller
                         'url' => route('products.show', $product->slug),
                     ];
                 });
-                
+
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
             report($e);

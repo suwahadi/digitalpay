@@ -35,8 +35,6 @@ class Product extends BaseModel
         'is_featured',
         'is_active',
         'sort_order',
-        'is_digital',
-        'digital_instructions',
     ];
 
     protected static function boot()
@@ -57,7 +55,6 @@ class Product extends BaseModel
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
-            'is_digital' => 'boolean',
         ];
     }
 
@@ -116,9 +113,6 @@ class Product extends BaseModel
         return '/images/placeholder.png';
     }
 
-    /**
-     * A 640px copy for cards and lists; the product page keeps the full image.
-     */
     public function getThumbUrlAttribute(): string
     {
         if (!$this->image || str_starts_with($this->image, '/') || str_starts_with($this->image, 'http')) {
@@ -147,31 +141,30 @@ class Product extends BaseModel
     public function getDiscountPercentageAttribute(): ?float
     {
         $variant = $this->variants()->first();
-        
+
         if ($variant && $variant->original_price > $variant->price) {
             return round((($variant->original_price - $variant->price) / $variant->original_price) * 100);
         }
-        
+
         return null;
     }
 
     public function getStockStatusAttribute(): string
     {
-        $variants = $this->variants()->where('is_active', true);
+        $stocks = $this->variants()->where('is_active', true)->withAvailableStockCount()->get()
+            ->map(fn (ProductVariant $variant) => $variant->availableStock());
 
-        if ((clone $variants)->whereNull('stock_quantity')->exists()) {
+        if ($stocks->containsStrict(null)) {
             return 'unlimited';
         }
 
-        $totalStock = $variants->sum('stock_quantity');
+        $total = $stocks->sum();
 
-        if ($totalStock > 10) {
+        if ($total > 10) {
             return 'in_stock';
-        } elseif ($totalStock > 0) {
-            return 'low_stock';
-        } else {
-            return 'out_of_stock';
         }
+
+        return $total > 0 ? 'low_stock' : 'out_of_stock';
     }
 
     public function getSeoTitleAttribute(): string
@@ -185,47 +178,4 @@ class Product extends BaseModel
             ?: $this->short_description
             ?: Str::limit(trim(strip_tags((string) $this->description)), 160, '');
     }
-
-    public function isDigital(): bool
-    {
-        return $this->is_digital === true;
-    }
-
-    /**
-     * Get digital template for this product
-     */
-    public function getDigitalTemplate(): ?string
-    {
-        if (!$this->isDigital()) {
-            return null;
-        }
-        
-        return $this->digital_instructions;
-    }
-
-    /**
-     * Get variants that have digital stock
-     */
-    public function digitalVariants()
-    {
-        return $this->variants()
-            ->where('auto_delivery', true);
-    }
-
-    /**
-     * Scope untuk produk digital
-     */
-    public function scopeDigital($query)
-    {
-        return $query->where('is_digital', true);
-    }
-
-    /**
-     * Scope untuk produk fisik
-     */
-    public function scopePhysical($query)
-    {
-        return $query->where('is_digital', false);
-    }
-
 }

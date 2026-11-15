@@ -9,6 +9,10 @@ use App\Models\DigitalStock;
 
 class ProductVariant extends Model
 {
+    public const DELIVERY_AUTO = 'auto';
+
+    public const DELIVERY_MANUAL = 'manual';
+
     protected $fillable = [
         'product_id',
         'name',
@@ -18,9 +22,9 @@ class ProductVariant extends Model
         'duration_days',
         'stock_quantity',
         'is_active',
-        'auto_delivery',
+        'delivery_type',
         'sort_order',
-        'max_downloads', 
+        'max_downloads',
         'download_expiry_hours',
         'delivery_template',
     ];
@@ -34,7 +38,6 @@ class ProductVariant extends Model
             'stock_quantity' => 'integer',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
-            'auto_delivery' => 'boolean',
         ];
     }
 
@@ -56,9 +59,19 @@ class ProductVariant extends Model
     public function scopeInStock($query)
     {
         return $query->where(function ($q) {
-            $q->whereNull('stock_quantity')
-              ->orWhere('stock_quantity', '>', 0);
+            $q->where(function ($manual) {
+                $manual->where('delivery_type', self::DELIVERY_MANUAL)
+                    ->where(fn ($qty) => $qty->whereNull('stock_quantity')->orWhere('stock_quantity', '>', 0));
+            })->orWhere(function ($auto) {
+                $auto->where('delivery_type', self::DELIVERY_AUTO)
+                    ->whereHas('digitalStocks', fn ($stock) => $stock->usable());
+            });
         });
+    }
+
+    public function scopeWithAvailableStockCount($query)
+    {
+        return $query->withCount(['digitalStocks as available_stock_count' => fn ($stock) => $stock->usable()]);
     }
 
     public function scopeOrdered($query)
@@ -81,7 +94,7 @@ class ProductVariant extends Model
         if ($this->original_price && $this->original_price > $this->price) {
             return round((($this->original_price - $this->price) / $this->original_price) * 100);
         }
-        
+
         return null;
     }
 
@@ -90,17 +103,34 @@ class ProductVariant extends Model
         return $this->original_price ? ($this->original_price - $this->price) : 0;
     }
 
+    public function isAutoDelivery(): bool
+    {
+        return $this->delivery_type === self::DELIVERY_AUTO;
+    }
+
+    public function isManualDelivery(): bool
+    {
+        return $this->delivery_type === self::DELIVERY_MANUAL;
+    }
+
+    public function availableStock(): ?int
+    {
+        if ($this->isAutoDelivery()) {
+            return $this->available_stock_count;
+        }
+
+        return $this->stock_quantity === null ? null : (int) $this->stock_quantity;
+    }
+
     public function getStockStatusAttribute(): string
     {
-        if ($this->stock_quantity === null) {
+        $stock = $this->availableStock();
+
+        if ($stock === null || $stock > 10) {
             return 'Tersedia';
-        } elseif ($this->stock_quantity > 10) {
-            return 'Tersedia';
-        } elseif ($this->stock_quantity > 0) {
-            return "Tersisa {$this->stock_quantity}";
-        } else {
-            return 'Habis';
         }
+
+        return $stock > 0 ? "Tersisa {$stock}" : 'Habis';
     }
 
     public function getDurationTextAttribute(): string
@@ -108,7 +138,7 @@ class ProductVariant extends Model
         if (!$this->duration_days) {
             return 'Lifetime';
         }
-        
+
         if ($this->duration_days >= 365) {
             $years = floor($this->duration_days / 365);
             return $years . ' Tahun';
@@ -122,21 +152,20 @@ class ProductVariant extends Model
 
     public function isInStock(): bool
     {
-        return $this->stock_quantity === null || $this->stock_quantity > 0;
+        $stock = $this->availableStock();
+
+        return $stock === null || $stock > 0;
     }
 
     public function decrementStock(int $quantity = 1): bool
     {
-        if ($this->stock_quantity === null) {
+        if ($this->isAutoDelivery() || $this->stock_quantity === null) {
             return true;
         }
-        
-        if ($this->stock_quantity >= $quantity) {
-            $this->decrement('stock_quantity', $quantity);
-            return true;
-        }
-        
-        return false;
+
+        return static::whereKey($this->getKey())
+            ->where('stock_quantity', '>=', $quantity)
+            ->decrement('stock_quantity', $quantity) > 0;
     }
 
     public function digitalStocks()
@@ -144,54 +173,27 @@ class ProductVariant extends Model
         return $this->hasMany(DigitalStock::class);
     }
 
-    /**
-     * Get available digital stock count
-     */
-    public function getAvailableStockCountAttribute(): int
+    public function getAvailableStockCountAttribute($value): int
     {
-        return $this->digitalStocks()
-                    ->where('status', DigitalStock::STATUS_AVAILABLE)
-                    ->count();
+        return $value ?? $this->digitalStocks()->usable()->count();
     }
 
-    /**
-     * Check if has available stock
-     */
     public function hasAvailableStock(): bool
     {
         return $this->available_stock_count > 0;
     }
 
-    /**
-     * Check if auto delivery enabled
-     */
-    public function hasAutoDelivery(): bool
-    {
-        return $this->auto_delivery === true;
-    }
-
-    /**
-     * Get next available stock
-     */
     public function getNextAvailableStock(bool $lock = false): ?DigitalStock
     {
         return $this->digitalStocks()
-            ->where('status', 'available')
-            ->where(function($q) {
-                $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
-            })
+            ->usable()
             ->orderBy('added_at', 'asc')
             ->when($lock, fn($q) => $q->lockForUpdate())
             ->first();
     }
 
-    /**
-     * Get delivery template (from variant or product)
-     */
     public function getDeliveryTemplate(): ?string
     {
-        return $this->delivery_template ?? $this->product->digital_instructions;
+        return $this->delivery_template;
     }
-
 }

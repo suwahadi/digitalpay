@@ -11,12 +11,10 @@ class ManualDeliveryProductSeeder extends Seeder
 {
     public function run()
     {
-        // Update existing YouTube Premium 3 Bulan variant (ID 17 dari database) 
-        // yang sudah ada auto_delivery = 0
         $existingVariant = ProductVariant::find(17);
         if ($existingVariant) {
             $this->command->info('✅ YouTube Premium 3 Bulan variant already exists with manual delivery');
-            
+
             $this->createDigitalStocks($existingVariant, 'YouTube Premium Manual');
         }
 
@@ -32,7 +30,7 @@ class ManualDeliveryProductSeeder extends Seeder
                 'max_users' => 2,
                 'stock_quantity' => null,
                 'is_active' => true,
-                'auto_delivery' => false,
+                'delivery_type' => ProductVariant::DELIVERY_MANUAL,
                 'max_downloads' => 5,
                 'download_expiry_hours' => 168,
                 'delivery_template' => '=== MANUAL DELIVERY ===
@@ -69,7 +67,7 @@ Terima kasih telah berbelanja!',
     private function createDigitalStocks(ProductVariant $variant, string $prefix): void
     {
         $existingCount = DigitalStock::where('product_variant_id', $variant->id)->count();
-        
+
         if ($existingCount > 0) {
             $this->command->info("   - {$prefix} already has {$existingCount} stocks");
             return;

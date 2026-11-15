@@ -21,6 +21,7 @@ class DigitalStock extends Model
         'assigned_at',
         'assigned_to_order_item_id',
         'delivered_at',
+        'expires_at',
     ];
 
     protected $casts = [
@@ -28,67 +29,50 @@ class DigitalStock extends Model
         'added_at' => 'datetime',
         'assigned_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
-    // Konstanta untuk status
     const STATUS_AVAILABLE = 'available';
     const STATUS_RESERVED = 'reserved';
     const STATUS_DELIVERED = 'delivered';
     const STATUS_EXPIRED = 'expired';
 
-    /**
-     * Relationship ke ProductVariant
-     * Satu stock belong to satu product variant
-     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
     }
 
-    /**
-     * Relationship ke User (admin yang menambahkan stock)
-     */
     public function addedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'added_by_user_id');
     }
 
-    /**
-     * Relationship ke OrderItem (order yang menggunakan stock ini)
-     */
     public function assignedToOrderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class, 'assigned_to_order_item_id');
     }
 
-    /**
-     * Relationship ke DigitalDelivery
-     * Satu stock bisa punya banyak delivery attempts (jika gagal)
-     */
     public function digitalDeliveries(): HasMany
     {
         return $this->hasMany(DigitalDelivery::class);
     }
 
-    /**
-     * Scope untuk mengambil stock yang available
-     */
     public function scopeAvailable($query)
     {
         return $query->where('status', self::STATUS_AVAILABLE);
     }
 
-    /**
-     * Scope untuk mengambil stock dari variant tertentu
-     */
+    public function scopeUsable($query)
+    {
+        return $query->where('status', self::STATUS_AVAILABLE)
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+    }
+
     public function scopeForVariant($query, $variantId)
     {
         return $query->where('product_variant_id', $variantId);
     }
 
-    /**
-     * Method untuk assign stock ke order item
-     */
     public function assignToOrderItem(OrderItem $orderItem): bool
     {
         if ($this->status !== self::STATUS_AVAILABLE) {
@@ -104,9 +88,6 @@ class DigitalStock extends Model
         return true;
     }
 
-    /**
-     * Method untuk mark stock sebagai delivered
-     */
     public function markAsDelivered(): void
     {
         $this->update([
@@ -115,26 +96,20 @@ class DigitalStock extends Model
         ]);
     }
 
-    /**
-     * Check apakah stock masih valid (belum expired)
-     */
     public function isValid()
     {
         return $this->status === 'available';
     }
 
-    /**
-     * Get formatted stock data untuk display
-     */
     public function getFormattedStockDataAttribute(): string
     {
         $data = $this->stock_data;
         $formatted = [];
-        
+
         foreach ($data as $key => $value) {
             $formatted[] = ucfirst($key) . ': ' . $value;
         }
-        
+
         return implode("\n", $formatted);
     }
 }

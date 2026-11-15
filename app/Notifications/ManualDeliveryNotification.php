@@ -15,32 +15,22 @@ class ManualDeliveryNotification extends Notification implements ShouldQueue
 
     protected Order $order;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Order $order)
     {
         $this->order = $order;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(object $notifiable): array
     {
-        // Only use database channel for User model, not for GuestUser
         $channels = ['brevo'];
-        
+
         if ($notifiable instanceof User) {
             $channels[] = 'database';
         }
-        
+
         return $channels;
     }
 
-    /**
-     * Get the array representation of the notification for database.
-     */
     public function toDatabase(object $notifiable): array
     {
         return [
@@ -50,30 +40,24 @@ class ManualDeliveryNotification extends Notification implements ShouldQueue
         ];
     }
 
-    /**
-     * Send notification via Brevo
-     */
     public function toBrevo(object $notifiable): bool
     {
         $brevoService = app(BrevoService::class);
-        
+
         $orderData = $this->prepareOrderData();
-        
+
         $result = $brevoService->sendManualDeliveryNotification($orderData);
-        
+
         return $result['success'] ?? false;
     }
 
-    /**
-     * Prepare order data for email
-     */
     protected function prepareOrderData(): array
     {
         $this->order->load([
             'items.productVariant.product',
             'items.digitalDelivery.digitalStock'
         ]);
-        
+
         return [
             'order_number' => $this->order->order_number,
             'customer_name' => $this->order->customer_name,
@@ -84,18 +68,18 @@ class ManualDeliveryNotification extends Notification implements ShouldQueue
             'delivery_date' => now()->translatedFormat('d M Y H:i'),
             'items' => $this->order->items
                 ->filter(function ($item) {
-                    return !($item->productVariant?->auto_delivery ?? true);
+                    return (bool) $item->productVariant?->isManualDelivery();
                 })
                 ->map(function ($item) {
                     $delivery = $item->digitalDelivery;
                     $digitalCode = null;
-                    
+
                     if ($delivery && $delivery->delivery_trigger === 'manual' && $delivery->delivery_content) {
                         $digitalCode = $delivery->delivery_content;
                     } else {
                         $digitalCode = 'Produk sedang diproses...';
                     }
-                    
+
                     return [
                         'product_name' => $item->product_name,
                         'variant_name' => $item->variant_name,

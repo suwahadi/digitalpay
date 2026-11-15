@@ -288,7 +288,7 @@ class Order extends Model
     {
         return $this->orderItems()
             ->whereHas('productVariant', function ($query) {
-                $query->where('auto_delivery', false);
+                $query->where('delivery_type', ProductVariant::DELIVERY_MANUAL);
             })
             ->exists();
     }
@@ -297,7 +297,7 @@ class Order extends Model
     {
         return $this->orderItems()
             ->whereHas('productVariant', function ($query) {
-                $query->where('auto_delivery', true);
+                $query->where('delivery_type', ProductVariant::DELIVERY_AUTO);
             })
             ->exists();
     }

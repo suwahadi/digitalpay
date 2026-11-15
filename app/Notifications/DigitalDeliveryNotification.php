@@ -16,33 +16,23 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
     protected Order $order;
     protected array $deliveryData;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Order $order, array $deliveryData = [])
     {
         $this->order = $order;
         $this->deliveryData = $deliveryData;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(object $notifiable): array
     {
-        // Only use database channel for User model, not for GuestUser
         $channels = ['brevo'];
-        
+
         if ($notifiable instanceof User) {
             $channels[] = 'database';
         }
-        
+
         return $channels;
     }
 
-    /**
-     * Get the array representation of the notification for database.
-     */
     public function toDatabase(object $notifiable): array
     {
         return [
@@ -52,15 +42,12 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
         ];
     }
 
-    /**
-     * Send notification via Brevo
-     */
     public function toBrevo(object $notifiable): bool
     {
         $brevoService = app(BrevoService::class);
-        
+
         $deliveryData = $this->prepareDeliveryData();
-        
+
         $result = $brevoService->sendDigitalDelivery($deliveryData);
 
         if ($result['success'] ?? false) {
@@ -70,16 +57,13 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
         return $result['success'] ?? false;
     }
 
-    /**
-     * Prepare delivery data for email
-     */
     protected function prepareDeliveryData(): array
     {
         $this->order->load([
             'items.productVariant.product',
             'items.digitalDelivery'
         ]);
-        
+
         return [
             'order_number' => $this->order->order_number,
             'customer_name' => $this->order->customer_name,
@@ -88,14 +72,14 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
             'delivery_date' => now()->translatedFormat('d M Y H:i'),
             'items' => $this->order->items
                 ->filter(function ($item) {
-                    return $item->productVariant?->product?->is_digital ?? false;
+                    return $item->digitalDelivery !== null || (bool) $item->productVariant?->isAutoDelivery();
                 })
                 ->map(function ($item) {
                     $digitalCode = 'Akan dikirim terpisah';
                     if ($item->digitalDelivery && $item->digitalDelivery->delivery_content) {
                         $digitalCode = $item->digitalDelivery->delivery_content;
                     }
-                    
+
                     return [
                         'product_name' => $item->product_name,
                         'variant_name' => $item->variant_name,
@@ -109,9 +93,6 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
         ];
     }
 
-    /**
-     * Mark auto-triggered digital deliveries as having their email sent
-     */
     protected function markDeliveriesAsEmailed(): void
     {
         $this->order->loadMissing(['items.digitalDelivery']);

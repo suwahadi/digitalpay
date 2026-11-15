@@ -44,7 +44,6 @@ class GoogleMapsReviewReplySeeder extends Seeder
                 'Termasuk tanggapan untuk ulasan negatif',
                 'Dikerjakan 1-3 hari kerja setelah pembayaran',
             ],
-            'is_digital' => false,
             'is_popular' => false,
             'is_featured' => false,
             'is_active' => true,
@@ -61,7 +60,7 @@ class GoogleMapsReviewReplySeeder extends Seeder
                     'original_price' => null,
                     'stock_quantity' => null,
                     'is_active' => true,
-                    'auto_delivery' => false,
+                    'delivery_type' => ProductVariant::DELIVERY_MANUAL,
                     'sort_order' => $index + 1,
                 ]
             );

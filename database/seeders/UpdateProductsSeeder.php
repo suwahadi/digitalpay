@@ -13,17 +13,17 @@ class UpdateProductsSeeder extends Seeder
     public function run(): void
     {
         $digitalCategory = Category::firstOrCreate([
-            'slug' => 'digital-products'
+            'slug' => 'streaming'
         ], [
-            'name' => 'Digital Products',
-            'description' => 'Produk-produk digital seperti akun premium, software, dll',
+            'name' => 'Streaming',
+            'description' => 'Akun premium layanan streaming film dan serial',
             'icon' => 'fas fa-download',
             'sort_order' => 1,
             'is_active' => true
         ]);
 
         $product = Product::first();
-        
+
         if ($product) {
             $product->update([
                 'category_id' => $digitalCategory->id,
@@ -31,8 +31,6 @@ class UpdateProductsSeeder extends Seeder
                 'slug' => 'netflix-premium-account',
                 'description' => 'Akun Netflix Premium dengan akses penuh ke semua konten dalam kualitas 4K Ultra HD. Nikmati streaming tanpa iklan dengan kualitas terbaik di 4 perangkat secara bersamaan.',
                 'short_description' => 'Netflix Premium 30 hari - 4 Screen - 4K Ultra HD',
-                'is_digital' => true,
-                'digital_instructions' => 'Akun Netflix Premium siap pakai dengan durasi 30 hari. Dapat digunakan untuk streaming di 4 perangkat secara bersamaan dengan kualitas 4K.'
             ]);
 
             $variant = $product->variants()->first();
@@ -42,8 +40,7 @@ class UpdateProductsSeeder extends Seeder
                     'description' => 'Netflix Premium selama 30 hari',
                     'price' => 50000,
                     'duration_days' => 30,
-                    'stock_quantity' => 100,
-                    'auto_delivery' => true,
+                    'delivery_type' => ProductVariant::DELIVERY_AUTO,
                     'max_downloads' => 5,
                     'download_expiry_hours' => 48,
                     'delivery_template' => '=== DIGITAL DELIVERY ===
@@ -92,9 +89,8 @@ Terima kasih telah berbelanja!'
             'price' => 30000,
             'original_price' => 50000,
             'duration_days' => 30,
-            'stock_quantity' => 50,
             'is_active' => true,
-            'auto_delivery' => true,
+            'delivery_type' => ProductVariant::DELIVERY_AUTO,
             'max_downloads' => 3,
             'download_expiry_hours' => 24,
             'sort_order' => 1,
@@ -136,9 +132,8 @@ WhatsApp: +6281234567890'
             'price' => 35000,
             'original_price' => 60000,
             'duration_days' => 30,
-            'stock_quantity' => 30,
             'is_active' => true,
-            'auto_delivery' => true,
+            'delivery_type' => ProductVariant::DELIVERY_AUTO,
             'max_downloads' => 3,
             'download_expiry_hours' => 24,
             'sort_order' => 1

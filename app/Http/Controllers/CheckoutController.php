@@ -122,7 +122,7 @@ class CheckoutController extends Controller
                 'name' => $selectedVariant->name,
                 'price' => $selectedVariant->price,
                 'original_price' => $selectedVariant->original_price,
-                'auto_delivery' => $selectedVariant->auto_delivery,
+                'auto_delivery' => $selectedVariant->isAutoDelivery(),
                 'discount_percentage' => $selectedVariant->discount_percentage,
                 'stock_status' => $selectedVariant->stock_status,
             ],
