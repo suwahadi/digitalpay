@@ -27,15 +27,6 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AdminPanelProvider extends PanelProvider
 {
-    /**
-     * Every image uploaded from the admin panel, including rich editor attachments,
-     * is validated by content and re-encoded to WebP under a server-generated name.
-     * A future non-image FileUpload must override saveUploadedFileUsing() itself.
-     *
-     * Registered as important: plain configureUsing() callbacks run before the
-     * component's setUp(), and FileUpload::setUp() installs its own save callback,
-     * which silently replaced this one and stored uploads unconverted.
-     */
     public function boot(): void
     {
         FileUpload::configureUsing(fn (FileUpload $upload) => $upload
@@ -60,12 +51,6 @@ class AdminPanelProvider extends PanelProvider
             )), isImportant: true);
     }
 
-    /**
-     * Filament sizes the sidebar with h-screen (100vh). Mobile browsers measure
-     * 100vh with the address bar hidden, so while it is showing the bottom of
-     * the sidebar sits off screen and the last menu items cannot be scrolled
-     * into view. 100dvh follows the visible viewport.
-     */
     private const MOBILE_SIDEBAR_CSS = '<style>'
         .'@supports (height: 100dvh){.fi-sidebar{height:100dvh}}'
         .'.fi-sidebar-nav{overscroll-behavior:contain;padding-bottom:calc(2rem + env(safe-area-inset-bottom))}'
@@ -77,6 +62,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->navigationGroups(['Transaksi', 'Katalog', 'Konten', 'Pengguna', 'Sistem'])
             ->login(Login::class)
             ->favicon('/favicon.ico')
             ->colors([

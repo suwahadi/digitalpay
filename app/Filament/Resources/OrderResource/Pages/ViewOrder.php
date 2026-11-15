@@ -24,7 +24,7 @@ class ViewOrder extends ViewRecord
                 ->modalSubmitActionLabel('Kirim ke Pembeli')
                 ->action(function (array $data) {
                     OrderResource::deliverManually($this->record, $data);
-                    $this->record->refresh();
+                    $this->redirect(OrderResource::getUrl('view', ['record' => $this->record]));
                 }),
             Actions\Action::make('mark_paid')
                 ->label('Tandai Lunas')
@@ -37,7 +37,7 @@ class ViewOrder extends ViewRecord
                 ->modalSubmitActionLabel('Ya, tandai lunas')
                 ->action(function () {
                     OrderResource::markPaid($this->record);
-                    $this->record->refresh();
+                    $this->redirect(OrderResource::getUrl('view', ['record' => $this->record]));
                 }),
             Actions\EditAction::make()->label('Ubah'),
         ];
