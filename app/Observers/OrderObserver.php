@@ -48,8 +48,6 @@ class OrderObserver
             } catch (\Exception $e) {
                 report($e);
             }
-
-            $this->notifyAdminPaymentReceived($order);
         }
 
         if ($order->isQrisgate()) {
@@ -82,7 +80,7 @@ class OrderObserver
         }
     }
 
-    protected function notifyAdminPaymentReceived(Order $order): void
+    public function notifyAdminPaymentReceived(Order $order): void
     {
         $adminEmail = ConfigHelper::contactSettings()['email'] ?? null;
 

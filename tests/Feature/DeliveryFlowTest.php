@@ -108,4 +108,41 @@ class DeliveryFlowTest extends TestCase
         $this->assertNotNull($order->fresh()->manual_processed_at);
         Notification::assertSentTimes(ManualDeliveryCompletedNotification::class, 1);
     }
+
+    public function test_admin_email_warns_when_stock_runs_out_between_two_payments(): void
+    {
+        $first = $this->paidOrderFor('auto', null, 1);
+        $variant = $first->orderItems->first()->productVariant;
+
+        $second = Order::forceCreate([
+            'uuid' => (string) Str::uuid(),
+            'order_number' => 'DIG-RACE001',
+            'customer_name' => 'Sari',
+            'customer_email' => 'sari@example.com',
+            'payment_gateway' => Order::QRISGATE,
+            'subtotal' => 10000,
+            'total_amount' => 10000,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+        ]);
+        OrderItem::create([
+            'order_id' => $second->id, 'product_id' => $variant->product_id, 'product_variant_id' => $variant->id,
+            'product_name' => 'Produk', 'variant_name' => 'Paket', 'price' => 10000, 'quantity' => 1, 'total' => 10000,
+        ]);
+        $second->markAsPaidFromGateway(now());
+
+        $this->assertFalse($first->needs_manual_delivery);
+        $this->assertTrue($second->fresh()->needs_manual_delivery);
+
+        $sent = [];
+        Notification::assertSentOnDemand(AdminPaymentReceivedNotification::class, function ($notification) use (&$sent) {
+            $data = $notification->orderData();
+            $sent[$data['order_number']] = $data['needs_manual_delivery'];
+
+            return true;
+        });
+
+        $this->assertFalse($sent[$first->order_number]);
+        $this->assertTrue($sent['DIG-RACE001']);
+    }
 }

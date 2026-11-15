@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
-use App\Models\ProductVariant;
 use App\Services\BrevoService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -55,14 +54,6 @@ class AdminPaymentReceivedNotification extends Notification implements ShouldQue
 
     private function needsManualDelivery(): bool
     {
-        if ($this->order->needs_manual_delivery || $this->order->requiresManualDelivery()) {
-            return true;
-        }
-
-        return $this->order->items()
-            ->whereDoesntHave('digitalDelivery')
-            ->whereHas('productVariant', fn ($q) => $q->where('delivery_type', ProductVariant::DELIVERY_AUTO)
-                ->whereDoesntHave('digitalStocks', fn ($stock) => $stock->usable()))
-            ->exists();
+        return (bool) $this->order->needs_manual_delivery;
     }
 }

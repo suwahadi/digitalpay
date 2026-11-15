@@ -14,7 +14,6 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -119,7 +118,6 @@ class PaymentEmailContentTest extends TestCase
     public function test_admin_email_sent_to_contact_email_when_order_is_paid(): void
     {
         Notification::fake();
-        Queue::fake();
         Setting::set('contact_email', 'owner@digitalpay.web.id');
         $order = $this->order();
 
@@ -134,7 +132,6 @@ class PaymentEmailContentTest extends TestCase
     public function test_admin_email_also_sent_for_midtrans_orders(): void
     {
         Notification::fake();
-        Queue::fake();
         $order = $this->order(['payment_gateway' => 'midtrans']);
 
         $order->updatePaymentStatus('settlement');

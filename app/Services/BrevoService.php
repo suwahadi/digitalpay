@@ -8,6 +8,26 @@ use Exception;
 
 class BrevoService
 {
+    public const SUBJECTS = [
+        'order_confirmation' => 'Konfirmasi Pesanan',
+        'payment_success' => 'Pembayaran Berhasil',
+        'digital_delivery' => 'Pengiriman Digital',
+        'manual_delivery_completed' => 'Produk Digital Anda Telah Dikirim',
+        'order_cancelled' => 'Pesanan Dibatalkan',
+        'order_expired' => 'Pesanan Kedaluwarsa',
+        'admin_payment_received' => 'Pembayaran Masuk',
+        'email_verification' => 'Kode Verifikasi Email',
+        'password_reset' => 'Reset Password',
+        'test' => 'Tes Email',
+    ];
+
+    public static function subject(string $type, ?string $suffix = null): string
+    {
+        $subject = self::SUBJECTS[$type] ?? $type;
+
+        return $suffix ? $subject.' - '.$suffix : $subject;
+    }
+
     protected string $apiKey;
     protected string $apiUrl;
     protected bool $enabled;
@@ -169,7 +189,7 @@ class BrevoService
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
-            'subject' => 'Konfirmasi Pesanan - ' . $orderData['order_number'],
+            'subject' => self::subject('order_confirmation', $orderData['order_number']),
             'html_content' => $htmlContent,
             'tags' => ['order', 'confirmation']
         ]);
@@ -182,7 +202,7 @@ class BrevoService
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
-            'subject' => 'Pembayaran Berhasil - ' . $orderData['order_number'],
+            'subject' => self::subject('payment_success', $orderData['order_number']),
             'html_content' => $htmlContent,
             'tags' => ['order', 'payment', 'success']
         ]);
@@ -195,22 +215,9 @@ class BrevoService
         return $this->sendEmail([
             'to' => $deliveryData['customer_email'],
             'recipient_name' => $deliveryData['customer_name'],
-            'subject' => 'Pengiriman Digital - ' . $deliveryData['order_number'],
+            'subject' => self::subject('digital_delivery', $deliveryData['order_number']),
             'html_content' => $htmlContent,
             'tags' => ['order', 'delivery', 'digital']
-        ]);
-    }
-
-    public function sendManualDeliveryNotification(array $orderData): array
-    {
-        $htmlContent = view('emails.manual-delivery-notification', $orderData)->render();
-
-        return $this->sendEmail([
-            'to' => $orderData['customer_email'],
-            'recipient_name' => $orderData['customer_name'],
-            'subject' => 'Pesanan Anda Sedang Diproses - ' . $orderData['order_number'],
-            'html_content' => $htmlContent,
-            'tags' => ['order', 'manual-delivery', 'notification']
         ]);
     }
 
@@ -221,7 +228,7 @@ class BrevoService
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
-            'subject' => 'Produk Digital Anda Telah Dikirim - ' . $orderData['order_number'],
+            'subject' => self::subject('manual_delivery_completed', $orderData['order_number']),
             'html_content' => $htmlContent,
             'tags' => ['order', 'manual-delivery', 'completed', 'digital']
         ]);
@@ -234,7 +241,7 @@ class BrevoService
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
-            'subject' => 'Pesanan Dibatalkan - ' . $orderData['order_number'],
+            'subject' => self::subject('order_cancelled', $orderData['order_number']),
             'html_content' => $htmlContent,
             'tags' => ['order', 'cancellation']
         ]);
@@ -247,7 +254,7 @@ class BrevoService
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
-            'subject' => 'Pesanan Kedaluwarsa - ' . $orderData['order_number'],
+            'subject' => self::subject('order_expired', $orderData['order_number']),
             'html_content' => $htmlContent,
             'tags' => ['order', 'expired']
         ]);
@@ -260,7 +267,7 @@ class BrevoService
         return $this->sendEmail([
             'to' => $orderData['admin_email'],
             'recipient_name' => 'Admin',
-            'subject' => 'Pembayaran Masuk - '.$orderData['order_number'].' - '.$orderData['formatted_total_amount'],
+            'subject' => self::subject('admin_payment_received', $orderData['order_number'].' - '.$orderData['formatted_total_amount']),
             'html_content' => $htmlContent,
             'tags' => ['admin', 'payment'],
         ]);
@@ -304,7 +311,7 @@ class BrevoService
     {
         return $this->sendEmail([
             'to' => $testEmail,
-            'subject' => 'Test Email from Brevo Integration',
+            'subject' => self::subject('test'),
             'html_content' => '<h1>Test Email</h1><p>This is a test email from your Brevo integration.</p>',
             'tags' => ['test']
         ]);

@@ -9,7 +9,6 @@ use App\Models\DigitalDelivery;
 use App\Models\ProductVariant;
 use App\Models\GuestUser;
 use App\Notifications\DigitalDeliveryNotification;
-use App\Notifications\ManualDeliveryNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -292,21 +291,6 @@ Terima kasih telah berbelanja!';
 
             if ($notifiable) {
                 $notifiable->notify(new DigitalDeliveryNotification($order));
-            }
-        } catch (Exception $e) {
-            report($e);
-        }
-    }
-
-    public function sendManualDeliveryNotification(Order $order): void
-    {
-        try {
-            $notifiable = $order->user_id
-                ? $order->user
-                : new GuestUser($order->customer_email, $order->customer_name, $order->customer_phone);
-
-            if ($notifiable) {
-                $notifiable->notify(new ManualDeliveryNotification($order));
             }
         } catch (Exception $e) {
             report($e);
