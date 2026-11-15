@@ -126,7 +126,7 @@ class QrisgateCheckoutTest extends TestCase
 
         $this->get(route('invoice.show', $order->order_number))
             ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Invoice/Show')
+                ->component('Invoice/Show', false)
                 ->where('order.qris.qr_string', '00020101021226QRTEST6304ABCD')
                 ->where('order.qris.checkout_url', 'https://qrisgate.test/pay/trx_1'));
     }
