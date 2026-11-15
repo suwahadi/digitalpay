@@ -67,6 +67,7 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
 Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::post('/checkout/voucher', [CheckoutController::class, 'checkVoucher'])->middleware('throttle:10,1')->name('checkout.voucher');
 
 Route::prefix('payment')->name('payment.')->middleware('order.access')->group(function () {
     Route::get('/{orderNumber}', [PaymentController::class, 'show'])->name('show');

@@ -71,7 +71,7 @@ class VoucherResource extends Resource
                             ->minValue(0)
                             ->suffix(fn ($get) => $get('discount_type') === 'percentage' ? '%' : 'Rp')
                             ->placeholder('10000 atau 10')
-                            ->helperText(fn ($get) => $get('discount_type') === 'percentage' 
+                            ->helperText(fn ($get) => $get('discount_type') === 'percentage'
                                 ? 'Masukkan persentase disko'
                                 : 'Masukkan nominal diskon')
                             ->columnSpan(1),
@@ -117,6 +117,11 @@ class VoucherResource extends Resource
                             ->default(true)
                             ->helperText('Aktifkan/nonaktifkan voucher')
                             ->columnSpan(1),
+                        Toggle::make('is_public')
+                            ->label('Tampilkan di daftar promo')
+                            ->default(true)
+                            ->helperText('Matikan untuk voucher khusus: tidak tampil di daftar promo, hanya bisa dipakai dengan mengetik kodenya')
+                            ->columnSpan(2),
                     ])->columns(3),
                 ]),
             ]);
@@ -145,9 +150,9 @@ class VoucherResource extends Resource
                     ->color(fn ($state) => $state === 'fixed' ? 'success' : 'warning'),
                 TextColumn::make('discount_value')
                     ->label('Nilai Diskon')
-                    ->formatStateUsing(fn ($state, $record) => 
-                        $record->discount_type === 'percentage' 
-                            ? number_format($state, 0) . '%' 
+                    ->formatStateUsing(fn ($state, $record) =>
+                        $record->discount_type === 'percentage'
+                            ? number_format($state, 0) . '%'
                             : 'Rp ' . number_format($state, 0, ',', '.')
                     )
                     ->sortable(),
@@ -157,13 +162,13 @@ class VoucherResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('usage_stats')
                     ->label('Penggunaan')
-                    ->formatStateUsing(fn ($record) => 
+                    ->formatStateUsing(fn ($record) =>
                         $record->used_count . ' / ' . ($record->usage_limit ?: '∞')
                     )
                     ->badge()
-                    ->color(fn ($record) => 
-                        $record->usage_limit && $record->used_count >= $record->usage_limit 
-                            ? 'danger' 
+                    ->color(fn ($record) =>
+                        $record->usage_limit && $record->used_count >= $record->usage_limit
+                            ? 'danger'
                             : 'success'
                     )->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('expires_at')
@@ -171,7 +176,7 @@ class VoucherResource extends Resource
                     ->dateTime('d M Y')
                     ->formatStateUsing(fn ($state) => $state ? $state->translatedFormat('d M Y') : 'Unlimited')
                     ->badge()
-                    ->color(fn ($state) => 
+                    ->color(fn ($state) =>
                         !$state ? 'gray' : ($state->isPast() ? 'danger' : 'success')
                     )
                     ->sortable()
@@ -183,12 +188,23 @@ class VoucherResource extends Resource
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger'),
+                IconColumn::make('is_public')
+                    ->label('Publik')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-eye')
+                    ->falseIcon('heroicon-o-eye-slash')
+                    ->trueColor('info')
+                    ->falseColor('gray'),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Status')
                     ->trueLabel('Aktif')
                     ->falseLabel('Nonaktif'),
+                Tables\Filters\TernaryFilter::make('is_public')
+                    ->label('Visibilitas')
+                    ->trueLabel('Publik')
+                    ->falseLabel('Khusus'),
                 Tables\Filters\SelectFilter::make('discount_type')
                     ->label('Tipe Diskon')
                     ->options([

@@ -20,6 +20,7 @@ class Voucher extends Model
         'starts_at',
         'expires_at',
         'is_active',
+        'is_public',
         'usage_limit',
         'used_count',
     ];
@@ -31,11 +32,22 @@ class Voucher extends Model
         'starts_at' => 'datetime',
         'expires_at' => 'datetime',
         'is_active' => 'boolean',
+        'is_public' => 'boolean',
     ];
 
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopePublic($query)
+    {
+        return $query->where('is_public', true);
+    }
+
+    public function hasUsageLeft(): bool
+    {
+        return ! $this->usage_limit || $this->used_count < $this->usage_limit;
     }
 
     public function scopeValidDate($query)

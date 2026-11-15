@@ -91,23 +91,17 @@ class CheckoutController extends Controller
             });
 
         $subtotal = (float) ($selectedVariant->price);
-        $availableVouchers = \App\Models\Voucher::query()
-            ->where('is_active', true)
-            ->where(function($q){ $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()); })
-            ->where(function($q){ $q->whereNull('expires_at')->orWhere('expires_at', '>=', now()); })
-            ->where(function($q) use ($subtotal){ $q->whereNull('min_total')->orWhere('min_total', '<=', $subtotal); })
+        $availableVouchers = Voucher::active()
+            ->public()
+            ->validDate()
+            ->where(function ($q) use ($subtotal) {
+                $q->whereNull('min_total')->orWhere('min_total', '<=', $subtotal);
+            })
             ->orderBy('id', 'desc')
             ->get()
-            ->map(function($v){ return [
-                'id' => $v->id,
-                'code' => $v->code,
-                'name' => $v->name,
-                'discount_type' => $v->discount_type,
-                'discount_value' => (float) $v->discount_value,
-                'max_discount' => (float) ($v->max_discount ?? 0),
-                'min_total' => (float) ($v->min_total ?? 0),
-                'expires_at' => optional($v->expires_at)->toDateTimeString(),
-            ]; });
+            ->filter(fn (Voucher $v) => $v->hasUsageLeft())
+            ->map(fn (Voucher $v) => $this->voucherPayload($v))
+            ->values();
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Checkout/Create', [
@@ -382,6 +376,38 @@ class CheckoutController extends Controller
         app(OrderObserver::class)->notifyOrderCreated($order);
 
         return redirect()->route('invoice.show', $order->order_number);
+    }
+
+    public function checkVoucher(Request $request)
+    {
+        $data = $request->validate([
+            'code' => 'required|string|max:50',
+        ]);
+
+        $voucher = Voucher::active()
+            ->validDate()
+            ->where('code', trim($data['code']))
+            ->first();
+
+        if (! $voucher || ! $voucher->hasUsageLeft()) {
+            return response()->json(['message' => 'Voucher tidak valid atau sudah tidak berlaku.'], 422);
+        }
+
+        return response()->json(['voucher' => $this->voucherPayload($voucher)]);
+    }
+
+    private function voucherPayload(Voucher $voucher): array
+    {
+        return [
+            'id' => $voucher->id,
+            'code' => $voucher->code,
+            'name' => $voucher->name,
+            'discount_type' => $voucher->discount_type,
+            'discount_value' => (float) $voucher->discount_value,
+            'max_discount' => (float) ($voucher->max_discount ?? 0),
+            'min_total' => (float) ($voucher->min_total ?? 0),
+            'expires_at' => optional($voucher->expires_at)->toDateTimeString(),
+        ];
     }
 
     private function checkoutFailed(Request $request, string $message)

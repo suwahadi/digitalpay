@@ -11,7 +11,6 @@
 
         <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
             <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                <!-- Header -->
                 <div class="mb-8">
                     <nav class="flex mb-4" aria-label="Breadcrumb">
                         <ol class="flex items-center space-x-2 text-sm">
@@ -42,9 +41,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Main Form -->
                     <div class="lg:col-span-2 space-y-6">
-                        <!-- Customer Information -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Informasi Pembeli
@@ -124,7 +121,6 @@
                         </div>
 
 
-                        <!-- Voucher Modal -->
                         <Teleport to="body">
                             <Transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
                                 <div v-if="showVoucherModal" class="fixed inset-0 z-50 overflow-y-auto">
@@ -183,7 +179,6 @@
                             </Transition>
                         </Teleport>
 
-                        <!-- Payment Methods -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Metode Pembayaran
@@ -238,7 +233,6 @@
                             </div>
                         </div>
 
-                        <!-- Voucher Section -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-4 sm:p-6">
                             <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Gunakan Voucher</h2>
                             <div class="grid grid-cols-[1fr_auto] gap-2 sm:gap-3">
@@ -252,6 +246,7 @@
                                 />
                                 <button
                                     @click="appliedVoucher ? cancelVoucher() : applyVoucher()"
+                                    :disabled="voucherChecking"
                                     class="px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg text-white bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 flex items-center justify-center gap-1.5 whitespace-nowrap text-sm sm:text-base"
                                 >
                                     <template v-if="appliedVoucher">
@@ -259,7 +254,7 @@
                                         <span>Batalkan</span>
                                     </template>
                                     <template v-else>
-                                        <span>Gunakan</span>
+                                        <span>{{ voucherChecking ? 'Memeriksa...' : 'Gunakan' }}</span>
                                     </template>
                                 </button>
                             </div>
@@ -274,14 +269,12 @@
                         </div>
                     </div>
 
-                    <!-- Order Summary -->
                     <div class="lg:col-span-1">
                         <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm p-6 lg:sticky lg:top-24">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                                 Ringkasan Pesanan
                             </h2>
                             
-                            <!-- Product Details -->
                             <div class="space-y-4 mb-6">
                                 <div class="flex space-x-4">
                                     <img 
@@ -304,7 +297,6 @@
                                 </div>
                             </div>
 
-                            <!-- Price Breakdown -->
                                 <div class="space-y-3 py-4 border-t border-b dark:border-gray-700">
                                 <div v-if="selectedVariant.original_price > selectedVariant.price" class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Harga Normal:</span>
@@ -337,7 +329,6 @@
                                 <span class="text-blue-600 dark:text-blue-400">{{ formatPrice(calculateTotal()) }}</span>
                             </div>
 
-                            <!-- Delivery Notice -->
                             <div 
                                 v-if="selectedVariant.auto_delivery === true" 
                                 class="mt-6 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
@@ -363,7 +354,6 @@
                                 </p>
                             </div>
 
-                            <!-- Submit Button -->
                             <div class="mt-6 hidden lg:block">
                                 <button
                                     type="button"
@@ -383,7 +373,6 @@
                     </div>
                 </div>
 
-                <!-- Mobile Order Bar -->
                 <div
                     class="sticky bottom-0 z-30 -mx-4 mt-6 border-t border-gray-200 bg-white px-4 pt-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)] dark:border-gray-700 dark:bg-gray-900 sm:-mx-6 sm:px-6 lg:hidden"
                     style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));"
@@ -411,7 +400,6 @@
             </div>
         </div>
         
-        <!-- Confirmation Modal -->
         <Teleport to="body">
             <Transition
                 enter-active-class="duration-300 ease-out"
@@ -423,13 +411,11 @@
             >
                 <div v-if="showConfirmationModal" class="fixed inset-0 z-50 overflow-y-auto">
                     <div class="flex min-h-screen items-center justify-center p-4">
-                        <!-- Backdrop -->
                         <div 
                             class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             @click="closeConfirmationModal"
                         ></div>
                         
-                        <!-- Modal Content -->
                         <Transition
                             enter-active-class="duration-300 ease-out"
                             enter-from-class="opacity-0 scale-95"
@@ -454,7 +440,6 @@
                                     </h3>
                                 </div>
 
-                                <!-- Order Details -->
                                 <div class="space-y-2 mb-4 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Subtotal:</span>
@@ -482,7 +467,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Contact Information -->
                                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg mb-5">
                                     <button
                                         type="button"
@@ -524,7 +508,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Action Buttons -->
                                 <div class="flex gap-3">
                                     <button
                                         type="button"
@@ -556,6 +539,7 @@
 import { onImageError } from '@/imageFallback'
 import { ref, computed, onMounted, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
+import axios from 'axios'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import IconifyIcon from '@/Components/IconifyIcon.vue'
 
@@ -629,12 +613,15 @@ const voucherCode = ref('')
 const appliedVoucher = ref(null)
 const showVoucherModal = ref(false)
 const voucherChecked = ref(false)
+const voucherChecking = ref(false)
+const voucherServerError = ref('')
 watch(voucherCode, (newVal) => {
   const appliedCode = (appliedVoucher.value?.code || '').trim()
   const currentCode = (String(newVal || '')).trim()
   if (appliedCode !== currentCode) {
     voucherChecked.value = false
     appliedVoucher.value = null
+    voucherServerError.value = ''
   }
 })
 
@@ -699,9 +686,30 @@ const calculateVoucherDiscount = () => {
 
 const openVoucherModal = () => { showVoucherModal.value = true }
 const closeVoucherModal = () => { showVoucherModal.value = false }
-const applyVoucher = () => {
-    voucherChecked.value = true
-    appliedVoucher.value = findVoucherByCode(voucherCode.value)
+const applyVoucher = async () => {
+    const code = (voucherCode.value || '').trim()
+    if (!code || voucherChecking.value) return
+
+    const local = findVoucherByCode(code)
+    if (local) {
+        appliedVoucher.value = local
+        voucherChecked.value = true
+        return
+    }
+
+    voucherChecking.value = true
+    try {
+        const response = await axios.post('/checkout/voucher', { code })
+        appliedVoucher.value = response.data.voucher
+    } catch (error) {
+        appliedVoucher.value = null
+        voucherServerError.value = error.response?.status === 429
+            ? 'Terlalu banyak percobaan. Coba lagi dalam 1 menit.'
+            : (error.response?.data?.message || 'Voucher tidak valid atau sudah tidak berlaku.')
+    } finally {
+        voucherChecking.value = false
+        voucherChecked.value = true
+    }
 }
 
 const applyVoucherFromModal = (voucher) => {
@@ -711,6 +719,7 @@ const applyVoucherFromModal = (voucher) => {
     closeVoucherModal()
 }
 const cancelVoucher = () => {
+    voucherServerError.value = ''
     appliedVoucher.value = null
     voucherCode.value = ''
     voucherChecked.value = false
@@ -754,7 +763,7 @@ const voucherErrorText = computed(() => {
     if (!code) return ''
     const subtotal = parseFloat(props.selectedVariant.price || 0)
     const v = appliedVoucher.value || findVoucherByCode(code)
-    if (!v) return 'Voucher tidak valid atau sudah tidak berlaku.'
+    if (!v) return voucherServerError.value || 'Voucher tidak valid atau sudah tidak berlaku.'
     if (v.min_total && subtotal < parseFloat(v.min_total)) {
         return 'Voucher tidak berlaku: min. belanja ' + formatPrice(v.min_total)
     }
