@@ -3,225 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
     <title>@yield('title')</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            padding: 30px 20px;
-            text-align: center;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .content {
-            padding: 30px 20px;
-        }
-        .greeting {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .order-info {
-            background-color: #f8f9fa;
-            border-left: 3px solid #667eea;
-            padding: 12px 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .order-info p {
-            margin: 4px 0;
-            font-size: 13px;
-        }
-        .order-info strong {
-            color: #667eea;
-            font-weight: 600;
-        }
-        .info-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-            border: 1px solid #e9ecef;
-        }
-        .info-box h4 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-        }
-        .product-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            margin: 12px 0;
-            border-radius: 4px;
-            border: 1px solid #e9ecef;
-        }
-        .product-box h4 {
-            margin: 0 0 8px 0;
-            font-size: 15px;
-            font-weight: 600;
-            color: #333;
-        }
-        .content-box {
-            background-color: #ffffff;
-            padding: 12px;
-            margin: 12px 0;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
-        }
-        .text-small {
-            font-size: 12px;
-            color: #6c757d;
-        }
-        .text-xs {
-            font-size: 11px;
-            color: #6c757d;
-        }
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        .items-table th {
-            background-color: #f8f9fa;
-            padding: 8px 10px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 12px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .items-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #dee2e6;
-            font-size: 13px;
-        }
-        .total-section {
-            margin-top: 15px;
-            padding: 12px 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 4px 0;
-            font-size: 13px;
-        }
-        .total-row.grand-total {
-            font-size: 15px;
-            font-weight: 600;
-            color: #667eea;
-            border-top: 1px solid #dee2e6;
-            padding-top: 8px;
-            margin-top: 8px;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff !important;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 600;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .button:hover {
-            opacity: 0.9;
-        }
-        .alert {
-            padding: 12px 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-            border-left: 3px solid;
-            font-size: 13px;
-        }
-        .alert-info {
-            background-color: #d1ecf1;
-            border-color: #0c5460;
-            color: #0c5460;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #155724;
-            color: #155724;
-        }
-        .alert-warning {
-            background-color: #fff3cd;
-            border-color: #856404;
-            color: #856404;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #721c24;
-            color: #721c24;
-        }
-        .footer {
-            background-color: #f8f9fa;
-            padding: 15px 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-        }
-        .footer p {
-            margin: 4px 0;
-        }
+        body { margin: 0; padding: 0; background: #ffffff; color: #111827; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; -webkit-text-size-adjust: 100%; }
+        table { border-collapse: collapse; }
+        a { color: #2563eb; }
+        .wrap { width: 100%; background: #ffffff; }
+        .container { width: 100%; max-width: 560px; margin: 0 auto; }
+        .pad { padding: 0 24px; }
+        .brand { padding: 32px 24px 0; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: #111827; text-decoration: none; }
+        .eyebrow { margin: 32px 0 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6b7280; }
+        .eyebrow.alert { color: #b45309; }
+        h1 { margin: 0 0 12px; font-size: 22px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; color: #111827; }
+        p { margin: 0 0 14px; }
+        .muted { color: #6b7280; }
+        .small { font-size: 13px; }
+        .amount { margin: 20px 0 4px; font-size: 30px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; color: #111827; }
+        .btn-wrap { padding: 20px 0 8px; }
+        .btn { display: inline-block; padding: 12px 22px; background: #111827; color: #ffffff !important; text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 8px; }
+        .rule { border: 0; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+        .section-title { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: #6b7280; }
+        .rows { width: 100%; }
+        .rows td { padding: 6px 0; vertical-align: top; font-size: 14px; }
+        .rows td.label { color: #6b7280; padding-right: 16px; }
+        .rows td.value { text-align: right; color: #111827; }
+        .rows tr.total td { padding-top: 12px; border-top: 1px solid #e5e7eb; font-weight: 700; font-size: 15px; color: #111827; }
+        .item-name { font-weight: 600; color: #111827; }
+        .code { margin: 8px 0 18px; padding: 14px 16px; background: #f3f4f6; border-radius: 8px; font-family: 'SFMono-Regular', Menlo, Consolas, 'Courier New', monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: #111827; }
+        .otp { margin: 20px 0; font-family: 'SFMono-Regular', Menlo, Consolas, 'Courier New', monospace; font-size: 32px; font-weight: 700; letter-spacing: 0.3em; color: #111827; }
+        .footer { padding: 0 24px 40px; font-size: 12px; line-height: 1.7; color: #9ca3af; }
+        .footer a { color: #6b7280; text-decoration: none; }
+        .preheader { display: none !important; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0; overflow: hidden; mso-hide: all; }
         @media only screen and (max-width: 600px) {
-            .container {
-                margin: 0;
-                border-radius: 0;
-            }
-            .content {
-                padding: 20px 15px;
-            }
-            .items-table th,
-            .items-table td {
-                padding: 8px;
-                font-size: 14px;
-            }
+            .amount { font-size: 26px; }
+            h1 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>@yield('header-title')</h1>
-        </div>
-        
-        <div class="content">
-            @yield('content')
-        </div>
-        
-        <div class="footer">
-            <p><strong>{{ \App\Helpers\ConfigHelper::siteName() }}</strong></p>
-            <p>Email ini dikirim secara otomatis, mohon tidak membalas email ini.</p>
-            <p>Jika Anda memiliki pertanyaan, silakan hubungi customer service kami di:</p>
-            <p>
-                Email: <a href="mailto:{{ \App\Helpers\ConfigHelper::get('contact_email', 'admin@digitalpay.web.id') }}" style="color: #667eea;">{{ \App\Helpers\ConfigHelper::get('contact_email', 'admin@digitalpay.web.id') }}</a> | 
-                WhatsApp: <a href="https://wa.me/{{ \App\Helpers\ConfigHelper::get('contact_whatsapp', '6281234567890') }}" style="color: #667eea;">{{ \App\Helpers\ConfigHelper::get('contact_phone', '081234567890') }}</a>
-            </p>
-        </div>
-    </div>
+    <span class="preheader">@yield('preheader')</span>
+    <table role="presentation" class="wrap" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td align="center">
+                <table role="presentation" class="container" width="560" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="brand">
+                            <a href="{{ config('app.url') }}" style="color: #111827; text-decoration: none;">{{ \App\Helpers\ConfigHelper::siteName() }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="pad">
+                            @yield('content')
+                            <hr class="rule">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            @php
+                                $contactEmail = \App\Helpers\ConfigHelper::get('contact_email', 'admin@digitalpay.web.id');
+                                $contactWhatsapp = \App\Helpers\ConfigHelper::get('contact_whatsapp', '6281234567890');
+                                $contactPhone = \App\Helpers\ConfigHelper::get('contact_phone', '081234567890');
+                            @endphp
+                            Butuh bantuan? Hubungi <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a> atau WhatsApp <a href="https://wa.me/{{ $contactWhatsapp }}">{{ $contactPhone }}</a>.<br>
+                            Email ini dikirim otomatis oleh {{ \App\Helpers\ConfigHelper::siteName() }}.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

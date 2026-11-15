@@ -1,97 +1,36 @@
 @extends('emails.layout')
 
-@section('title', 'Konfirmasi Pesanan')
+@section('title', 'Selesaikan Pembayaran')
 
-@section('header-title', 'Konfirmasi Pesanan')
+@section('preheader', 'Bayar '.$formatted_total_amount.' untuk pesanan '.$order_number.' sebelum '.$expires_at.'.')
 
 @section('content')
-    <p class="greeting">Halo {{ $customer_name }},</p>
-    
-    <p>Terima kasih atas pesanan Anda! Pesanan Anda telah berhasil dibuat dan menunggu pembayaran.</p>
-    
-    <div class="order-info">
-        <p><strong>Nomor Pesanan:</strong> {{ $order_number }}</p>
-        <p><strong>Tanggal Pesanan:</strong> {{ $order_date }}</p>
-        <p><strong>Metode Pembayaran:</strong> {{ $payment_method }}</p>
-        @if(isset($expires_at))
-        <p><strong>Batas Pembayaran:</strong> {{ $expires_at }}</p>
-        @endif
-    </div>
-    
-    <h3 style="margin-top: 25px; margin-bottom: 12px; font-size: 15px; font-weight: 600;">Detail Pesanan</h3>
-    
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th>Produk</th>
-                <th style="text-align: center;">Qty</th>
-                <th style="text-align: right;">Harga</th>
-                <th style="text-align: right;">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($items as $item)
-            <tr>
-                <td>
-                    <strong style="font-size: 13px;">{{ $item['product_name'] }}</strong><br>
-                    <span class="text-small">{{ $item['variant_name'] }}</span>
-                </td>
-                <td style="text-align: center; font-size: 13px;">{{ $item['quantity'] }}</td>
-                <td style="text-align: right; font-size: 13px;">{{ $item['formatted_price'] }}</td>
-                <td style="text-align: right; font-size: 13px;">{{ $item['formatted_total'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    
-    <div class="total-section">
-        <div class="total-row">
-            <span>Subtotal:</span>
-            <span>{{ $formatted_subtotal }}</span>
-        </div>
-        @if(($discount_amount ?? 0) > 0)
-        <div class="total-row">
-            <span>Diskon Voucher:</span>
-            <span>-{{ $formatted_discount_amount }}</span>
-        </div>
-        @endif
-        @if($fee_amount > 0)
-        <div class="total-row">
-            <span>Biaya Layanan:</span>
-            <span>{{ $formatted_fee_amount }}</span>
-        </div>
-        @endif
-        @if(($unique_code ?? 0) > 0)
-        <div class="total-row">
-            <span>Kode Unik:</span>
-            <span>{{ $formatted_unique_code }}</span>
-        </div>
-        @endif
-        <div class="total-row grand-total">
-            <span>Total Pembayaran:</span>
-            <span>{{ $formatted_total_amount }}</span>
-        </div>
-    </div>
-    
-    @if(isset($payment_url))
-    <div class="alert alert-info">
-        <p style="margin: 0;"><strong>Segera selesaikan pembayaran Anda!</strong></p>
-        @if(isset($time_remaining))
-        <p style="margin: 5px 0 0 0;">Pesanan ini akan kedaluwarsa dalam {{ $time_remaining }}</p>
-        @endif
-    </div>
-    
-    <div style="text-align: center;">
-        <a href="{{ $payment_url }}" class="button">Bayar Sekarang</a>
+    <p class="eyebrow">Menunggu Pembayaran</p>
+    <h1>Selesaikan pembayaran Anda</h1>
+    <p class="muted">Halo {{ $customer_name }}, pesanan Anda sudah kami terima. Bayar sebelum <strong style="color: #111827;">{{ $expires_at }} WIB</strong> agar pesanan tidak dibatalkan otomatis.</p>
+
+    <p class="amount">{{ $formatted_total_amount }}</p>
+    <p class="muted small">Bayar sesuai nominal ini, termasuk kode unik.</p>
+
+    @if(!empty($payment_url))
+    <div class="btn-wrap">
+        <a href="{{ $payment_url }}" class="btn">Bayar Sekarang</a>
     </div>
     @endif
-    
-    <div class="alert alert-warning" style="margin-top: 30px;">
-        <p style="margin: 0;"><strong>Penting:</strong></p>
-        <ul style="margin: 10px 0 0 20px; padding: 0;">
-            <li>Pastikan Anda melakukan pembayaran sebelum batas waktu yang ditentukan</li>
-            <li>Setelah pembayaran dikonfirmasi, produk akan dikirim ke email Anda</li>
-            <li>Simpan nomor pesanan untuk referensi Anda</li>
-        </ul>
-    </div>
+
+    <hr class="rule">
+
+    <p class="section-title">Rincian Pesanan</p>
+    @include('emails.partials.items')
+    @include('emails.partials.amounts', ['total_label' => 'Total Pembayaran'])
+
+    <hr class="rule">
+
+    <table role="presentation" class="rows" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td class="label">Nomor Pesanan</td><td class="value">{{ $order_number }}</td></tr>
+        <tr><td class="label">Tanggal</td><td class="value">{{ $order_date }}</td></tr>
+        <tr><td class="label">Metode</td><td class="value">{{ $payment_method }}</td></tr>
+    </table>
+
+    <p class="muted small" style="margin-top: 20px;">Setelah pembayaran terkonfirmasi, produk dikirim ke halaman pesanan dan ke email ini.</p>
 @endsection

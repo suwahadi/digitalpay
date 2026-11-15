@@ -15,32 +15,22 @@ class ManualDeliveryCompletedNotification extends Notification implements Should
 
     protected Order $order;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Order $order)
     {
         $this->order = $order;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(object $notifiable): array
     {
-        // Only use database channel for User model, not for GuestUser
         $channels = ['brevo'];
-        
+
         if ($notifiable instanceof User) {
             $channels[] = 'database';
         }
-        
+
         return $channels;
     }
 
-    /**
-     * Get the array representation of the notification for database.
-     */
     public function toDatabase(object $notifiable): array
     {
         return [
@@ -50,32 +40,27 @@ class ManualDeliveryCompletedNotification extends Notification implements Should
         ];
     }
 
-    /**
-     * Send notification via Brevo
-     */
     public function toBrevo(object $notifiable): bool
     {
         $brevoService = app(BrevoService::class);
-        
+
         $orderData = $this->prepareOrderData();
-        
+
         $result = $brevoService->sendManualDeliveryCompleted($orderData);
-        
+
         return $result['success'] ?? false;
     }
 
-    /**
-     * Prepare order data for email
-     */
     protected function prepareOrderData(): array
     {
         $this->order->load([
             'items.productVariant.product',
             'items.digitalDelivery.digitalStock'
         ]);
-        
+
         return [
             'order_number' => $this->order->order_number,
+            'invoice_url' => route('invoice.show', $this->order->order_number),
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
             'customer_phone' => $this->order->customer_phone,
@@ -85,13 +70,13 @@ class ManualDeliveryCompletedNotification extends Notification implements Should
             'items' => $this->order->items
                 ->filter(function ($item) {
                     $delivery = $item->digitalDelivery;
-                    return $delivery 
-                        && $delivery->delivery_trigger === 'manual' 
+                    return $delivery
+                        && $delivery->delivery_trigger === 'manual'
                         && $delivery->delivery_content;
                 })
                 ->map(function ($item) {
                     $delivery = $item->digitalDelivery;
-                    
+
                     return [
                         'product_name' => $item->product_name,
                         'variant_name' => $item->variant_name,

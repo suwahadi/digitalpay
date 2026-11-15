@@ -58,6 +58,7 @@ class PaymentSuccessNotification extends Notification implements ShouldQueue
 
         return [
             'order_number' => $this->order->order_number,
+            'invoice_url' => route('invoice.show', $this->order->order_number),
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
             'customer_phone' => $this->order->customer_phone,
@@ -84,7 +85,7 @@ class PaymentSuccessNotification extends Notification implements ShouldQueue
             ...$this->order->emailAmounts(),
             'payment_method' => $this->order->paymentMethod->name ?? 'N/A',
             'has_digital_items' => $this->order->hasAutoDeliveryItems(),
-            'needs_manual_delivery' => $this->order->needs_manual_delivery,
+            'needs_manual_delivery' => $this->order->needs_manual_delivery || $this->order->requiresManualDelivery(),
         ];
     }
 }

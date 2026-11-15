@@ -66,6 +66,7 @@ class DigitalDeliveryNotification extends Notification implements ShouldQueue
 
         return [
             'order_number' => $this->order->order_number,
+            'invoice_url' => route('invoice.show', $this->order->order_number),
             'customer_name' => $this->order->customer_name,
             'customer_email' => $this->order->customer_email,
             'order_date' => $this->order->created_at->translatedFormat('d M Y H:i'),

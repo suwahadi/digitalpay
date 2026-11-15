@@ -2,96 +2,36 @@
 
 @section('title', 'Pembayaran Berhasil')
 
-@section('header-title', 'Pembayaran Berhasil')
+@section('preheader', 'Pembayaran '.$formatted_total_amount.' untuk pesanan '.$order_number.' sudah kami terima.')
 
 @section('content')
-    <p class="greeting">Halo {{ $customer_name }},</p>
-    
-    <p>Selamat! Pembayaran Anda telah berhasil dikonfirmasi.</p>
-    
-    <div class="alert alert-success">
-        <p style="margin: 0;"><strong>Pembayaran Dikonfirmasi</strong></p>
-        <p style="margin: 5px 0 0 0;">Pesanan Anda sedang diproses dan akan segera dikirim.</p>
+    <p class="eyebrow">Pembayaran Diterima</p>
+    <h1>Terima kasih, pembayaran Anda berhasil</h1>
+    <p class="muted">Halo {{ $customer_name }}, pembayaran untuk pesanan {{ $order_number }} sudah kami terima pada {{ $payment_date }} WIB.</p>
+
+    <p class="amount">{{ $formatted_total_amount }}</p>
+
+    @if(!empty($needs_manual_delivery))
+    <p>Pesanan Anda sedang disiapkan oleh admin. Produk akan muncul di halaman pesanan dan dikirim ke email ini setelah selesai.</p>
+    @else
+    <p>Produk Anda sedang dikirim otomatis. Detail akses akan muncul di halaman pesanan dan email terpisah dalam beberapa saat.</p>
+    @endif
+
+    <div class="btn-wrap">
+        <a href="{{ $invoice_url }}" class="btn">Lihat Pesanan</a>
     </div>
-    
-    <div class="order-info">
-        <p><strong>Nomor Pesanan:</strong> {{ $order_number }}</p>
-        <p><strong>Tanggal Pesanan:</strong> {{ $order_date }}</p>
-        <p><strong>Tanggal Pembayaran:</strong> {{ $payment_date }}</p>
-        <p><strong>Metode Pembayaran:</strong> {{ $payment_method }}</p>
-    </div>
-    
-    <h3 style="margin-top: 25px; margin-bottom: 12px; font-size: 15px; font-weight: 600;">Detail Pesanan</h3>
-    
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th>Produk</th>
-                <th style="text-align: center;">Qty</th>
-                <th style="text-align: right;">Harga</th>
-                <th style="text-align: right;">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($items as $item)
-            <tr>
-                <td>
-                    <strong style="font-size: 13px;">{{ $item['product_name'] }}</strong><br>
-                    <span class="text-small">{{ $item['variant_name'] }}</span>
-                    @if(isset($item['auto_delivery']) && $item['auto_delivery'])
-                    <br><span class="text-small" style="color: #28a745;">Pengiriman Otomatis</span>
-                    @endif
-                </td>
-                <td style="text-align: center; font-size: 13px;">{{ $item['quantity'] }}</td>
-                <td style="text-align: right; font-size: 13px;">{{ $item['formatted_price'] }}</td>
-                <td style="text-align: right; font-size: 13px;">{{ $item['formatted_total'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
+
+    <hr class="rule">
+
+    <p class="section-title">Rincian Pembayaran</p>
+    @include('emails.partials.items')
+    @include('emails.partials.amounts', ['total_label' => 'Total Dibayar'])
+
+    <hr class="rule">
+
+    <table role="presentation" class="rows" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td class="label">Nomor Pesanan</td><td class="value">{{ $order_number }}</td></tr>
+        <tr><td class="label">Tanggal Pesanan</td><td class="value">{{ $order_date }}</td></tr>
+        <tr><td class="label">Metode</td><td class="value">{{ $payment_method }}</td></tr>
     </table>
-    
-    <div class="total-section">
-        <div class="total-row">
-            <span>Subtotal:</span>
-            <span>{{ $formatted_subtotal }}</span>
-        </div>
-        @if(($discount_amount ?? 0) > 0)
-        <div class="total-row">
-            <span>Diskon Voucher:</span>
-            <span>-{{ $formatted_discount_amount }}</span>
-        </div>
-        @endif
-        @if($fee_amount > 0)
-        <div class="total-row">
-            <span>Biaya Layanan:</span>
-            <span>{{ $formatted_fee_amount }}</span>
-        </div>
-        @endif
-        @if(($unique_code ?? 0) > 0)
-        <div class="total-row">
-            <span>Kode Unik:</span>
-            <span>{{ $formatted_unique_code }}</span>
-        </div>
-        @endif
-        <div class="total-row grand-total">
-            <span>Total Dibayar:</span>
-            <span>{{ $formatted_total_amount }}</span>
-        </div>
-    </div>
-    
-    @if(isset($has_digital_items) && $has_digital_items)
-    <div class="alert alert-info">
-        <p style="margin: 0;"><strong>Produk Digital</strong></p>
-        <p style="margin: 5px 0 0 0;">Produk digital Anda akan dikirim ke email ini dalam beberapa menit.</p>
-    </div>
-    @endif
-    
-    @if(isset($needs_manual_delivery) && $needs_manual_delivery)
-    <div class="alert alert-warning">
-        <p style="margin: 0;"><strong>Pemrosesan Manual</strong></p>
-        <p style="margin: 5px 0 0 0;">Beberapa produk memerlukan pemrosesan manual. Tim kami akan segera mengirimkannya dalam 1-3 hari kerja.</p>
-    </div>
-    @endif
-    
-    <p style="margin-top: 25px;">Terima kasih telah berbelanja dengan kami!</p>
 @endsection

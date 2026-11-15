@@ -2,57 +2,39 @@
 
 @section('title', 'Pembayaran Masuk')
 
-@section('header-title', 'Pembayaran Masuk')
+@section('preheader', ($needs_manual_delivery ? 'Perlu kirim manual. ' : '').$order_number.' - '.$formatted_total_amount)
 
 @section('content')
-    <p class="greeting">Halo Admin,</p>
-
-    <p>Pembayaran untuk pesanan berikut sudah diterima.</p>
-
-    <div class="order-info">
-        <p><strong>Nomor Pesanan:</strong> {{ $order_number }}</p>
-        <p><strong>Total Dibayar:</strong> {{ $formatted_total_amount }}</p>
-        <p><strong>Metode Pembayaran:</strong> {{ $payment_method }}</p>
-        <p><strong>Tanggal Pembayaran:</strong> {{ $payment_date }}</p>
-    </div>
-
-    <div class="order-info">
-        <p><strong>Pembeli:</strong> {{ $customer_name }}</p>
-        <p><strong>Email:</strong> {{ $customer_email }}</p>
-        @if($customer_phone)
-        <p><strong>WhatsApp:</strong> {{ $customer_phone }}</p>
-        @endif
-    </div>
-
-    <h3 style="margin-top: 25px; margin-bottom: 12px; font-size: 15px; font-weight: 600;">Produk</h3>
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th>Produk</th>
-                <th style="text-align: center;">Qty</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($items as $item)
-            <tr>
-                <td>
-                    <strong style="font-size: 13px;">{{ $item['product_name'] }}</strong><br>
-                    <span class="text-small">{{ $item['variant_name'] }}</span>
-                </td>
-                <td style="text-align: center; font-size: 13px;">{{ $item['quantity'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
     @if($needs_manual_delivery)
-    <div class="alert alert-warning">
-        <p style="margin: 0;"><strong>Perlu Pengiriman Manual</strong></p>
-        <p style="margin: 5px 0 0 0;">Pesanan ini harus dikirim manual oleh admin (varian manual atau stok otomatis habis). Buka pesanan lalu tekan Kirim Manual.</p>
-    </div>
+    <p class="eyebrow alert">Perlu Kirim Manual</p>
+    <h1>{{ $order_number }} lunas, produk belum terkirim</h1>
+    <p>Pesanan ini perlu dikirim manual (varian manual atau stok otomatis habis). Buka pesanan lalu tekan <strong>Kirim Manual</strong>.</p>
+    @else
+    <p class="eyebrow">Pembayaran Masuk</p>
+    <h1>{{ $order_number }} lunas</h1>
+    <p class="muted">Produk sudah dikirim otomatis ke pembeli. Tidak perlu tindakan.</p>
     @endif
 
-    <div style="text-align: center;">
-        <a href="{{ $admin_url }}" class="button">Lihat Pesanan</a>
+    <p class="amount">{{ $formatted_total_amount }}</p>
+    <p class="muted small">{{ $payment_method }} &middot; {{ $payment_date }} WIB</p>
+
+    <div class="btn-wrap">
+        <a href="{{ $admin_url }}" class="btn">Lihat Pesanan</a>
     </div>
+
+    <hr class="rule">
+
+    <p class="section-title">Produk</p>
+    @include('emails.partials.items')
+
+    <hr class="rule">
+
+    <p class="section-title">Pembeli</p>
+    <table role="presentation" class="rows" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td class="label">Nama</td><td class="value">{{ $customer_name }}</td></tr>
+        <tr><td class="label">Email</td><td class="value">{{ $customer_email }}</td></tr>
+        @if($customer_phone)
+        <tr><td class="label">WhatsApp</td><td class="value">{{ $customer_phone }}</td></tr>
+        @endif
+    </table>
 @endsection
