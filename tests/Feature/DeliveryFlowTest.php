@@ -145,4 +145,18 @@ class DeliveryFlowTest extends TestCase
         $this->assertFalse($sent[$first->order_number]);
         $this->assertTrue($sent['DIG-RACE001']);
     }
+
+    public function test_failed_delivery_job_queues_manual_delivery_and_still_emails_admin(): void
+    {
+        $order = $this->paidOrderFor('manual');
+        $order->update(['needs_manual_delivery' => false]);
+        Notification::fake();
+
+        (new \App\Jobs\ProcessDigitalDelivery($order))->failed(new \RuntimeException('database down'));
+
+        $this->assertTrue($order->fresh()->needs_manual_delivery);
+        Notification::assertSentOnDemand(AdminPaymentReceivedNotification::class, function ($notification) {
+            return $notification->orderData()['needs_manual_delivery'] === true;
+        });
+    }
 }

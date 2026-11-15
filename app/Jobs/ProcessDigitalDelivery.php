@@ -10,7 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Exception;
+use Throwable;
 
 class ProcessDigitalDelivery implements ShouldQueue
 {
@@ -18,6 +18,8 @@ class ProcessDigitalDelivery implements ShouldQueue
 
     public $timeout = 300;
     public $tries = 3;
+
+    public $backoff = [10, 30];
 
     protected Order $order;
     protected string $trigger;
@@ -49,7 +51,24 @@ class ProcessDigitalDelivery implements ShouldQueue
         app(OrderObserver::class)->notifyAdminPaymentReceived($this->order->fresh());
     }
 
-    public function failed(Exception $exception): void
+    public function failed(?Throwable $exception = null): void
     {
+        if ($this->trigger === 'manual') {
+            return;
+        }
+
+        $order = $this->order->fresh();
+
+        if (! $order || $order->status !== 'paid') {
+            return;
+        }
+
+        $hasUndelivered = $order->orderItems()->where('delivery_status', '!=', 'delivered')->exists();
+
+        if ($hasUndelivered && ! $order->needs_manual_delivery) {
+            $order->markAsManualDeliveryQueued();
+        }
+
+        app(OrderObserver::class)->notifyAdminPaymentReceived($order->fresh());
     }
 }
