@@ -2,18 +2,6 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
@@ -41,6 +29,16 @@ return [
         'enabled' => env('BREVO_ENABLED', false),
         'sender_email' => env('BREVO_SENDER_EMAIL', 'no-reply@digitalpay.web.id'),
         'sender_name' => env('BREVO_SENDER_NAME', 'DigitalPay'),
+    ],
+
+    'payment_gateway' => env('PAYMENT_GATEWAY', 'qrisgate'),
+
+    'qrisgate' => [
+        'base_url' => rtrim(env('QRISGATE_BASE_URL', 'https://qrisgate.web.id/api/v1'), '/'),
+        'api_key' => env('QRISGATE_API_KEY'),
+        'webhook_secret' => env('QRISGATE_WEBHOOK_SECRET'),
+        'timeout' => (int) env('QRISGATE_TIMEOUT', 15),
+        'signature_tolerance' => 300,
     ],
 
     'manual_qris' => [
