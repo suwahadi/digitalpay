@@ -23,12 +23,6 @@ class BrevoService
         $this->senderName = config('services.brevo.sender_name');
     }
 
-    /**
-     * Send transactional email via Brevo API
-     *
-     * @param array $data
-     * @return array
-     */
     public function sendEmail(array $data): array
     {
         if (!$this->enabled) {
@@ -47,7 +41,7 @@ class BrevoService
 
         try {
             $payload = $this->preparePayload($data);
-            
+
             $response = Http::withHeaders([
                 'to' => $data['to'] ?? null,
                 'subject' => $data['subject'] ?? null
@@ -79,7 +73,6 @@ class BrevoService
                 'message' => 'Failed to send email',
                 'error' => $response->json()
             ];
-
         } catch (Exception $e) {
             Log::warning('Brevo API request failed', [
                 'to' => $data['to'] ?? null,
@@ -95,12 +88,6 @@ class BrevoService
         }
     }
 
-    /**
-     * Prepare email payload for Brevo API
-     *
-     * @param array $data
-     * @return array
-     */
     protected function preparePayload(array $data): array
     {
         $payload = [
@@ -140,27 +127,27 @@ class BrevoService
 
         if (isset($data['template_id'])) {
             $payload['templateId'] = $data['template_id'];
-            
+
             if (isset($data['params'])) {
                 $payload['params'] = $data['params'];
             }
         }
 
         if (isset($data['cc'])) {
-            $payload['cc'] = is_array($data['cc']) 
-                ? $data['cc'] 
+            $payload['cc'] = is_array($data['cc'])
+                ? $data['cc']
                 : [['email' => $data['cc']]];
         }
 
         if (isset($data['bcc'])) {
-            $payload['bcc'] = is_array($data['bcc']) 
-                ? $data['bcc'] 
+            $payload['bcc'] = is_array($data['bcc'])
+                ? $data['bcc']
                 : [['email' => $data['bcc']]];
         }
 
         if (isset($data['reply_to'])) {
-            $payload['replyTo'] = is_array($data['reply_to']) 
-                ? $data['reply_to'] 
+            $payload['replyTo'] = is_array($data['reply_to'])
+                ? $data['reply_to']
                 : ['email' => $data['reply_to']];
         }
 
@@ -175,16 +162,10 @@ class BrevoService
         return $payload;
     }
 
-    /**
-     * Send order confirmation email
-     *
-     * @param array $orderData
-     * @return array
-     */
     public function sendOrderConfirmation(array $orderData): array
     {
         $htmlContent = view('emails.order-confirmation', $orderData)->render();
-        
+
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
@@ -194,16 +175,10 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Send payment success email
-     *
-     * @param array $orderData
-     * @return array
-     */
     public function sendPaymentSuccess(array $orderData): array
     {
         $htmlContent = view('emails.payment-success', $orderData)->render();
-        
+
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
@@ -213,16 +188,10 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Send digital delivery email
-     *
-     * @param array $deliveryData
-     * @return array
-     */
     public function sendDigitalDelivery(array $deliveryData): array
     {
         $htmlContent = view('emails.digital-delivery', $deliveryData)->render();
-        
+
         return $this->sendEmail([
             'to' => $deliveryData['customer_email'],
             'recipient_name' => $deliveryData['customer_name'],
@@ -232,16 +201,10 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Send manual delivery notification email
-     *
-     * @param array $orderData
-     * @return array
-     */
     public function sendManualDeliveryNotification(array $orderData): array
     {
         $htmlContent = view('emails.manual-delivery-notification', $orderData)->render();
-        
+
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
@@ -251,16 +214,10 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Send manual delivery completed email (with actual delivery content)
-     *
-     * @param array $orderData
-     * @return array
-     */
     public function sendManualDeliveryCompleted(array $orderData): array
     {
         $htmlContent = view('emails.manual-delivery-completed', $orderData)->render();
-        
+
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
@@ -270,16 +227,10 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Send order cancellation email
-     *
-     * @param array $orderData
-     * @return array
-     */
     public function sendOrderCancellation(array $orderData): array
     {
         $htmlContent = view('emails.order-cancellation', $orderData)->render();
-        
+
         return $this->sendEmail([
             'to' => $orderData['customer_email'],
             'recipient_name' => $orderData['customer_name'],
@@ -289,12 +240,6 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Send order expired email
-     *
-     * @param array $orderData
-     * @return array
-     */
     public function sendOrderExpired(array $orderData): array
     {
         $htmlContent = view('emails.order-expired', $orderData)->render();
@@ -308,11 +253,19 @@ class BrevoService
         ]);
     }
 
-    /**
-     * Get account information from Brevo
-     *
-     * @return array
-     */
+    public function sendAdminPaymentReceived(array $orderData): array
+    {
+        $htmlContent = view('emails.admin-payment-received', $orderData)->render();
+
+        return $this->sendEmail([
+            'to' => $orderData['admin_email'],
+            'recipient_name' => 'Admin',
+            'subject' => 'Pembayaran Masuk - '.$orderData['order_number'].' - '.$orderData['formatted_total_amount'],
+            'html_content' => $htmlContent,
+            'tags' => ['admin', 'payment'],
+        ]);
+    }
+
     public function getAccount(): array
     {
         if (!$this->enabled || empty($this->apiKey)) {
@@ -339,7 +292,6 @@ class BrevoService
                 'success' => false,
                 'error' => $response->json()
             ];
-
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -348,12 +300,6 @@ class BrevoService
         }
     }
 
-    /**
-     * Test email connection
-     *
-     * @param string $testEmail
-     * @return array
-     */
     public function testConnection(string $testEmail): array
     {
         return $this->sendEmail([

@@ -46,6 +46,10 @@ class Order extends Model
         'processed_by_user_id',
     ];
 
+    protected $hidden = [
+        'payment_gateway',
+    ];
+
     protected $casts = [
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
@@ -169,6 +173,19 @@ class Order extends Model
     public function isPending()
     {
         return $this->payment_status === 'pending';
+    }
+
+    public function emailAmounts(): array
+    {
+        $discount = (int) round((float) ($this->discount_amount ?? 0));
+        $uniqueCode = (int) ($this->unique_code ?? 0);
+
+        return [
+            'discount_amount' => $discount,
+            'formatted_discount_amount' => 'Rp '.number_format($discount, 0, ',', '.'),
+            'unique_code' => $uniqueCode,
+            'formatted_unique_code' => 'Rp '.number_format($uniqueCode, 0, ',', '.'),
+        ];
     }
 
     public function isQrisgate(): bool

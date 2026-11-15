@@ -64,7 +64,7 @@
                                 <div class="mx-auto mt-4 flex h-[244px] w-[244px] items-center justify-center rounded-lg bg-white">
                                     <img v-if="qrImage" :src="qrImage" alt="Kode QRIS pembayaran" width="244" height="244" class="h-[244px] w-[244px] rounded-lg" />
                                     <div v-else-if="!qrError" class="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-                                    <p v-else class="px-4 text-sm text-red-600">QR gagal ditampilkan. Gunakan tombol halaman pembayaran di bawah.</p>
+                                    <p v-else class="px-4 text-sm text-red-600">QR gagal ditampilkan. Muat ulang halaman ini.</p>
                                 </div>
 
                                 <div class="mt-4 rounded-xl bg-gray-50 p-3 dark:bg-gray-700">
@@ -73,12 +73,9 @@
                                     <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">Bayar sebelum {{ formatDateTime(order.expires_at) }}</p>
                                 </div>
 
-                                <div class="mt-3 flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-4">
+                                <div class="mt-3 flex justify-center">
                                     <a v-if="qrImage" :href="qrImage" :download="`QRIS-${order.order_number}.png`" class="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
                                         Unduh gambar QRIS
-                                    </a>
-                                    <a v-if="order.qris.checkout_url" :href="order.qris.checkout_url" target="_blank" rel="noopener" class="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
-                                        Buka halaman pembayaran
                                     </a>
                                 </div>
 

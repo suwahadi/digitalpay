@@ -55,10 +55,22 @@
             <span>Subtotal:</span>
             <span>{{ $formatted_subtotal }}</span>
         </div>
+        @if(($discount_amount ?? 0) > 0)
+        <div class="total-row">
+            <span>Diskon Voucher:</span>
+            <span>-{{ $formatted_discount_amount }}</span>
+        </div>
+        @endif
         @if($fee_amount > 0)
         <div class="total-row">
             <span>Biaya Layanan:</span>
             <span>{{ $formatted_fee_amount }}</span>
+        </div>
+        @endif
+        @if(($unique_code ?? 0) > 0)
+        <div class="total-row">
+            <span>Kode Unik:</span>
+            <span>{{ $formatted_unique_code }}</span>
         </div>
         @endif
         <div class="total-row grand-total">

@@ -2,7 +2,10 @@
 
 namespace App\Observers;
 
+use App\Helpers\ConfigHelper;
 use App\Models\Order;
+use App\Notifications\AdminPaymentReceivedNotification;
+use Illuminate\Support\Facades\Notification;
 use App\Models\GuestUser;
 use App\Notifications\OrderCreatedNotification;
 use App\Notifications\PaymentSuccessNotification;
@@ -45,6 +48,8 @@ class OrderObserver
             } catch (\Exception $e) {
                 report($e);
             }
+
+            $this->notifyAdminPaymentReceived($order);
         }
 
         if ($order->isQrisgate()) {
@@ -74,6 +79,22 @@ class OrderObserver
             } catch (\Exception $e) {
                 report($e);
             }
+        }
+    }
+
+    protected function notifyAdminPaymentReceived(Order $order): void
+    {
+        $adminEmail = ConfigHelper::contactSettings()['email'] ?? null;
+
+        if (! $adminEmail || ! filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        try {
+            Notification::route('brevo', $adminEmail)
+                ->notify(new AdminPaymentReceivedNotification($order, $adminEmail));
+        } catch (\Exception $e) {
+            report($e);
         }
     }
 

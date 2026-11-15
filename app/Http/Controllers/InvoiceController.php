@@ -91,7 +91,6 @@ class InvoiceController extends Controller
                 'customer_phone' => $order->customer_phone,
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
-                'payment_gateway' => $order->payment_gateway,
                 'unique_code' => $order->unique_code,
                 'qris' => $this->qrisPayload($order),
                 'subtotal' => (int) ceil($order->subtotal),
@@ -111,7 +110,6 @@ class InvoiceController extends Controller
                 ] : null,
                 'payment' => $order->payment ? [
                     'id' => $order->payment->id,
-                    'gateway_transaction_id' => $order->payment->gateway_transaction_id,
                     'status' => $order->payment->status
                 ] : null
             ];
@@ -274,7 +272,6 @@ class InvoiceController extends Controller
 
         return [
             'qr_string' => $data['qr_string'],
-            'checkout_url' => $data['checkout_url'] ?? null,
             'merchant_name' => $data['merchant_name'] ?? null,
         ];
     }

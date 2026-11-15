@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends BaseModel
 {
-    // Status constants
     const STATUS_PENDING = 'pending';
     const STATUS_PROCESSING = 'processing';
     const STATUS_SUCCESS = 'success';
@@ -38,13 +37,24 @@ class Payment extends BaseModel
         'return_url',
         'paid_at',
         'expired_at',
-        // Midtrans fields
+
         'midtrans_snap_token',
         'midtrans_transaction_status',
         'midtrans_fraud_status',
         'midtrans_payment_type',
         'midtrans_gross_amount',
         'midtrans_signature_key',
+        'midtrans_raw_response',
+    ];
+
+    protected $hidden = [
+        'gateway_provider',
+        'gateway_transaction_id',
+        'gateway_reference',
+        'gateway_response',
+        'payment_url',
+        'callback_url',
+        'return_url',
         'midtrans_raw_response',
     ];
 
@@ -62,7 +72,6 @@ class Payment extends BaseModel
         ];
     }
 
-    // Relationships
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -83,7 +92,6 @@ class Payment extends BaseModel
         return $this->hasMany(PaymentLog::class);
     }
 
-    // Scopes
     public function scopeStatus($query, $status)
     {
         return $query->where('status', $status);
@@ -109,7 +117,6 @@ class Payment extends BaseModel
         return $query->orderBy('created_at', 'desc');
     }
 
-    // Helper Methods
     public function isSuccess(): bool
     {
         return $this->status === self::STATUS_SUCCESS;
@@ -130,17 +137,17 @@ class Payment extends BaseModel
         if (!$this->expired_at) {
             return false;
         }
-        
+
         return $this->expired_at->isPast();
     }
-    
+
     public function markAsExpired(): void
     {
         if (!in_array($this->status, [self::STATUS_SUCCESS, self::STATUS_CANCELLED, self::STATUS_EXPIRED])) {
             $this->update([
                 'status' => self::STATUS_EXPIRED,
             ]);
-            
+
             if ($this->order && !in_array($this->order->status, ['paid', 'cancelled', 'expired'])) {
                 $this->order->update([
                     'status' => 'expired',
@@ -158,7 +165,6 @@ class Payment extends BaseModel
             'gateway_response' => $gatewayResponse,
         ]);
 
-        // Update order payment status
         $this->order->update(['payment_status' => 'paid']);
     }
 
@@ -170,9 +176,6 @@ class Payment extends BaseModel
         ]);
     }
 
-    /**
-     * Update from Midtrans notification
-     */
     public function updateFromMidtransNotification($notificationData)
     {
         $this->update([
@@ -185,32 +188,24 @@ class Payment extends BaseModel
             'gateway_response' => $notificationData,
         ]);
 
-        // Update status based on transaction status
         $this->updateStatusFromMidtrans($notificationData['transaction_status'], $notificationData['fraud_status'] ?? null);
     }
 
-    /**
-     * Update payment status based on Midtrans status
-     */
     public function updateStatusFromMidtrans($transactionStatus, $fraudStatus = null)
     {
         $newStatus = $this->mapMidtransStatusToPaymentStatus($transactionStatus, $fraudStatus);
-        
+
         $updateData = ['status' => $newStatus];
-        
+
         if ($newStatus === self::STATUS_SUCCESS) {
             $updateData['paid_at'] = now();
         }
-        
+
         $this->update($updateData);
-        
-        // Also update the order
+
         $this->order->updatePaymentStatus($transactionStatus, $fraudStatus, $this->midtrans_raw_response);
     }
 
-    /**
-     * Map Midtrans status to payment status
-     */
     private function mapMidtransStatusToPaymentStatus($transactionStatus, $fraudStatus = null)
     {
         return match($transactionStatus) {
@@ -224,31 +219,24 @@ class Payment extends BaseModel
         };
     }
 
-    /**
-     * Check if this payment uses Midtrans
-     */
     public function isMidtransPayment()
     {
         return $this->gateway_provider === 'midtrans';
     }
 
-    /**
-     * Get Midtrans payment URL
-     */
     public function getMidtransPaymentUrl()
     {
         if (!$this->midtrans_snap_token) {
             return null;
         }
 
-        $baseUrl = config('midtrans.is_production') 
+        $baseUrl = config('midtrans.is_production')
             ? config('midtrans.snap_url.production')
             : config('midtrans.snap_url.sandbox');
-            
+
         return $baseUrl . '/' . $this->midtrans_snap_token;
     }
 
-    // Accessors
     public function getFormattedAmountAttribute(): string
     {
         return 'Rp ' . number_format($this->amount, 0, ',', '.');

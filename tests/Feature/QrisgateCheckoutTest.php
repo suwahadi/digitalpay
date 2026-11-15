@@ -128,7 +128,8 @@ class QrisgateCheckoutTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Invoice/Show', false)
                 ->where('order.qris.qr_string', '00020101021226QRTEST6304ABCD')
-                ->where('order.qris.checkout_url', 'https://qrisgate.test/pay/trx_1'));
+                ->missing('order.qris.checkout_url')
+                ->missing('order.payment_gateway'));
     }
 
     public function test_api_failure_cancels_order_and_returns_to_product(): void

@@ -15,32 +15,22 @@ class PaymentSuccessNotification extends Notification implements ShouldQueue
 
     protected Order $order;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Order $order)
     {
         $this->order = $order;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(object $notifiable): array
     {
-        // Only use database channel for User model, not for GuestUser
         $channels = ['brevo'];
-        
+
         if ($notifiable instanceof User) {
             $channels[] = 'database';
         }
-        
+
         return $channels;
     }
 
-    /**
-     * Get the array representation of the notification for database.
-     */
     public function toDatabase(object $notifiable): array
     {
         return [
@@ -51,27 +41,21 @@ class PaymentSuccessNotification extends Notification implements ShouldQueue
         ];
     }
 
-    /**
-     * Send notification via Brevo
-     */
     public function toBrevo(object $notifiable): bool
     {
         $brevoService = app(BrevoService::class);
-        
+
         $orderData = $this->prepareOrderData();
-        
+
         $result = $brevoService->sendPaymentSuccess($orderData);
-        
+
         return $result['success'] ?? false;
     }
 
-    /**
-     * Prepare order data for email
-     */
     protected function prepareOrderData(): array
     {
         $this->order->load('items.productVariant.product', 'paymentMethod');
-        
+
         return [
             'order_number' => $this->order->order_number,
             'customer_name' => $this->order->customer_name,
@@ -98,6 +82,7 @@ class PaymentSuccessNotification extends Notification implements ShouldQueue
             'formatted_subtotal' => $this->order->formatted_subtotal,
             'formatted_fee_amount' => $this->order->formatted_fee_amount,
             'formatted_total_amount' => $this->order->formatted_total_amount,
+            ...$this->order->emailAmounts(),
             'payment_method' => $this->order->paymentMethod->name ?? 'N/A',
             'has_digital_items' => $this->order->hasAutoDeliveryItems(),
             'needs_manual_delivery' => $this->order->needs_manual_delivery,
