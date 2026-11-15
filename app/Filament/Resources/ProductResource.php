@@ -23,6 +23,7 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
     protected static ?string $navigationGroup = 'Katalog';
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $modelLabel = 'Produk';
     protected static ?string $pluralModelLabel = 'Produk';
@@ -54,7 +55,6 @@ class ProductResource extends Resource
                         Toggle::make('is_active')->label('Aktif')->default(true),
                         Toggle::make('is_featured')->label('Sorotan'),
                         Toggle::make('is_popular')->label('Populer'),
-                        Toggle::make('is_digital')->label('Produk Digital')->default(false),
                         TextInput::make('sort_order')->label('Urutan')->numeric()->default(0),
                     ])->columns(3),
                     Section::make('Media')->schema([
@@ -66,9 +66,6 @@ class ProductResource extends Resource
                     ])->columns(1),
                     Section::make('Fitur')->schema([
                         KeyValue::make('features')->label('Fitur')->columnSpanFull(),
-                    ])->columns(1),
-                    Section::make('Instruksi Digital')->schema([
-                        RichEditor::make('digital_instructions')->label('Instruksi')->columnSpanFull(),
                     ])->columns(1),
                 ]),
             ]);
@@ -84,9 +81,7 @@ class ProductResource extends Resource
                 TextColumn::make('is_active')->label('Aktif')->badge()
                     ->formatStateUsing(fn ($state) => $state ? 'Aktif' : 'Nonaktif')
                     ->color(fn ($state) => $state ? 'success' : 'danger'),
-                TextColumn::make('is_digital')->label('Digital')->badge()
-                    ->formatStateUsing(fn ($state) => $state ? 'Ya' : 'Tidak')
-                    ->color(fn ($state) => $state ? 'info' : 'gray'),
+                TextColumn::make('variants_count')->label('Varian')->counts('variants')->badge()->color('gray'),
                 TextColumn::make('created_at')->label('Dibuat')
                     ->dateTime('d M Y H:i')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -99,8 +94,6 @@ class ProductResource extends Resource
                     ->relationship('category', 'name'),
                 Tables\Filters\TernaryFilter::make('is_active')->label('Status')
                     ->trueLabel('Aktif')->falseLabel('Nonaktif'),
-                Tables\Filters\TernaryFilter::make('is_digital')->label('Produk Digital')
-                    ->trueLabel('Ya')->falseLabel('Tidak'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -109,6 +102,13 @@ class ProductResource extends Resource
             ->defaultSort('sort_order', 'asc')
             ->searchPlaceholder('Cari')
             ->reorderable('sort_order');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ProductResource\RelationManagers\VariantsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

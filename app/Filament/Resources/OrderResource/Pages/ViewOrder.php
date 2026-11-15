@@ -14,6 +14,18 @@ class ViewOrder extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('deliver_manual')
+                ->label('Kirim Manual')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('warning')
+                ->visible(fn () => OrderResource::canDeliverManually($this->record))
+                ->form(OrderResource::manualDeliveryForm())
+                ->modalHeading('Kirim Manual - '.$this->record->order_number)
+                ->modalSubmitActionLabel('Kirim ke Pembeli')
+                ->action(function (array $data) {
+                    OrderResource::deliverManually($this->record, $data);
+                    $this->record->refresh();
+                }),
             Actions\Action::make('mark_paid')
                 ->label('Tandai Lunas')
                 ->icon('heroicon-o-check-badge')

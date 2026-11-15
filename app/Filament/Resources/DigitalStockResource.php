@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,52 +21,52 @@ use Filament\Tables\Columns\TextColumn;
 class DigitalStockResource extends Resource
 {
     protected static ?string $model = DigitalStock::class;
-    protected static ?string $navigationGroup = 'Digital';
+    protected static ?string $navigationGroup = 'Katalog';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
-    protected static ?string $modelLabel = 'Digital Stock';
-    protected static ?string $pluralModelLabel = 'Digital Stock';
+    protected static ?string $modelLabel = 'Stok Digital';
+    protected static ?string $pluralModelLabel = 'Stok Digital';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Grid::make(3)->schema([
-                    Section::make('Informasi Stock')->schema([
+                    Section::make('Informasi Stok')->schema([
                         Select::make('product_variant_id')
                             ->label('Varian Produk')
-                            ->relationship('productVariant', 'name')
+                            ->relationship('productVariant', 'name', fn ($query) => $query->where('delivery_type', ProductVariant::DELIVERY_AUTO))
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->product->name . ' - ' . $record->name)
+                            ->helperText('Hanya varian dengan pengiriman Otomatis')
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('stock_name')
-                            ->label('Nama Stock')
+                            ->label('Nama Stok')
                             ->required()
-                            ->helperText('Nama identifikasi untuk stock ini'),
+                            ->helperText('Penanda internal, mis. Akun 01'),
                         Select::make('status')
                             ->label('Status')
                             ->options([
-                                DigitalStock::STATUS_AVAILABLE => 'Available',
-                                DigitalStock::STATUS_RESERVED => 'Reserved',
-                                DigitalStock::STATUS_DELIVERED => 'Delivered',
-                                DigitalStock::STATUS_EXPIRED => 'Expired',
+                                DigitalStock::STATUS_AVAILABLE => 'Tersedia',
+                                DigitalStock::STATUS_RESERVED => 'Dipesan',
+                                DigitalStock::STATUS_DELIVERED => 'Terkirim',
+                                DigitalStock::STATUS_EXPIRED => 'Kedaluwarsa',
                             ])
                             ->default(DigitalStock::STATUS_AVAILABLE)
                             ->required(),
                     ])->columns(2),
-                    Section::make('Data Stock')->schema([
+                    Section::make('Data Akun')->schema([
                         KeyValue::make('stock_data')
-                            ->label('Data Stock')
-                            ->keyLabel('Field')
-                            ->valueLabel('Value')
+                            ->label('Data Akun')
+                            ->keyLabel('Nama Kolom')
+                            ->valueLabel('Isi')
+                            ->required()
                             ->columnSpanFull()
-                            ->helperText('Data yang akan dikirim saat delivery (contoh: username, password, link, dll)'),
-                    ])->columns(1),
-                    Section::make('Informasi Tambahan')->schema([
-                        Textarea::make('notes')
-                            ->label('Catatan')
-                            ->rows(3)
-                            ->columnSpanFull(),
+                            ->helperText('Dikirim ke pembeli, mis. username, password, link, PIN'),
+                        DateTimePicker::make('expires_at')
+                            ->label('Berlaku Sampai')
+                            ->helperText('Opsional. Lewat dari tanggal ini, stok tidak akan dikirim'),
                     ])->columns(1),
                 ]),
             ]);
@@ -88,7 +89,7 @@ class DigitalStockResource extends Resource
                     })
                     ->html(),
                 TextColumn::make('stock_name')
-                    ->label('Nama Stock')
+                    ->label('Nama Stok')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')
@@ -102,18 +103,15 @@ class DigitalStockResource extends Resource
                         default => 'gray'
                     })
                     ->formatStateUsing(fn ($state) => match($state) {
-                        DigitalStock::STATUS_AVAILABLE => 'Available',
-                        DigitalStock::STATUS_RESERVED => 'Reserved',
-                        DigitalStock::STATUS_DELIVERED => 'Delivered',
-                        DigitalStock::STATUS_EXPIRED => 'Expired',
+                        DigitalStock::STATUS_AVAILABLE => 'Tersedia',
+                        DigitalStock::STATUS_RESERVED => 'Dipesan',
+                        DigitalStock::STATUS_DELIVERED => 'Terkirim',
+                        DigitalStock::STATUS_EXPIRED => 'Kedaluwarsa',
                         default => ucfirst($state)
                     }),
-                // TextColumn::make('assigned_at')
-                //     ->label('Assigned At')
-                //     ->dateTime('d M Y H:i')
-                //     ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('delivered_at')
-                    ->label('Delivered At')
+                    ->label('Terkirim')
                     ->dateTime('d M Y H:i')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
@@ -135,10 +133,10 @@ class DigitalStockResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status')
                     ->options([
-                        DigitalStock::STATUS_AVAILABLE => 'Available',
-                        DigitalStock::STATUS_RESERVED => 'Reserved',
-                        DigitalStock::STATUS_DELIVERED => 'Delivered',
-                        DigitalStock::STATUS_EXPIRED => 'Expired',
+                        DigitalStock::STATUS_AVAILABLE => 'Tersedia',
+                        DigitalStock::STATUS_RESERVED => 'Dipesan',
+                        DigitalStock::STATUS_DELIVERED => 'Terkirim',
+                        DigitalStock::STATUS_EXPIRED => 'Kedaluwarsa',
                     ]),
             ])
             ->actions([

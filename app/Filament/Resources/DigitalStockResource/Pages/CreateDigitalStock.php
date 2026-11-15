@@ -15,7 +15,7 @@ class CreateDigitalStock extends CreateRecord
     {
         $data['added_at'] = now();
         $data['added_by_user_id'] = Auth::id();
-        
+
         return $data;
     }
 }

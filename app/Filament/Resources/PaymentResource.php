@@ -139,14 +139,7 @@ class PaymentResource extends Resource
                         'expired' => 'gray',
                         default => 'gray'
                     }),
-                // TextColumn::make('gateway_provider')
-                //     ->label('Gateway')
-                //     ->badge()
-                //     ->color('info'),
-                // TextColumn::make('customer_email')
-                //     ->label('Customer')
-                //     ->searchable()
-                //     ->limit(30),
+
                 TextColumn::make('paid_at')
                     ->label('Dibayar')
                     ->dateTime('d M Y H:i')
@@ -169,12 +162,7 @@ class PaymentResource extends Resource
                         'cancelled' => 'Cancelled',
                         'expired' => 'Expired',
                     ]),
-                // Tables\Filters\SelectFilter::make('gateway_provider')
-                //     ->label('Gateway')
-                //     ->options([
-                //         'midtrans' => 'Midtrans',
-                //         'manual' => 'Manual',
-                //     ]),
+
                 Tables\Filters\SelectFilter::make('payment_method_id')
                     ->label('Metode Pembayaran')
                     ->relationship('paymentMethod', 'name')
@@ -183,7 +171,6 @@ class PaymentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->defaultSort('created_at', 'desc')
@@ -194,9 +181,7 @@ class PaymentResource extends Resource
     {
         return [
             'index' => PaymentResource\Pages\ListPayments::route('/'),
-            'create' => PaymentResource\Pages\CreatePayment::route('/create'),
             'view' => PaymentResource\Pages\ViewPayment::route('/{record}'),
-            'edit' => PaymentResource\Pages\EditPayment::route('/{record}/edit'),
         ];
     }
 }
