@@ -179,7 +179,6 @@ class EmailVerificationOTP extends Notification
                     text-decoration: underline;
                 }
 
-                /* Mobile Responsive */
                 @media only screen and (max-width: 600px) {
                     .email-wrapper {
                         padding: 16px;
