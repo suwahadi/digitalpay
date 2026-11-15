@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Models\Order;
 use App\Models\PaymentMethod;
+use App\Services\QrisgatePaymentSync;
+use Filament\Notifications\Notification;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Grid;
@@ -209,12 +211,46 @@ class OrderResource extends Resource
                     ->label('Items')
                     ->icon('heroicon-o-list-bullet')
                     ->url(fn ($record) => \App\Filament\Resources\OrderItemResource::getUrl('index', ['tableFilters' => ['order_id' => ['value' => $record->id]]])),
+                Tables\Actions\Action::make('mark_paid')
+                    ->label('Tandai Lunas')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->visible(fn (Order $record) => static::canMarkPaid($record))
+                    ->requiresConfirmation()
+                    ->modalHeading('Tandai pesanan lunas?')
+                    ->modalDescription(fn (Order $record) => static::markPaidDescription($record))
+                    ->modalSubmitActionLabel('Ya, tandai lunas')
+                    ->action(fn (Order $record) => static::markPaid($record)),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->defaultSort('created_at', 'desc')
             ->searchPlaceholder('Cari');
+    }
+
+    public static function canMarkPaid(Order $order): bool
+    {
+        return $order->isQrisgate() && $order->status !== 'paid';
+    }
+
+    public static function markPaidDescription(Order $order): string
+    {
+        return 'Pastikan dana '.$order->formatted_total_amount.' sudah masuk ke rekening QRIS. Email pembayaran berhasil dan pengiriman produk akan diproses otomatis.';
+    }
+
+    public static function markPaid(Order $order): void
+    {
+        $user = auth()->user();
+        $done = app(QrisgatePaymentSync::class)->markPaidByAdmin($order, $user?->id, $user?->name);
+
+        if ($done) {
+            Notification::make()->title('Pesanan ditandai lunas')->body('Pengiriman produk sedang diproses.')->success()->send();
+
+            return;
+        }
+
+        Notification::make()->title('Pesanan tidak dapat ditandai lunas')->warning()->send();
     }
 
     public static function getPages(): array

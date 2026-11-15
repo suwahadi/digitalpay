@@ -34,6 +34,22 @@ class QrisgatePaymentSync
         return $query->whereHas('order', fn ($q) => $q->where('order_number', $orderNumber))->latest('id')->first();
     }
 
+    public function markPaidByAdmin(Order $order, ?int $userId, ?string $userName): bool
+    {
+        if (! $order->isQrisgate() || $order->status === 'paid') {
+            return false;
+        }
+
+        $payment = $order->payments()->where('gateway_provider', Order::QRISGATE)->latest('id')->first();
+        $data = ['marked_by_user_id' => $userId, 'marked_by' => $userName, 'paid_at' => now()->toIso8601String()];
+
+        if (! $payment) {
+            return $order->markAsPaidFromGateway(now(), ['triggered_by' => 'qrisgate_admin', 'user_id' => $userId]);
+        }
+
+        return $this->apply($payment->setRelation('order', $order), self::PAID, $data, 'admin');
+    }
+
     public static function statusFromEvent(?string $event): ?string
     {
         return match ($event) {
