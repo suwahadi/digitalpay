@@ -53,9 +53,8 @@ Route::prefix('api')->group(function () {
     Route::get('/products/by-category', [ProductController::class, 'groupedByCategory']);
     Route::get('/payment-methods', [HomeController::class, 'paymentMethods']);
     Route::get('/work-hours', [HomeController::class, 'workHours']);
-    
+
     Route::get('/invoice/{orderNumber}/status', [InvoiceController::class, 'status'])->middleware('order.access')->name('invoice.status');
-    
 });
 
 Route::prefix('news')->group(function () {
@@ -71,7 +70,7 @@ Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('chec
 
 Route::prefix('payment')->name('payment.')->middleware('order.access')->group(function () {
     Route::get('/{orderNumber}', [PaymentController::class, 'show'])->name('show');
-    Route::get('/{orderNumber}/status', [PaymentController::class, 'checkStatus'])->name('status'); 
+    Route::get('/{orderNumber}/status', [PaymentController::class, 'checkStatus'])->name('status');
     Route::get('/{orderNumber}/callback-status', [App\Http\Controllers\PaymentWebhookController::class, 'checkCallbackStatus'])->name('callback-status');
     Route::get('/{orderNumber}/stream', [App\Http\Controllers\PaymentWebhookController::class, 'streamPaymentStatus'])->name('stream');
     Route::get('/{orderNumber}/success', [PaymentController::class, 'success'])->name('success');
@@ -84,7 +83,6 @@ Route::post('/order/{orderNumber}/verify', [OrderAccessController::class, 'verif
 Route::prefix('invoice')->name('invoice.')->middleware('order.access')->group(function () {
     Route::get('/{orderNumber}', [InvoiceController::class, 'show'])->name('show');
     Route::get('/{orderNumber}/refresh-deliveries', [InvoiceController::class, 'refreshDigitalDeliveries'])->name('refresh-deliveries');
-    Route::post('/{orderNumber}/manual-paid', [InvoiceController::class, 'confirmManualPayment'])->middleware('throttle:6,1')->name('manual-paid');
 });
 
 Route::prefix('midtrans')->name('midtrans.')->group(function () {
@@ -99,7 +97,7 @@ Route::get('/{page:slug}', [PageController::class, 'show'])->name('pages.show');
 Route::prefix('digital')->name('digital.')->group(function () {
     Route::get('/download/{token}', [SecureDownloadController::class, 'download'])
          ->name('download');
-    
+
     Route::get('/status/{token}', [SecureDownloadController::class, 'checkStatus'])
          ->name('status');
 });

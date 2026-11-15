@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Setting;
 use App\Jobs\ProcessDigitalDelivery;
 
 class Order extends Model
 {
-    public const MANUAL_QRIS = 'manual_qris';
+    public const QRISGATE = 'qrisgate';
 
     use HasFactory;
 
@@ -57,12 +58,8 @@ class Order extends Model
         'needs_manual_delivery' => 'boolean',
     ];
 
-    /**
-     * Generate a unique order number
-     */
     public static function generateOrderNumber()
     {
-        // Get prefix from settings
         $prefix = Setting::get('order_number_prefix', 'DIG');
         do {
             $orderNumber = strtoupper($prefix . '-' . Str::random(7));
@@ -71,25 +68,16 @@ class Order extends Model
         return $orderNumber;
     }
 
-    /**
-     * Get the user who made the order
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the payment method associated with the order
-     */
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class);
     }
 
-    /**
-     * Get the order items
-     */
     public function items()
     {
         return $this->hasMany(OrderItem::class);
@@ -100,10 +88,10 @@ class Order extends Model
         if (!$this->expires_at) {
             return false;
         }
-        
+
         return $this->expires_at->isPast();
     }
-    
+
     public function markAsExpired()
     {
         if (!in_array($this->status, ['paid', 'cancelled', 'expired'])) {
@@ -114,45 +102,30 @@ class Order extends Model
         }
     }
 
-    /**
-     * Get time remaining until expiration
-     */
     public function getTimeRemainingAttribute()
     {
         if ($this->isExpired()) {
             return null;
         }
-        
+
         return $this->expires_at->diffForHumans(null, true);
     }
 
-    /**
-     * Get formatted subtotal
-     */
     public function getFormattedSubtotalAttribute()
     {
         return 'Rp ' . number_format($this->subtotal, 0, ',', '.');
     }
 
-    /**
-     * Get formatted fee amount
-     */
     public function getFormattedFeeAmountAttribute()
     {
         return 'Rp ' . number_format($this->fee_amount, 0, ',', '.');
     }
 
-    /**
-     * Get formatted total amount
-     */
     public function getFormattedTotalAmountAttribute()
     {
         return 'Rp ' . number_format($this->total_amount, 0, ',', '.');
     }
 
-    /**
-     * Get status badge color
-     */
     public function getStatusColorAttribute()
     {
         return match($this->status) {
@@ -164,9 +137,6 @@ class Order extends Model
         };
     }
 
-    /**
-     * Get status label
-     */
     public function getStatusLabelAttribute()
     {
         return match($this->status) {
@@ -178,9 +148,6 @@ class Order extends Model
         };
     }
 
-    /**
-     * Get payment status label
-     */
     public function getPaymentStatusLabelAttribute()
     {
         return match($this->payment_status) {
@@ -194,54 +161,57 @@ class Order extends Model
         };
     }
 
-    /**
-     * Check if payment is paid
-     */
     public function isPaid()
     {
         return $this->payment_status === 'paid';
     }
 
-    /**
-     * Check if payment is pending
-     */
     public function isPending()
     {
         return $this->payment_status === 'pending';
     }
 
-    public function isManualQris(): bool
+    public function isQrisgate(): bool
     {
-        return $this->payment_gateway === self::MANUAL_QRIS;
+        return $this->payment_gateway === self::QRISGATE;
     }
 
-    /**
-     * A static QRIS carries no amount, so each pending manual order gets a
-     * 1-999 code added to its total that no other pending manual order with
-     * the same base amount uses, letting admin match an incoming transfer.
-     */
-    public static function pickManualUniqueCode(int $baseAmount): int
+    public function markAsPaidFromGateway(?\DateTimeInterface $paidAt = null, array $context = []): bool
     {
-        $taken = static::where('payment_gateway', self::MANUAL_QRIS)
-            ->where('status', 'pending')
-            ->whereBetween('total_amount', [$baseAmount + 1, $baseAmount + 999])
-            ->pluck('total_amount')
-            ->map(fn ($total) => (int) $total - $baseAmount)
-            ->all();
+        $order = DB::transaction(function () use ($paidAt) {
+            $order = static::whereKey($this->getKey())->lockForUpdate()->first();
 
-        $free = array_values(array_diff(range(1, 999), $taken));
+            if (! $order || $order->status === 'paid' || $order->payment_status === 'paid') {
+                return null;
+            }
 
-        return $free ? $free[array_rand($free)] : random_int(1, 999);
+            $order->update([
+                'status' => 'paid',
+                'payment_status' => 'paid',
+                'midtrans_paid_at' => $paidAt ?? now(),
+            ]);
+
+            $order->items()->where('delivery_status', 'failed')->update(['delivery_status' => 'pending']);
+
+            return $order;
+        });
+
+        if (! $order) {
+            return false;
+        }
+
+        $this->setRawAttributes($order->getAttributes(), true);
+
+        ProcessDigitalDelivery::dispatch($order, 'auto', $context);
+
+        return true;
     }
 
-    /**
-     * Update payment status from Midtrans
-     */
     public function updatePaymentStatus($transactionStatus, $fraudStatus = null, $response = null)
     {
         $oldPaymentStatus = $this->payment_status;
         $paymentStatus = $this->mapMidtransStatus($transactionStatus, $fraudStatus);
-        
+
         $updateData = [
             'payment_status' => $paymentStatus,
         ];
@@ -254,7 +224,7 @@ class Order extends Model
         }
 
         $this->update($updateData);
-        
+
         if ($oldPaymentStatus !== 'paid' && $paymentStatus === 'paid') {
             ProcessDigitalDelivery::dispatch($this, 'auto', [
                 'triggered_by' => 'payment_callback',
@@ -264,9 +234,6 @@ class Order extends Model
         }
     }
 
-    /**
-     * Map Midtrans status to our payment status
-     */
     private function mapMidtransStatus($transactionStatus, $fraudStatus = null)
     {
         return match($transactionStatus) {
@@ -280,17 +247,11 @@ class Order extends Model
         };
     }
 
-    /**
-     * Get the payment record associated with this order
-     */
     public function payment()
     {
         return $this->hasOne(Payment::class);
     }
 
-    /**
-     * Get all payments associated with this order
-     */
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -301,7 +262,6 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // Manual Delivery Methods
     public function processedByUser()
     {
         return $this->belongsTo(User::class, 'processed_by_user_id');
@@ -358,7 +318,6 @@ class Order extends Model
         ]);
     }
 
-    // Scopes untuk manual delivery
     public function scopePendingManualDelivery($query)
     {
         return $query->where('needs_manual_delivery', true)
@@ -369,5 +328,4 @@ class Order extends Model
     {
         return $query->whereNotNull('manual_processed_at');
     }
-
 }

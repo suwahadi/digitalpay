@@ -137,10 +137,7 @@ class OrderResource extends Resource
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),
-                // TextColumn::make('customer_email')
-                //     ->label('Email')
-                //     ->searchable()
-                //     ->limit(30),
+
                 TextColumn::make('formatted_total_amount')
                     ->label('Total')
                     ->searchable('total_amount')
@@ -158,7 +155,7 @@ class OrderResource extends Resource
                 TextColumn::make('payment_status')
                     ->label('Pembayaran')
                     ->badge()
-                    ->formatStateUsing(fn ($state, $record) => $record->isManualQris() && $state === 'pending' ? 'Menunggu Konfirmasi' : ucfirst((string) $state))
+                    ->formatStateUsing(fn ($state) => ucfirst((string) $state))
                     ->color(fn ($state) => match($state) {
                         'unpaid' => 'gray',
                         'pending' => 'warning',
@@ -172,15 +169,7 @@ class OrderResource extends Resource
                     ->label('Metode')
                     ->badge()
                     ->color('info'),
-                // TextColumn::make('delivery_method')
-                //     ->label('Delivery')
-                //     ->badge()
-                //     ->color(fn ($state) => match($state) {
-                //         'auto' => 'success',
-                //         'manual' => 'warning',
-                //         'mixed' => 'info',
-                //         default => 'gray'
-                //     }),
+
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')

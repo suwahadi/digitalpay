@@ -8,11 +8,6 @@ use App\Helpers\ConfigHelper;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-/**
- * Controller untuk mengelola invoice/faktur
- * 
- * Terintegrasi dengan digital delivery system
- */
 class InvoiceController extends Controller
 {
     protected $digitalDeliveryService;
@@ -22,12 +17,6 @@ class InvoiceController extends Controller
         $this->digitalDeliveryService = $digitalDeliveryService;
     }
 
-    /**
-     * Display invoice berdasarkan order number
-     * 
-     * @param string $orderNumber
-     * @return \Inertia\Response
-     */
     public function show(string $orderNumber)
     {
         try {
@@ -42,7 +31,7 @@ class InvoiceController extends Controller
                 $price = $this->safeNumeric($item->price);
                 $quantity = $this->safeNumeric($item->quantity, 1);
                 $totalPrice = $item->total_price ?? $this->calculateTotalPrice($price, $quantity);
-                
+
                 return [
                     'id' => $item->id,
                     'product_name' => $item->productVariant->product->name ?? 'Unknown Product',
@@ -65,16 +54,13 @@ class InvoiceController extends Controller
                 ];
             });
 
-            // Check apakah order memiliki produk digital
             $hasDigitalProducts = $this->digitalDeliveryService->orderHasDigitalProducts($order);
-            
-            // Get digital deliveries jika ada
+
             $digitalDeliveries = collect();
             if ($hasDigitalProducts && $order->status === 'paid') {
                 $digitalDeliveries = $this->digitalDeliveryService->getOrderDeliveries($order);
             }
 
-            // Transform digital deliveries untuk frontend
             $transformedDeliveries = $digitalDeliveries->map(function($delivery) {
                 return [
                     'id' => $delivery->id,
@@ -90,14 +76,13 @@ class InvoiceController extends Controller
                     'can_download' => $delivery->canDownload(),
                     'delivered_at' => $delivery->delivered_at ? $delivery->delivered_at->toISOString() : null,
                     'status' => $delivery->delivery_status,
-                    'delivery_status' => $delivery->delivery_status, // Tambahkan field ini
-                    'content' => $delivery->delivery_content, // Perbaiki field name
+                    'delivery_status' => $delivery->delivery_status,
+                    'content' => $delivery->delivery_content,
                     'first_download_at' => $delivery->first_download_at ? $delivery->first_download_at->toISOString() : null,
                     'last_download_at' => $delivery->last_download_at ? $delivery->last_download_at->toISOString() : null
                 ];
             });
 
-            // Transform order data untuk frontend
             $orderData = [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
@@ -108,7 +93,7 @@ class InvoiceController extends Controller
                 'payment_status' => $order->payment_status,
                 'payment_gateway' => $order->payment_gateway,
                 'unique_code' => $order->unique_code,
-                'manual_qris_image' => $order->isManualQris() ? config('services.manual_qris.image') : null,
+                'qris' => $this->qrisPayload($order),
                 'subtotal' => (int) ceil($order->subtotal),
                 'tax_amount' => (int) ceil($order->tax_amount ?? 0),
                 'fee_amount' => (int) ceil($order->fee_amount ?? 0),
@@ -131,7 +116,6 @@ class InvoiceController extends Controller
                 ] : null
             ];
 
-            // Get site name for title
             $siteName = ConfigHelper::siteName();
 
             return Inertia::render('Invoice/Show', [
@@ -140,7 +124,6 @@ class InvoiceController extends Controller
                 'hasDigitalProducts' => $hasDigitalProducts,
                 'digitalDeliveries' => $transformedDeliveries->toArray() ?? []
             ]);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return Inertia::render('Errors/404', [
                 'message' => 'Invoice tidak ditemukan'
@@ -153,12 +136,6 @@ class InvoiceController extends Controller
         }
     }
 
-    /**
-     * Download invoice sebagai PDF (optional)
-     * 
-     * @param string $orderNumber
-     * @return \Illuminate\Http\Response
-     */
     public function downloadPdf(string $orderNumber)
     {
         try {
@@ -168,32 +145,16 @@ class InvoiceController extends Controller
                 'payment'
             ])->where('order_number', $orderNumber)->firstOrFail();
 
-            // Generate PDF menggunakan library seperti DomPDF atau Snappy
-            // Contoh implementasi dengan DomPDF:
-            /*
-            $pdf = PDF::loadView('invoice.pdf', compact('order'));
-            return $pdf->download('invoice-' . $orderNumber . '.pdf');
-            */
-            
-            // Untuk sementara return error karena PDF library belum disetup
             return response()->json([
                 'message' => 'PDF download feature not implemented yet'
             ], 501);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             abort(404, 'Invoice tidak ditemukan');
         }
     }
 
-    /**
-     * Print invoice (view only untuk print)
-     * 
-     * @param string $orderNumber
-     * @return \Inertia\Response
-     */
     public function print(string $orderNumber)
     {
-        // Same logic as show() but with print-optimized template
         $order = Order::with([
             'orderItems.productVariant.product',
             'paymentMethod',
@@ -205,41 +166,11 @@ class InvoiceController extends Controller
         ]);
     }
 
-    /**
-     * Buyer's "Saya Sudah Bayar" on a manual QRIS order: hand it to admin for
-     * review and stop the unpaid-order expiry, since admin may take a while.
-     */
-    public function confirmManualPayment(string $orderNumber)
-    {
-        $order = Order::where('order_number', $orderNumber)->firstOrFail();
-
-        if (! $order->isManualQris() || $order->status !== 'pending' || $order->payment_status !== 'unpaid') {
-            return redirect()->route('invoice.show', $orderNumber)
-                ->with('error', 'Pesanan ini tidak dapat dikonfirmasi.');
-        }
-
-        if ($order->expires_at?->isPast()) {
-            return redirect()->route('invoice.show', $orderNumber)
-                ->with('error', 'Batas waktu pembayaran sudah lewat. Silakan buat pesanan baru.');
-        }
-
-        $order->update(['payment_status' => 'pending', 'expires_at' => null]);
-
-        return redirect()->route('invoice.show', $orderNumber)
-            ->with('success', 'Terima kasih! Pembayaran Anda sedang menunggu konfirmasi admin.');
-    }
-
-    /**
-     * Get invoice status (untuk AJAX calls)
-     * 
-     * @param string $orderNumber
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function status(string $orderNumber)
     {
         try {
             $order = Order::where('order_number', $orderNumber)->firstOrFail();
-            
+
             return response()->json([
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
@@ -247,32 +178,24 @@ class InvoiceController extends Controller
                 'is_expired' => $order->expires_at ? $order->expires_at->isPast() : false,
                 'has_digital_products' => $this->digitalDeliveryService->orderHasDigitalProducts($order)
             ]);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['error' => 'Order not found'], 404);
         }
     }
 
-    /**
-     * Refresh digital deliveries untuk order
-     * 
-     * @param string $orderNumber
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function refreshDigitalDeliveries(string $orderNumber)
     {
         try {
             $order = Order::where('order_number', $orderNumber)->firstOrFail();
-            
+
             if ($order->status !== 'paid') {
                 return response()->json([
                     'message' => 'Order belum dibayar'
                 ], 400);
             }
 
-            // Get fresh delivery data
             $deliveries = $this->digitalDeliveryService->getOrderDeliveries($order);
-            
+
             $transformedDeliveries = $deliveries->map(function($delivery) {
                 return [
                     'id' => $delivery->id,
@@ -288,8 +211,8 @@ class InvoiceController extends Controller
                     'can_download' => $delivery->canDownload(),
                     'delivered_at' => $delivery->delivered_at ? $delivery->delivered_at->toISOString() : null,
                     'status' => $delivery->delivery_status,
-                    'delivery_status' => $delivery->delivery_status, // Tambahkan field ini
-                    'content' => $delivery->delivery_content, // Perbaiki field name
+                    'delivery_status' => $delivery->delivery_status,
+                    'content' => $delivery->delivery_content,
                     'first_download_at' => $delivery->first_download_at ? $delivery->first_download_at->toISOString() : null,
                     'last_download_at' => $delivery->last_download_at ? $delivery->last_download_at->toISOString() : null
                 ];
@@ -298,7 +221,6 @@ class InvoiceController extends Controller
             return response()->json([
                 'deliveries' => $transformedDeliveries
             ]);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['error' => 'Order not found'], 404);
         } catch (\Exception $e) {
@@ -306,110 +228,94 @@ class InvoiceController extends Controller
         }
     }
 
-    /**
-     * Resend delivery notification email
-     * 
-     * @param string $orderNumber
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function resendDeliveryNotification(string $orderNumber)
     {
         try {
             $order = Order::where('order_number', $orderNumber)->firstOrFail();
-            
+
             if ($order->status !== 'paid') {
                 return response()->json([
                     'message' => 'Order belum dibayar'
                 ], 400);
             }
 
-            // Get deliveries
             $deliveries = $this->digitalDeliveryService->getOrderDeliveries($order);
-            
+
             if ($deliveries->isEmpty()) {
                 return response()->json([
                     'message' => 'Tidak ada produk digital untuk order ini'
                 ], 400);
             }
 
-            // Resend notification logic here
-            // Contoh: dispatch job untuk kirim email
-            /*
-            dispatch(new SendDigitalDeliveryNotification($order, $deliveries));
-            */
-
             return response()->json([
                 'message' => 'Notifikasi berhasil dikirim ulang'
             ]);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['error' => 'Order not found'], 404);
         }
     }
 
-    /**
-     * Format price untuk tampilan (dengan null safety)
-     * 
-     * @param mixed $price
-     * @return string
-     */
+    private function qrisPayload(Order $order): ?array
+    {
+        if (! $order->isQrisgate() || $order->status !== 'pending' || $order->payment_status !== 'pending') {
+            return null;
+        }
+
+        $payment = $order->payments()
+            ->where('gateway_provider', Order::QRISGATE)
+            ->latest('id')
+            ->first();
+
+        $data = $payment?->gateway_response;
+
+        if (! is_array($data) || empty($data['qr_string'])) {
+            return null;
+        }
+
+        return [
+            'qr_string' => $data['qr_string'],
+            'checkout_url' => $data['checkout_url'] ?? null,
+            'merchant_name' => $data['merchant_name'] ?? null,
+        ];
+    }
+
     private function formatPrice($price): string
     {
-        // Handle null atau invalid values
         if ($price === null || $price === '' || !is_numeric($price)) {
             return 'Rp 0';
         }
-        
-        // Convert to float untuk safety
+
         $price = (float) $price;
-        
+
         return 'Rp ' . number_format($price, 0, ',', '.');
     }
 
-    /**
-     * Safe numeric conversion
-     */
     private function safeNumeric($value, float $default = 0.0): float
     {
         if ($value === null || $value === '') {
             return $default;
         }
-        
+
         if (is_numeric($value)) {
             return (float) $value;
         }
-        
+
         return $default;
     }
 
-    /**
-     * Calculate total price safely
-     */
     private function calculateTotalPrice($price, $quantity): float
     {
         $safePrice = $this->safeNumeric($price);
         $safeQuantity = $this->safeNumeric($quantity, 1);
-        
+
         return $safePrice * $safeQuantity;
     }
 
-    /**
-     * Check if order has expired
-     * 
-     * @param Order $order
-     * @return bool
-     */
     private function isOrderExpired(Order $order): bool
     {
         return $order->expires_at && $order->expires_at->isPast();
     }
 
-    /**
-     * Get order status text untuk display
-     * 
-     * @param string $status
-     * @return string
-     */
     private function getStatusText(string $status): string
     {
         $statusMap = [
@@ -423,12 +329,6 @@ class InvoiceController extends Controller
         return $statusMap[$status] ?? ucfirst($status);
     }
 
-    /**
-     * Get payment status text untuk display
-     * 
-     * @param string $status
-     * @return string
-     */
     private function getPaymentStatusText(string $status): string
     {
         $statusMap = [

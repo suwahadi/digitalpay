@@ -38,10 +38,6 @@ class PaymentMethod extends Model
         return $this->getIconUrl();
     }
 
-    /**
-     * Seeded icons are public paths like /images/payment/bca.svg; icons uploaded
-     * from the admin panel are relative paths on the public disk.
-     */
     public function getIconUrl()
     {
         if (!$this->icon) {
@@ -55,14 +51,10 @@ class PaymentMethod extends Model
         return Storage::url($this->icon);
     }
 
-    /**
-     * Methods offered to buyers. While the temporary manual QRIS mode is on,
-     * only the QRIS method is offered; the others stay active in the database.
-     */
     public function scopeAvailable($query)
     {
         return $query->where('is_active', true)
-            ->when(config('services.manual_qris.enabled'), fn ($q) => $q->where('code', 'qris'));
+            ->when(config('services.payment_gateway') === Order::QRISGATE, fn ($q) => $q->where('code', 'qris'));
     }
 
     public function calculateFee($amount)
@@ -70,10 +62,9 @@ class PaymentMethod extends Model
         if ($this->fee_type === 'fixed') {
             return (float) ($this->fee_amount ?? 0);
         } elseif ($this->fee_type === 'percentage') {
-            // For percentage type, use fee_amount field as percentage value
             return ((float) $amount * (float) ($this->fee_amount ?? 0)) / 100;
         }
-        
+
         return 0;
     }
 
@@ -82,9 +73,6 @@ class PaymentMethod extends Model
         return $amount + $this->calculateFee($amount);
     }
 
-    /**
-     * Get payment method configuration for Core API
-     */
     public function getCoreApiConfig()
     {
         $config = [
@@ -174,9 +162,6 @@ class PaymentMethod extends Model
         return $times[$this->code] ?? '1-5 menit';
     }
 
-    /**
-     * Check if payment method requires manual confirmation
-     */
     public function requiresManualConfirmation()
     {
         return in_array($this->type, ['virtual_account', 'bank_transfer']);

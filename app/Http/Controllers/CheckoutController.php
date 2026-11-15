@@ -9,6 +9,10 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Helpers\ConfigHelper;
 use App\Services\MidtransService;
+use App\Services\QrisgateException;
+use App\Services\QrisgateService;
+use App\Observers\OrderObserver;
+use App\Models\Payment;
 use App\Http\Middleware\EnsureOrderAccess;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
@@ -23,14 +27,14 @@ class CheckoutController extends Controller
 {
     protected $midtransService;
 
-    public function __construct(MidtransService $midtransService)
+    protected $qrisgateService;
+
+    public function __construct(MidtransService $midtransService, QrisgateService $qrisgateService)
     {
         $this->midtransService = $midtransService;
+        $this->qrisgateService = $qrisgateService;
     }
-    /**
-     * Handle direct access to checkout page
-     * Redirect to home page when accessed without proper order data
-     */
+
     public function index(Request $request)
     {
         return redirect()->route('home')
@@ -50,12 +54,12 @@ class CheckoutController extends Controller
 
         $product = Product::with(['category', 'variants'])->findOrFail($request->product_id);
         $selectedVariant = ProductVariant::findOrFail($request->variant_id);
-        
+
         if (!$product || !$selectedVariant) {
             return redirect()->route('home')
                 ->with('error', 'Produk atau variant tidak ditemukan.');
         }
-    
+
         if ($selectedVariant->product_id !== $product->id) {
             abort(422, 'Invalid variant for this product');
         }
@@ -85,7 +89,7 @@ class CheckoutController extends Controller
                     'estimated_time' => $this->getEstimatedPaymentTime($method),
                 ];
             });
-        
+
         $subtotal = (float) ($selectedVariant->price);
         $availableVouchers = \App\Models\Voucher::query()
             ->where('is_active', true)
@@ -158,7 +162,7 @@ class CheckoutController extends Controller
             $request->validate($rules);
 
             DB::beginTransaction();
-            
+
             $product = Product::findOrFail($request->product_id);
             $variant = ProductVariant::findOrFail($request->variant_id);
             $paymentMethod = PaymentMethod::findOrFail($request->payment_method_id);
@@ -169,7 +173,7 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            $manualQris = (bool) config('services.manual_qris.enabled');
+            $useQrisgate = config('services.payment_gateway') === Order::QRISGATE;
 
             if ($variant->product_id !== $product->id || !$product->is_active || !$variant->is_active || $variant->stock_status === 'Habis') {
                 throw \Illuminate\Validation\ValidationException::withMessages([
@@ -192,18 +196,15 @@ class CheckoutController extends Controller
             }
 
             $discount = ceil($discount);
-            
+
             $discountedSubtotal = max($subtotal - $discount, 0);
             $feeAmount = $paymentMethod->calculateFee($discountedSubtotal);
-            
+
             $feeAmount = ceil($feeAmount);
-            
+
             $totalAmount = $discountedSubtotal + $feeAmount;
             $totalAmount = ceil($totalAmount);
 
-            $uniqueCode = $manualQris ? Order::pickManualUniqueCode((int) $totalAmount) : null;
-            $totalAmount += $uniqueCode ?? 0;
-            
             $order = Order::create([
                 'uuid' => Str::uuid(),
                 'order_number' => Order::generateOrderNumber(),
@@ -212,17 +213,16 @@ class CheckoutController extends Controller
                 'customer_email' => $request->customer_email,
                 'customer_phone' => $request->customer_phone,
                 'payment_method_id' => $request->payment_method_id,
-                'payment_gateway' => $manualQris ? Order::MANUAL_QRIS : 'midtrans',
+                'payment_gateway' => $useQrisgate ? Order::QRISGATE : 'midtrans',
                 'voucher_code' => $voucher?->code,
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
                 'subtotal' => ceil($subtotal),
                 'discount_amount' => $discount,
                 'fee_amount' => $feeAmount,
-                'unique_code' => $uniqueCode,
                 'total_amount' => $totalAmount,
                 'notes' => $request->notes,
-                'expires_at' => Carbon::now()->addMinutes($manualQris ? config('services.manual_qris.expires_minutes') : 15),
+                'expires_at' => Carbon::now()->addMinutes(15),
             ]);
 
             $voucher?->increment('used_count');
@@ -242,13 +242,12 @@ class CheckoutController extends Controller
 
             EnsureOrderAccess::grant($request, $order->order_number);
 
-            if ($manualQris) {
-                return redirect()->route('invoice.show', $order->order_number);
+            if ($useQrisgate) {
+                return $this->startQrisgatePayment($request, $order, $paymentMethod);
             }
 
-            // Create Midtrans Core API payment (outside transaction)
             $paymentResult = $this->midtransService->createTransaction($order, $paymentMethod);
-            
+
             if ($paymentResult['success']) {
                 try {
                     $payment = \App\Models\Payment::create([
@@ -281,67 +280,110 @@ class CheckoutController extends Controller
                     'checkout_order_number' => $order->order_number,
                 ]);
 
-                // Frontend will extract order_number and force redirect to prevent stuck loading
                 if ($request->header('X-Inertia')) {
                     return redirect()->route('payment.show', $order->order_number)
                         ->with([
                             'success' => 'Pesanan berhasil dibuat! Silakan lakukan pembayaran.',
                         ]);
                 }
-                
+
                 return redirect()->away(url('/payment/' . $order->order_number))
                     ->with([
                         'success' => 'Pesanan berhasil dibuat! Silakan lakukan pembayaran.',
                     ]);
             } else {
                 $order->updateQuietly(['status' => 'cancelled', 'payment_status' => 'failed']);
-                
+
                 \Log::error('[Checkout] Payment creation failed', [
                     'order_number' => $order->order_number,
                     'error_message' => $paymentResult['message'] ?? 'Unknown error',
                 ]);
-                
+
                 return $this->checkoutFailed($request, 'Pembayaran tidak dapat dibuat saat ini. Silakan coba lagi beberapa saat lagi.');
             }
-            
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-            
+
             \Log::warning('[Checkout] Validation failed', [
                 'errors' => $e->errors(),
             ]);
-            
+
             return $this->checkoutFailed($request, collect($e->errors())->flatten()->first());
-            
         } catch (\Illuminate\Session\TokenMismatchException $e) {
             DB::rollBack();
-            
+
             \Log::error('[Checkout] CSRF token mismatch', [
                 'session_id' => $request->session()->getId(),
                 'error' => $e->getMessage(),
             ]);
-            
+
             return back()->withErrors([
                 'csrf' => 'Session expired. Please refresh the page and try again.'
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('[Checkout] Exception occurred', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->checkoutFailed($request, 'Terjadi kesalahan saat memproses pesanan. Silakan coba lagi.');
         }
     }
 
-    /**
-     * The checkout page only renders from the product page's POST, so a
-     * failed order is sent back to the product with a toast instead of
-     * back(), which lands on GET /checkout and bounces to the home page.
-     */
+    private function startQrisgatePayment(Request $request, Order $order, PaymentMethod $paymentMethod)
+    {
+        try {
+            $data = $this->qrisgateService->createTransaction($order);
+        } catch (QrisgateException $e) {
+            $order->updateQuietly(['status' => 'cancelled', 'payment_status' => 'failed']);
+            $order->items()->update(['delivery_status' => 'failed']);
+
+            \Log::error('[Checkout] QRISGate transaction failed', [
+                'order_number' => $order->order_number,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->checkoutFailed($request, 'Pembayaran QRIS tidak dapat dibuat saat ini. Silakan coba lagi beberapa saat lagi.');
+        }
+
+        $total = (int) $data['total_amount'];
+        $expiresAt = ! empty($data['expires_at']) ? Carbon::parse($data['expires_at'])->setTimezone(config('app.timezone')) : $order->expires_at;
+
+        $order->update([
+            'unique_code' => isset($data['unique_code']) ? (int) $data['unique_code'] : max($total - (int) round((float) $order->total_amount), 0),
+            'total_amount' => $total,
+            'payment_status' => 'pending',
+            'expires_at' => $expiresAt,
+        ]);
+
+        Payment::create([
+            'uuid' => Str::uuid(),
+            'order_id' => $order->id,
+            'user_id' => $order->user_id,
+            'payment_method_id' => $paymentMethod->id,
+            'amount' => $total,
+            'fee_amount' => ceil($order->fee_amount),
+            'total_amount' => $total,
+            'currency' => 'IDR',
+            'customer_type' => $order->user_id ? 'registered' : 'guest',
+            'customer_email' => $order->customer_email,
+            'customer_phone' => $order->customer_phone,
+            'gateway_provider' => Order::QRISGATE,
+            'gateway_transaction_id' => $data['transaction_id'],
+            'gateway_response' => $data,
+            'status' => Payment::STATUS_PENDING,
+            'payment_url' => $data['checkout_url'] ?? null,
+            'return_url' => route('invoice.show', $order->order_number),
+            'expired_at' => $expiresAt,
+        ]);
+
+        app(OrderObserver::class)->notifyOrderCreated($order);
+
+        return redirect()->route('invoice.show', $order->order_number);
+    }
+
     private function checkoutFailed(Request $request, string $message)
     {
         $product = Product::find($request->input('product_id'));
@@ -350,9 +392,6 @@ class CheckoutController extends Controller
             ->with('error', $message);
     }
 
-    /**
-     * Get payment method description
-     */
     private function getPaymentMethodDescription($method)
     {
         $descriptions = [
@@ -368,18 +407,12 @@ class CheckoutController extends Controller
         return $descriptions[$method->code] ?? 'Metode pembayaran ' . $method->name;
     }
 
-    /**
-     * Check if payment method is instant
-     */
     private function isInstantPayment($method)
     {
         $instantMethods = ['qris', 'gopay', 'dana', 'shopeepay'];
         return in_array($method->code, $instantMethods);
     }
 
-    /**
-     * Get estimated payment time
-     */
     private function getEstimatedPaymentTime($method)
     {
         $times = [
@@ -394,5 +427,4 @@ class CheckoutController extends Controller
 
         return $times[$method->code] ?? '1-5 menit';
     }
-
 }

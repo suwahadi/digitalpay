@@ -11,18 +11,20 @@ use App\Notifications\OrderExpiredNotification;
 
 class OrderObserver
 {
-    /**
-     * Handle the Order "created" event.
-     */
     public function created(Order $order): void
     {
-        if ($order->isManualQris()) {
+        if ($order->isQrisgate()) {
             return;
         }
 
+        $this->notifyOrderCreated($order);
+    }
+
+    public function notifyOrderCreated(Order $order): void
+    {
         try {
             $notifiable = $this->getNotifiable($order);
-            
+
             if ($notifiable) {
                 $notifiable->notify(new OrderCreatedNotification($order));
             }
@@ -31,19 +33,12 @@ class OrderObserver
         }
     }
 
-    /**
-     * Handle the Order "updated" event.
-     */
     public function updated(Order $order): void
     {
-        if ($order->isManualQris()) {
-            return;
-        }
-
         if ($order->isDirty('payment_status') && $order->payment_status === 'paid') {
             try {
                 $notifiable = $this->getNotifiable($order);
-                
+
                 if ($notifiable) {
                     $notifiable->notify(new PaymentSuccessNotification($order));
                 }
@@ -52,10 +47,14 @@ class OrderObserver
             }
         }
 
+        if ($order->isQrisgate()) {
+            return;
+        }
+
         if ($order->isDirty('status') && $order->status === 'cancelled') {
             try {
                 $notifiable = $this->getNotifiable($order);
-                
+
                 if ($notifiable) {
                     $reason = $order->notes ?? 'Pesanan dibatalkan';
                     $notifiable->notify(new OrderCancellationNotification($order, $reason));
@@ -78,9 +77,6 @@ class OrderObserver
         }
     }
 
-    /**
-     * Get notifiable entity (User or GuestUser)
-     */
     protected function getNotifiable(Order $order)
     {
         if ($order->user_id) {

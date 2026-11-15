@@ -8,14 +8,12 @@
 
         <div class="py-12">
             <div class="w-full mx-auto max-w-4xl py-12 px-2 sm:px-4">
-                <!-- Dynamic Title -->
                 <Head>
                     <title>Order ID: #{{ order.order_number }}</title>
                     <meta name="description" :content="`Invoice untuk order ${order.order_number} di ${$page.props.settings?.title || 'DigitalPay'}`">
                 </Head>
 
                 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-                    <!-- Progress Bar (if still loading) -->
                     <div v-if="reloadProgress < 100" class="fixed top-0 left-0 w-full z-50">
                         <div class="bg-blue-600 h-1 transition-all duration-300" 
                              :style="{ width: reloadProgress + '%' }">
@@ -27,7 +25,6 @@
                         </div>
                     </div>
 
-                    <!-- Main Content Container -->
                     <div class="relative overflow-hidden rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-8" 
                          :class="{ 'mt-20': reloadProgress < 100 }">
                         <div v-if="isLunas" class="pointer-events-none absolute right-0 top-0 h-28 w-28 overflow-hidden sm:h-32 sm:w-32" aria-hidden="true">
@@ -35,7 +32,6 @@
                                 LUNAS
                             </div>
                         </div>
-                        <!-- Header -->
                         <div class="text-center mb-8">
                             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                 Terima kasih atas Order Anda
@@ -43,7 +39,6 @@
                             <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-gray-600 dark:text-gray-300">
                                 <span class="text-sm sm:text-base">Order ID: #{{ order.order_number }}</span>
                                 
-                                <!-- Copy Order Number Button -->
                                 <button type="button" @click="copyOrderNumber"
                                         :aria-label="copied ? 'Nomor pesanan tersalin' : 'Salin nomor pesanan'"
                                         class="inline-flex min-h-[32px] items-center px-2.5 py-1.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -59,34 +54,35 @@
                             </div>
                             <span class="text-sm sm:text-base text-gray-600 dark:text-gray-300">{{ formatDateTime(order.created_at) }}</span>
                         </div>
-                        <!-- Order Status Alert -->
                         <div class="mb-6">
-                            <!-- Pending Payment -->
-                                                        <div v-if="isManualQris && order.status === 'pending' && order.payment_status === 'unpaid' && !isExpired"
-                                 class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                    <div class="flex-1">
-                                        <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                            Menunggu Pembayaran QRIS
-                                        </h3>
-                                        <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                            Bayar {{ formatPrice(order.total_amount) }} sebelum {{ formatDateTime(order.expires_at) }}, lalu tekan "Saya Sudah Bayar".
-                                        </p>
-                                    </div>
-                                    <button type="button" @click="showQris = true" class="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                                        Tampilkan QRIS
-                                    </button>
-                                </div>
-                            </div>
+                            <div v-if="isQrisPending"
+                                 class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 rounded-xl p-4 sm:p-6 text-center">
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Bayar dengan QRIS</h3>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pindai dengan aplikasi bank atau e-wallet apa pun.</p>
+                                <p v-if="order.qris.merchant_name" class="mt-1 text-xs text-gray-500 dark:text-gray-400">a.n. {{ order.qris.merchant_name }}</p>
 
-                            <div v-else-if="isManualQris && order.status === 'pending' && order.payment_status === 'pending'"
-                                 class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                                <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                    Menunggu Konfirmasi Admin
-                                </h3>
-                                <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                                    Pembayaran Anda sedang diperiksa. Status pesanan akan diperbarui setelah admin mengonfirmasi.
-                                </p>
+                                <div class="mx-auto mt-4 flex h-[244px] w-[244px] items-center justify-center rounded-lg bg-white">
+                                    <img v-if="qrImage" :src="qrImage" alt="Kode QRIS pembayaran" width="244" height="244" class="h-[244px] w-[244px] rounded-lg" />
+                                    <div v-else-if="!qrError" class="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                                    <p v-else class="px-4 text-sm text-red-600">QR gagal ditampilkan. Gunakan tombol halaman pembayaran di bawah.</p>
+                                </div>
+
+                                <div class="mt-4 rounded-xl bg-gray-50 p-3 dark:bg-gray-700">
+                                    <p class="text-xs text-gray-600 dark:text-gray-300">Total yang harus dibayar</p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatPrice(order.total_amount) }}</p>
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">Bayar sebelum {{ formatDateTime(order.expires_at) }}</p>
+                                </div>
+
+                                <div class="mt-3 flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-4">
+                                    <a v-if="qrImage" :href="qrImage" :download="`QRIS-${order.order_number}.png`" class="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                                        Unduh gambar QRIS
+                                    </a>
+                                    <a v-if="order.qris.checkout_url" :href="order.qris.checkout_url" target="_blank" rel="noopener" class="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                                        Buka halaman pembayaran
+                                    </a>
+                                </div>
+
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Status pesanan diperbarui otomatis setelah pembayaran diterima.</p>
                             </div>
 
                             <div v-else-if="order.status === 'pending' && order.payment_status === 'pending' && !isExpired" 
@@ -106,7 +102,6 @@
                                 </div>
                             </div>
 
-                            <!-- Expired -->
                             <div v-else-if="isExpired && order.status !== 'paid'" 
                                  class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                                 <div class="flex items-center">
@@ -124,7 +119,6 @@
                                 </div>
                             </div>
 
-                            <!-- Paid -->
                             <div v-if="(order.status === 'paid' || order.payment_status === 'paid') && showPaymentSuccessNotification" 
                                  class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 relative">
                                 <button @click="showPaymentSuccessNotification = false" 
@@ -149,12 +143,10 @@
                             </div>
                         </div>
 
-                        <!-- DIGITAL DOWNLOADS SECTION - PRIORITAS UTAMA -->
                         <div v-if="hasDigitalProducts && (order.status === 'paid' || order.payment_status === 'paid')" 
                              class="rounded-lg shadow-sm border p-6 mb-6"
                              :class="completedDeliveries.length > 0 ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'">
                             
-                            <!-- Header untuk delivery sedang diproses -->
                             <div v-if="completedDeliveries.length === 0 && !loadingDeliveries" class="mb-6">
                                 <div class="flex items-start">
                                     <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +168,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Header untuk delivery yang sudah ready -->
                             <div v-else-if="completedDeliveries.length > 0 && !loadingDeliveries" class="mb-6">
                                 <div class="flex items-start">
                                     <svg class="w-6 h-6 text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +182,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Loading State -->
                             <div v-if="loadingDeliveries" class="text-center py-8">
                                 <svg class="animate-spin w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -200,7 +190,6 @@
                                 <p class="text-gray-600 dark:text-gray-300">Memproses file digital Anda...</p>
                             </div>
 
-                            <!-- Digital Downloads -->
                             <div v-else-if="completedDeliveries.length > 0 || deliveries.length > 0" class="space-y-4">
                                 <div v-for="delivery in (completedDeliveries.length > 0 ? completedDeliveries : deliveries)" :key="delivery.id"
                                      class="border rounded-lg p-4 delivery-card transition-all duration-200"
@@ -252,7 +241,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Expired Warning Alert -->
                                     <div v-if="isDeliveryExpired(delivery)" 
                                          class="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                                         <div class="flex items-start">
@@ -271,7 +259,6 @@
                                     </div>
 
                                     <div class="flex gap-3">
-                                        <!-- Download Button - Only show if can download -->
                                         <button v-if="canDownloadFile(delivery)"
                                                 @click="downloadFile(delivery)"
                                                 :disabled="downloading === delivery.id || isDeliveryExpired(delivery)"
@@ -287,7 +274,6 @@
                                             <span v-else>Download File</span>
                                         </button>
 
-                                        <!-- Expired Button - Show when expired -->
                                         <button v-else-if="isDeliveryExpired(delivery)"
                                                 disabled
                                                 class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 cursor-not-allowed opacity-75">
@@ -297,7 +283,6 @@
                                             Link Expired
                                         </button>
 
-                                        <!-- Download Limit Reached Button -->
                                         <button v-else-if="isDownloadLimitReached(delivery)"
                                                 disabled
                                                 class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-400 cursor-not-allowed opacity-60">
@@ -307,7 +292,6 @@
                                             Batas Download Tercapai
                                         </button>
 
-                                        <!-- Pending/Processing Button -->
                                         <button v-else
                                                 disabled
                                                 class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-500 cursor-not-allowed opacity-75">
@@ -318,7 +302,6 @@
                                             Sedang Diproses
                                         </button>
 
-                                        <!-- Check Status Button -->
                                         <button @click="checkDeliveryStatus(delivery)"
                                                 :disabled="checking === delivery.id"
                                                 class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">
@@ -344,7 +327,6 @@
                             </div>
                         </div>
 
-                        <!-- Section untuk belum ada pembayaran -->
                         <div v-else-if="hasDigitalProducts && (order.status !== 'paid' && order.payment_status !== 'paid')" 
                              class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
                             <div class="text-center py-8">
@@ -359,7 +341,6 @@
                             </div>
                         </div>
 
-                        <!-- Payment Gateway Button -->
                         <div v-if="order.status === 'pending' && order.payment_status === 'pending' && !isExpired && order.snap_token" 
                              class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 text-center">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -383,9 +364,7 @@
                             </p>
                         </div>
 
-                        <!-- Order Summary - Compact Single Section -->
                         <div v-if="order && order.order_items && order.order_items.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                            <!-- Order Items -->
                             <div class="mb-6">
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Item Pesanan</h3>
                                 <div class="space-y-2">
@@ -417,7 +396,6 @@
                                 </div>
                             </div>
 
-                            <!-- Customer Information -->
                             <div class="mb-6 pb-6 border-b border-gray-200 dark:border-gray-600">
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Informasi Customer</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -440,23 +418,19 @@
                                 </div>
                             </div>
 
-                            <!-- Payment Summary -->
                             <div class="space-y-2">
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Ringkasan Pembayaran</h3>
                                 
-                                <!-- Subtotal -->
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
                                     <span class="text-gray-900 dark:text-white">{{ formatPrice(order.total_amount - (order.fee_amount || 0) - (order.unique_code || 0)) }}</span>
                                 </div>
 
-                                <!-- Voucher Discount (if exists) -->
                                 <div v-if="order.discount_amount && order.discount_amount > 0" class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Voucher Diskon</span>
                                     <span class="font-medium text-green-600 dark:text-green-400">-{{ formatPrice(order.discount_amount) }}</span>
                                 </div>
                                 
-                                <!-- Fee Platform -->
                                 <div v-if="order.fee_amount && order.fee_amount > 0" class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Fee Platform</span>
                                     <span class="text-gray-900 dark:text-white">{{ formatPrice(order.fee_amount) }}</span>
@@ -467,7 +441,6 @@
                                     <span class="text-gray-900 dark:text-white">{{ formatPrice(order.unique_code) }}</span>
                                 </div>
                                 
-                                <!-- Total -->
                                 <div class="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-600">
                                     <span class="text-base font-semibold text-gray-900 dark:text-white">Total Pembayaran</span>
                                     <span class="text-lg font-bold text-gray-900 dark:text-white">
@@ -477,7 +450,6 @@
                             </div>
                         </div>
 
-                        <!-- Payment Gateway Button -->
                         <div v-if="order.status === 'pending' && order.payment_status === 'pending' && !isExpired && order.snap_token" 
                              class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 text-center">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -502,7 +474,6 @@
                         </div>
 
 
-                        <!-- Help Section -->
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 sm:p-6">
                                 <div class="flex items-start">
@@ -537,7 +508,6 @@
                         </div>
                     </div>
 
-                    <!-- Success Modal -->
                     <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
                         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 border border-gray-200 dark:border-gray-700">
                             <div class="text-center">
@@ -557,42 +527,6 @@
             </div>
         </div>
 
-        <!-- QRIS MODAL -->
-        <Teleport to="body">
-            <div v-if="showQris && isManualQris && order.payment_status === 'unpaid' && !isExpired"
-                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-                 role="dialog" aria-modal="true" aria-labelledby="qris-title"
-                 @click.self="showQris = false">
-                <div class="relative max-h-[95vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-gray-800">
-                    <button type="button" @click="showQris = false" class="absolute right-2 top-2 rounded-lg p-2.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" aria-label="Tutup">
-                        <IconifyIcon icon="lucide:x" width="22" />
-                    </button>
-                    <h2 id="qris-title" class="text-lg font-semibold text-gray-900 dark:text-white">Bayar dengan QRIS</h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pindai dengan aplikasi bank atau e-wallet apa pun.</p>
-
-                    <img :src="order.manual_qris_image" alt="Kode QRIS pembayaran" width="244" height="244"
-                         class="qris-image mx-auto mt-4 h-[244px] w-[244px] rounded-lg bg-white" />
-
-                    <div class="mt-4 rounded-xl bg-gray-50 p-3 dark:bg-gray-700">
-                        <p class="text-xs text-gray-600 dark:text-gray-300">Total yang harus dibayar</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatPrice(order.total_amount) }}</p>
-                        <p v-if="order.unique_code" class="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                            Ketik nominal tepat, termasuk kode unik {{ order.unique_code }}, agar pembayaran mudah dicocokkan.
-                        </p>
-                    </div>
-
-                    <a :href="order.manual_qris_image" :download="`QRIS-${order.order_number}.webp`" class="mt-1 inline-flex min-h-[44px] items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
-                        Unduh gambar QRIS
-                    </a>
-
-                    <button type="button" @click="confirmManualPayment" :disabled="confirmingPayment"
-                            class="mt-4 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
-                        {{ confirmingPayment ? 'Memproses...' : 'Saya Sudah Bayar' }}
-                    </button>
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Tekan setelah pembayaran berhasil di aplikasi Anda.</p>
-                </div>
-            </div>
-        </Teleport>
     </AppLayout>
     <div v-else class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div class="text-center">
@@ -607,9 +541,10 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { Head, usePage, router } from '@inertiajs/vue3'
+import { Head, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import axios from 'axios'
+import QRCode from 'qrcode'
 
 const props = defineProps({
     order: {
@@ -643,20 +578,9 @@ const reloadProgress = ref(100)
 const showCustomerInfo = ref(false)
 const copied = ref(false)
 const showPaymentSuccessNotification = ref(true)
-const isManualQris = computed(() => props.order?.payment_gateway === 'manual_qris')
 const isLunas = computed(() => props.order?.status === 'paid' || props.order?.payment_status === 'paid')
-const showQris = ref(isManualQris.value && props.order?.status === 'pending' && props.order?.payment_status === 'unpaid')
-const confirmingPayment = ref(false)
-
-const confirmManualPayment = () => {
-    confirmingPayment.value = true
-    router.post(`/invoice/${props.order.order_number}/manual-paid`, {}, {
-        preserveScroll: true,
-        onFinish: () => {
-            confirmingPayment.value = false
-        },
-    })
-}
+const qrImage = ref(null)
+const qrError = ref(false)
 
 let statusCheckInterval = null
 let pageReloadInterval = null
@@ -665,6 +589,17 @@ const isExpired = computed(() => {
     if (!props.order || !props.order.expires_at) return false
     return new Date(props.order.expires_at) < new Date()
 })
+
+const isQrisPending = computed(() => !!props.order?.qris && props.order.status === 'pending' && !isExpired.value)
+
+const renderQris = async () => {
+    if (!isQrisPending.value) return
+    try {
+        qrImage.value = await QRCode.toDataURL(props.order.qris.qr_string, { width: 488, margin: 2, errorCorrectionLevel: 'M' })
+    } catch (error) {
+        qrError.value = true
+    }
+}
 
 const supportEmail = computed(() => {
     return $page.props.settings?.contact?.email || 'admin@digitalpay.web.id'
@@ -850,14 +785,13 @@ const downloadFile = async (delivery) => {
                 return
             }
         } catch (statusError) {
-            // If status check fails, still try to download (might be network issue)
             console.warn('Status check failed, proceeding with download:', statusError)
         }
         
         if (delivery.download_url) {
             const link = document.createElement('a')
             link.href = delivery.download_url
-            link.download = '' // Let server set filename via Content-Disposition
+            link.download = ''
             link.target = '_blank'
             document.body.appendChild(link)
             link.click()
@@ -1003,7 +937,6 @@ const maskPhone = (phone) => {
     
     if (cleaned.length < 4) return phone
     
-    // Show first 3 digits and last 3 digits, mask the middle
     const first = cleaned.substring(0, 3)
     const last = cleaned.substring(cleaned.length - 3)
     const middle = '*'.repeat(Math.max(0, cleaned.length - 6))
@@ -1056,7 +989,7 @@ const startPageReload = () => {
                 
             } catch (error) {
             }
-        }, 10000) // Check every 10 seconds instead of reloading
+        }, 10000)
     }
 }
 
@@ -1088,6 +1021,7 @@ onMounted(() => {
         refreshDeliveries()
     }
     
+    renderQris()
     startStatusChecking()
     startPageReload()
     
@@ -1110,7 +1044,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* Original styles preserved */
 .animate-spin {
     animation: spin 1s linear infinite;
 }

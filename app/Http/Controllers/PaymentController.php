@@ -19,17 +19,18 @@ class PaymentController extends Controller
         $this->midtransService = $midtransService;
     }
 
-    /**
-     * Show payment instructions
-     */
     public function show(Request $request, $orderNumber)
     {
         $order = Order::with(['items.product', 'items.productVariant', 'paymentMethod'])
             ->where('order_number', $orderNumber)
             ->firstOrFail();
 
+        if ($order->isQrisgate()) {
+            return redirect()->route('invoice.show', $order->order_number);
+        }
+
         $payment = $order->payment;
-        
+
         if (!$payment) {
             return redirect()->route('home')
                 ->with('error', 'Payment data not found.');
@@ -37,12 +38,12 @@ class PaymentController extends Controller
 
         $paymentInstructions = session('payment_instructions');
         $paymentData = session('payment_data');
-        
+
         if (!$paymentInstructions && $payment->gateway_response) {
-            $gatewayData = is_string($payment->gateway_response) ? 
-                json_decode($payment->gateway_response, true) : 
+            $gatewayData = is_string($payment->gateway_response) ?
+                json_decode($payment->gateway_response, true) :
                 $payment->gateway_response;
-                
+
             if ($gatewayData) {
                 $paymentInstructions = $this->midtransService->extractPaymentInstructions($gatewayData);
             }
@@ -115,18 +116,14 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Check payment status (called by frontend for real-time updates)
-     */
     public function checkStatus(Request $request, $orderNumber)
     {
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
-        
-        // Check if there's a payment success callback in session (from Midtrans callback)
+
         $successCallback = session()->get('payment_success_callback');
         if ($successCallback && $successCallback['order_number'] === $orderNumber) {
             session()->forget('payment_success_callback');
-            
+
             return response()->json([
                 'status' => 'success',
                 'payment_status' => 'paid',
@@ -136,9 +133,7 @@ class PaymentController extends Controller
                 'force_reload' => true
             ]);
         }
-        
-        // Return current status without making external API calls
-        // (We rely on Midtrans callbacks to update the status)
+
         return response()->json([
             'status' => 'success',
             'payment_status' => $order->payment_status,
@@ -149,13 +144,10 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Handle payment success
-     */
     public function success($orderNumber)
     {
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
-        
+
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Payment/Success', [
@@ -170,13 +162,10 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Handle payment failure
-     */
     public function failed($orderNumber)
     {
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
-        
+
         $siteName = ConfigHelper::siteName();
 
         return Inertia::render('Payment/Failed', [
@@ -191,13 +180,10 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Extract payment instructions from payment data
-     */
     private function extractPaymentInstructionsFromPayment(Payment $payment)
     {
         $gatewayResponse = $payment->gateway_response;
-        
+
         if (!$gatewayResponse) {
             return null;
         }
@@ -252,9 +238,6 @@ class PaymentController extends Controller
         return $instructions;
     }
 
-    /**
-     * Map Midtrans status to payment status
-     */
     private function mapMidtransStatusToPaymentStatus($transactionStatus, $fraudStatus = null)
     {
         return match($transactionStatus) {
@@ -268,7 +251,6 @@ class PaymentController extends Controller
         };
     }
 
-    // Helper methods for instructions (same as in MidtransService)
     private function getVAInstructions($bank)
     {
         $instructions = [

@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
@@ -39,12 +38,6 @@ return [
         'webhook_secret' => env('QRISGATE_WEBHOOK_SECRET'),
         'timeout' => (int) env('QRISGATE_TIMEOUT', 15),
         'signature_tolerance' => 300,
-    ],
-
-    'manual_qris' => [
-        'enabled' => env('MANUAL_QRIS_ENABLED', false),
-        'image' => '/images/payment/qris-static.webp',
-        'expires_minutes' => (int) env('MANUAL_QRIS_EXPIRES_MINUTES', 60),
     ],
 
 ];
