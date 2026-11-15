@@ -92,6 +92,8 @@ Route::prefix('midtrans')->name('midtrans.')->group(function () {
     Route::get('/error', [MidtransController::class, 'error'])->name('error');
 });
 
+Route::post('/qrisgate/webhook', App\Http\Controllers\QrisgateWebhookController::class)->middleware('throttle:120,1')->name('qrisgate.webhook');
+
 Route::get('/{page:slug}', [PageController::class, 'show'])->name('pages.show');
 
 Route::prefix('digital')->name('digital.')->group(function () {

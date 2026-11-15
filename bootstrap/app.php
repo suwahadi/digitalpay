@@ -14,20 +14,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
-        
+
         $middleware->web(prepend: [
             \App\Http\Middleware\HandleCors::class,
         ]);
-        
+
         $middleware->alias([
             'member' => \App\Http\Middleware\MemberOnly::class,
             'order.access' => \App\Http\Middleware\EnsureOrderAccess::class,
         ]);
-        
+
         $middleware->validateCsrfTokens(except: [
             'midtrans/notification',
             'midtrans/callback',
             'api/midtrans/notification',
+            'qrisgate/webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

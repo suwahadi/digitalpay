@@ -13,3 +13,7 @@ Schedule::command('orders:expire')
     ->withoutOverlapping()
     ->runInBackground();
 
+Schedule::command('qrisgate:sync')
+    ->everyTwoMinutes()
+    ->withoutOverlapping()
+    ->runInBackground();
