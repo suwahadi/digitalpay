@@ -639,7 +639,7 @@ const canSubmit = computed(() => {
 
 const submitHint = computed(() => {
     if (!form.value.customer_name || !form.value.customer_email || !form.value.customer_phone) {
-        return 'Lengkapi nama, email, dan nomor WhatsApp untuk melanjutkan.'
+        return 'Lengkapi form pemesanan untuk melanjutkan.'
     }
     if (!form.value.payment_method_id) {
         return 'Pilih metode pembayaran untuk melanjutkan.'
