@@ -602,7 +602,7 @@ const form = ref({
     customer_name: props.auth?.user?.name || '',
     customer_email: props.auth?.user?.email || '',
     customer_phone: props.auth?.user?.phone || '',
-    payment_method_id: null,
+    payment_method_id: props.paymentMethods?.length === 1 ? props.paymentMethods[0].id : null,
     notes: '',
 })
 
